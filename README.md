@@ -32,6 +32,22 @@
 $ npm install
 ```
 
+## Docker
+
+```bash
+$ docker compose up -d
+
+Ports: 5435
+User: capstone
+Password: capstone
+```
+
+## Generate files
+
+```bash
+$ nest g <controller/service> <foler> --no-spec
+```
+
 ## Running the app
 
 ```bash
