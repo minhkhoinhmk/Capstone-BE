@@ -1,0 +1,11 @@
+version: '3.8'
+services:
+  capstone:
+    image: postgres:15.0
+    container_name: capstone
+    ports:
+      - 5435:5432
+    environment:
+      POSTGRES_USER: capstone
+      POSTGRES_PASSWORD: capstone
+      POSTGRES_DB: Capstone-DB
