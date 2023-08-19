@@ -6,11 +6,14 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { Character } from './entity/character.entity';
 import { Repository } from 'typeorm';
-import { CreateCharacterDto } from './entity/create-character.dto';
+import { CreateCharacterDto } from './dto/create-character.dto';
 import { isUUID } from 'class-validator';
+import { Logger } from '@nestjs/common';
 
 @Injectable()
 export class CharacterService {
+  private logger = new Logger('CharacterService', { timestamp: true });
+
   constructor(
     @InjectRepository(Character)
     private characterRepository: Repository<Character>,
@@ -23,11 +26,21 @@ export class CharacterService {
       });
 
       if (!found) {
+        this.logger.error(
+          `method=getCharacterById, could not find id= ${characterId}`,
+        );
         throw new NotFoundException(`Character ${characterId} not found`);
       }
 
+      this.logger.log(
+        `method=getCharacterById, response: ${JSON.stringify(found)}`,
+      );
+
       return found;
     } else {
+      this.logger.error(
+        `method=getCharacterById, uuid= ${characterId} not correct`,
+      );
       throw new BadRequestException(`UUID ${characterId} not correct format`);
     }
   }
@@ -45,6 +58,10 @@ export class CharacterService {
     });
     await this.characterRepository.save(character);
 
+    this.logger.log(
+      `method=createCharacter, response: ${JSON.stringify(character)}`,
+    );
+
     return character;
   }
 
@@ -52,12 +69,20 @@ export class CharacterService {
     if (isUUID(characterId)) {
       const result = await this.characterRepository.delete(characterId);
 
+      this.logger.error(`method=deleteCharacterById, deleted successfully`);
+
       if (result.affected === 0) {
+        this.logger.error(
+          `method=deleteCharacterById, could not find id= ${characterId}`,
+        );
         throw new NotFoundException(
           `Character with id ${characterId} not found`,
         );
       }
     } else {
+      this.logger.error(
+        `method=deleteCharacterById, uuid= ${characterId} not correct`,
+      );
       throw new BadRequestException(`UUID ${characterId} not correct format`);
     }
   }
@@ -77,13 +102,22 @@ export class CharacterService {
       character.imgUrl = imgUrl;
       await this.characterRepository.save(character);
 
+      this.logger.log(
+        `method=updateCharacter, response: ${JSON.stringify(character)}`,
+      );
+
       return character;
     } else {
+      this.logger.error(
+        `method=updateCharacter, uuid= ${characterId} not correct`,
+      );
       throw new BadRequestException(`UUID ${characterId} not correct format`);
     }
   }
 
   async getAllCharacters(): Promise<Character[]> {
-    return await this.characterRepository.find();
+    const characters: Character[] = await this.characterRepository.find();
+    this.logger.log(`method=getAllCharacters, size: ${characters.length}`);
+    return characters;
   }
 }

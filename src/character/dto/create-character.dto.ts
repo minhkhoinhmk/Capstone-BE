@@ -1,34 +1,27 @@
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { IsEnum, IsNotEmpty, MaxLength } from 'class-validator';
 import { CharacterRole } from '../enum/character-role.enum';
 import { Lane } from '../enum/lane.enum';
 import { ApiProperty } from '@nestjs/swagger';
-import { UUID } from 'typeorm/driver/mongodb/bson.typings';
 
-@Entity()
-export class Character {
-  @ApiProperty({ type: UUID, description: 'UUIDe of the character' })
-  @PrimaryGeneratedColumn('uuid')
-  id: string;
-
+export class CreateCharacterDto {
   @ApiProperty({ type: String, description: 'Name of the character' })
-  @Column({
-    length: 100,
-  })
+  @IsNotEmpty()
+  @MaxLength(50)
   name: string;
 
   @ApiProperty({ enum: CharacterRole, description: 'Role of the character' })
-  @Column()
+  @IsEnum(CharacterRole)
   role: CharacterRole;
 
   @ApiProperty({ enum: Lane, description: 'Lane of the character' })
-  @Column()
+  @IsEnum(Lane)
   lane: Lane;
 
   @ApiProperty({ type: String, description: 'Description of the character' })
-  @Column()
+  @IsNotEmpty()
   description: string;
 
   @ApiProperty({ type: String, description: 'Link image of the character' })
-  @Column()
+  @IsNotEmpty()
   imgUrl: string;
 }
