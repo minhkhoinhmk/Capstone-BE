@@ -31,4 +31,8 @@ export class Character {
   @ApiProperty({ type: String, description: 'Link image of the character' })
   @Column()
   imgUrl: string;
+
+  @ApiProperty({ type: Boolean, description: 'Is active of the character' })
+  @Column()
+  isActive: boolean;
 }

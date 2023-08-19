@@ -11,7 +11,7 @@ async function bootstrap() {
     .setTitle('Game Character API')
     .setDescription('This swagger is about Game Character API')
     .setVersion('1.0')
-    .addTag('characters')
+    .addTag('APIs')
     .build();
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api', app, document);
