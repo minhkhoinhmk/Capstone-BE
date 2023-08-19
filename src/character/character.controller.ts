@@ -1,11 +1,14 @@
 import {
   Body,
   Controller,
+  DefaultValuePipe,
   Delete,
   Get,
   Param,
+  ParseIntPipe,
   Patch,
   Post,
+  Query,
 } from '@nestjs/common';
 import { Character } from './entity/character.entity';
 import { CharacterService } from './character.service';
@@ -16,20 +19,48 @@ import {
   ApiNotFoundResponse,
   ApiOkResponse,
   ApiParam,
+  ApiQuery,
+  ApiTags,
 } from '@nestjs/swagger';
+import { IPaginationOptions, Pagination } from 'nestjs-typeorm-paginate';
+import { ApiPaginatedResponse } from 'src/common/decorator/api-pagination-response';
 
 @Controller('character')
+@ApiTags('Character')
 export class CharacterController {
   constructor(private characterService: CharacterService) {}
 
   @Get()
-  @ApiOkResponse({
-    description: 'Get All Characters Successfully',
-    type: Character,
-    isArray: true,
+  @ApiPaginatedResponse({
+    model: Character,
+    description: 'Get Paginated Characters',
   })
-  getCharacters(): Promise<Character[]> {
-    return this.characterService.getAllCharacters();
+  @ApiQuery({
+    name: 'isActive',
+    description: 'Is Active field to filter',
+    required: false,
+  })
+  @ApiQuery({
+    name: 'page',
+    type: 'integer',
+    required: false,
+  })
+  @ApiQuery({
+    name: 'limit',
+    type: 'integer',
+    required: false,
+  })
+  getCharacters(
+    @Query('isActive') isActive: boolean,
+    @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number = 1,
+    @Query('limit', new DefaultValuePipe(10), ParseIntPipe) limit: number = 10,
+  ): Promise<Pagination<Character>> {
+    const options: IPaginationOptions = {
+      limit,
+      page,
+    };
+
+    return this.characterService.getAllCharacters(options, isActive);
   }
 
   @Post()

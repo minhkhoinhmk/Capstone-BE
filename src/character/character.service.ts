@@ -2,13 +2,18 @@ import {
   BadRequestException,
   Injectable,
   NotFoundException,
+  Logger,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Character } from './entity/character.entity';
 import { Repository } from 'typeorm';
 import { CreateCharacterDto } from './dto/create-character.dto';
 import { isUUID } from 'class-validator';
-import { Logger } from '@nestjs/common';
+import {
+  IPaginationOptions,
+  Pagination,
+  paginate,
+} from 'nestjs-typeorm-paginate';
 
 @Injectable()
 export class CharacterService {
@@ -48,13 +53,15 @@ export class CharacterService {
   async createCharacter(
     createCharacterDto: CreateCharacterDto,
   ): Promise<Character> {
-    const { name, role, lane, description, imgUrl } = createCharacterDto;
+    const { name, role, lane, description, imgUrl, isActive } =
+      createCharacterDto;
     const character = this.characterRepository.create({
       name,
       role,
       lane,
       description,
       imgUrl,
+      isActive,
     });
     await this.characterRepository.save(character);
 
@@ -93,13 +100,15 @@ export class CharacterService {
   ): Promise<Character> {
     if (isUUID(characterId)) {
       const character = await this.getCharacterById(characterId);
-      const { name, role, lane, description, imgUrl } = createCharacterDto;
+      const { name, role, lane, description, imgUrl, isActive } =
+        createCharacterDto;
 
       character.lane = lane;
       character.name = name;
       character.role = role;
       character.description = description;
       character.imgUrl = imgUrl;
+      character.isActive = isActive;
       await this.characterRepository.save(character);
 
       this.logger.log(
@@ -115,9 +124,25 @@ export class CharacterService {
     }
   }
 
-  async getAllCharacters(): Promise<Character[]> {
-    const characters: Character[] = await this.characterRepository.find();
-    this.logger.log(`method=getAllCharacters, size: ${characters.length}`);
+  async getAllCharacters(
+    options: IPaginationOptions,
+    isActive: boolean,
+  ): Promise<Pagination<Character>> {
+    const queryBuilder = this.characterRepository.createQueryBuilder('c');
+
+    if (isActive) {
+      queryBuilder.where('c.isActive = :isActive', {
+        isActive: isActive,
+      });
+    }
+
+    queryBuilder.getMany();
+    const characters = await paginate<Character>(queryBuilder, options);
+
+    this.logger.log(
+      `method=getAllCharacters, size: ${characters.meta.totalItems}, isActive: ${isActive}`,
+    );
+
     return characters;
   }
 }
