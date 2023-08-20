@@ -7,10 +7,6 @@ jobs:
       name: node/default
     steps:
       - checkout
-      - run:
-          command: rm -rf node_modules
-      - run:
-          command: rm -f package-lock.json
       - node/install-packages
       - run:
           command: npm run build
