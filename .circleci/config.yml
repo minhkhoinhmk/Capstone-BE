@@ -10,3 +10,6 @@ jobs:
       - checkout
       - node/install-packages:
           pkg-manager: npm install
+      - run:
+          command: npm run start:dev
+          name: Run project
