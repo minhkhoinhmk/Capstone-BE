@@ -2,7 +2,7 @@ version: 2.1
 orbs:
   node: circleci/node@5.0.2
 jobs:
-  build-and-test:
+  build:
     executor:
       name: node/default
     steps:
@@ -10,6 +10,8 @@ jobs:
       - node/install-packages
       - run:
           command: npm run build
+  test:
+    steps:
       - run:
           command: npm run test
       - persist_to_workspace:
