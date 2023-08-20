@@ -9,7 +9,7 @@ jobs:
       - checkout
       - node/install-packages
       - run:
-          command: npm buid
+          command: npm run buid
 workflows:
   build-and-test:
     jobs:
