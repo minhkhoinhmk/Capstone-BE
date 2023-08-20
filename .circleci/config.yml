@@ -13,3 +13,8 @@ jobs:
       - run:
           command: npm run start:dev
           name: Run project
+
+workflows:
+  test_my_app:
+    jobs:
+      - build_and_test
