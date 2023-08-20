@@ -8,8 +8,6 @@ jobs:
     steps:
       - checkout
       - node/install-packages
-      - run:
-          command: npm run build
 workflows:
   build-and-test:
     jobs:
