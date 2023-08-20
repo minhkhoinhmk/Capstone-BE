@@ -8,10 +8,7 @@ jobs:
     steps:
       - checkout
       - node/install-packages:
-          pkg-manager: npm
-      - run:
-          command: npm cache clean --force
-          name: Build app
+          pkg-manager: npm install
       - run:
           command: npm run build
           name: Build app
