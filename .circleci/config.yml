@@ -2,16 +2,16 @@ version: 2.1
 orbs:
   node: circleci/node@5.0.2
 jobs:
-  build:
+  build-and-test:
     executor:
       name: node/default
+    docker:
+      - image: cimg/base:2023.03
     steps:
       - checkout
       - node/install-packages
       - run:
           command: npm run build
-  test:
-    steps:
       - run:
           command: npm run test
       - persist_to_workspace:
@@ -21,5 +21,4 @@ jobs:
 workflows:
   build-and-test:
     jobs:
-      - build
-      - test
+      - build-and-test
