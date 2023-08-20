@@ -10,6 +10,9 @@ jobs:
       - node/install-packages:
           pkg-manager: npm
       - run:
+          command: npm cache clean --force
+          name: Build app
+      - run:
           command: npm run build
           name: Build app
 workflows:
