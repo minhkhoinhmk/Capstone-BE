@@ -1,6 +1,7 @@
 version: 2.1
 orbs:
   node: circleci/node@5.0.2
+  heroku: circleci/heroku@2.0
 jobs:
   build:
     executor:
@@ -22,10 +23,20 @@ jobs:
           root: ~/project
           paths:
             - .
+  deploy:
+    executor: heroku/default
+    steps:
+      - attach_workspace:
+          at: ~/project
+      - heroku/deploy-via-git:
+          app-name: ${HEROKU_APP_NAME}
 workflows:
-  build-and-test:
+  build-and-test-and-deploy:
     jobs:
       - build
       - test:
           requires:
             - build
+      - deploy:
+          requires:
+            - test
