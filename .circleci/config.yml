@@ -22,6 +22,7 @@ jobs:
   deploy:
     executor: heroku/default
     steps:
+      - checkout
       - heroku/deploy-via-git:
           force: true
           app-name: ${HEROKU_APP_NAME}
