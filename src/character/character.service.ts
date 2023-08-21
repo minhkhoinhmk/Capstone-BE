@@ -143,6 +143,10 @@ export class CharacterService {
       `method=getAllCharacters, size: ${characters.meta.totalItems}, isActive: ${isActive}`,
     );
 
+    this.logger.log(
+      `method=getAllCharacters, Hello from Khoi`,
+    );
+
     return characters;
   }
 }
