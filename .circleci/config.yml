@@ -37,4 +37,4 @@ workflows:
             - test
           filters:
             branches:
-              only: main
+              only: fix/remove-steps-in-CI
