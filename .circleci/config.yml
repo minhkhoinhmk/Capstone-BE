@@ -29,6 +29,7 @@ jobs:
       - attach_workspace:
           at: ~/project
       - heroku/deploy-via-git:
+          force: true
           app-name: ${HEROKU_APP_NAME}
 workflows:
   build-and-test-and-deploy:
