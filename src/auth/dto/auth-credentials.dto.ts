@@ -10,7 +10,7 @@ export class AuthCridentalsDto {
   @MinLength(8)
   @MaxLength(32)
   @Matches(/((?=.*\d)|(?=.*\W+))(?![.\n])(?=.*[A-Z])(?=.*[a-z]).*$/, {
-    message: 'password must be not weak',
+    message: 'password must be stronger',
   })
   password: string;
 }
