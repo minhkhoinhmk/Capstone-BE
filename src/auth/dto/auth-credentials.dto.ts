@@ -12,5 +12,5 @@ export class AuthCridentalsDto {
   @Matches(/((?=.*\d)|(?=.*\W+))(?![.\n])(?=.*[A-Z])(?=.*[a-z]).*$/, {
     message: 'password must be strong',
   })
-  password: string; 
+  password: string;
 }
