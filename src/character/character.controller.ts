@@ -9,6 +9,7 @@ import {
   Patch,
   Post,
   Query,
+  UseGuards,
 } from '@nestjs/common';
 import { Character } from './entity/character.entity';
 import { CharacterService } from './character.service';
@@ -24,6 +25,10 @@ import {
 } from '@nestjs/swagger';
 import { IPaginationOptions, Pagination } from 'nestjs-typeorm-paginate';
 import { ApiPaginatedResponse } from 'src/common/decorator/api-pagination-response';
+import { AuthGuard } from '@nestjs/passport';
+import { RolesGuard } from 'src/auth/role.guard';
+import { HasRoles } from 'src/auth/roles.decorator';
+import { Role } from 'src/auth/enum/role.enum';
 
 @Controller('character')
 @ApiTags('Character')
@@ -63,6 +68,8 @@ export class CharacterController {
     return this.characterService.getAllCharacters(options, isActive);
   }
 
+  @UseGuards(AuthGuard(), RolesGuard)
+  @HasRoles(Role.ADMIN)
   @Post()
   @ApiCreatedResponse({
     description: 'Created Characters Successfully',
@@ -74,6 +81,8 @@ export class CharacterController {
     return this.characterService.createCharacter(createCharacterDto);
   }
 
+  @UseGuards(AuthGuard(), RolesGuard)
+  @HasRoles(Role.USER, Role.ADMIN)
   @ApiParam({ name: 'id', description: 'Id of character' })
   @ApiOkResponse({
     description: 'Get Character By ID Successfully',
@@ -88,6 +97,8 @@ export class CharacterController {
     return this.characterService.getCharacterById(id);
   }
 
+  @UseGuards(AuthGuard(), RolesGuard)
+  @HasRoles(Role.ADMIN)
   @ApiParam({ name: 'id', description: 'Id of character' })
   @ApiOkResponse({
     description: 'Delete Character Successfully',
@@ -101,6 +112,8 @@ export class CharacterController {
     return this.characterService.deleteCharacterById(id);
   }
 
+  @UseGuards(AuthGuard(), RolesGuard)
+  @HasRoles(Role.ADMIN)
   @ApiParam({ name: 'id', description: 'Id of character' })
   @ApiOkResponse({
     description: 'Update Character By ID Successfully',
