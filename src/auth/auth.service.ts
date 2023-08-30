@@ -12,6 +12,7 @@ import { Role } from './enum/role.enum';
 import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
 import { JwtPayload } from './jwt-payload.interface';
+import { Token } from './dto/token.dto';
 
 @Injectable()
 export class AuthService {
@@ -51,9 +52,7 @@ export class AuthService {
     }
   }
 
-  async signin(
-    authCredentialsDto: AuthCridentalsDto,
-  ): Promise<{ accessToken: string }> {
+  async signin(authCredentialsDto: AuthCridentalsDto): Promise<Token> {
     const { username, password } = authCredentialsDto;
 
     const user = await this.userRepository.findOne({
