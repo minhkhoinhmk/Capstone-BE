@@ -5,6 +5,12 @@ import { CharacterModule } from './character/character.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { configValidationSchema } from './config.schema';
 import { AuthModule } from './auth/auth.module';
+import { PaymentModule } from './payment/payment.module';
+import { MailerModule } from '@nestjs-modules/mailer';
+import { async } from 'rxjs';
+import { config } from 'process';
+import { join } from 'path';
+import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
 
 @Module({
   imports: [
@@ -34,8 +40,33 @@ import { AuthModule } from './auth/auth.module';
         };
       },
     }),
+    MailerModule.forRootAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: async (config: ConfigService) => ({
+        transport: {
+          host: config.get('MAIL_HOST'),
+          sercure: false,
+          auth: {
+            user: config.get('MAIL_USER'),
+            pass: config.get('MAIL_PASSWORD'),
+          },
+        },
+        defaults: {
+          from: `"No Reply" <${config.get('MAIL_FROM')}"`,
+        },
+        template: {
+          dir: join(__dirname, 'src/templates/email'),
+          adapter: new HandlebarsAdapter(),
+          options: {
+            strict: true,
+          },
+        },
+      }),
+    }),
     CharacterModule,
     AuthModule,
+    PaymentModule,
   ],
 })
 export class AppModule {}

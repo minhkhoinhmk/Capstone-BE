@@ -13,6 +13,7 @@ import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
 import { JwtPayload } from './jwt-payload.interface';
 import { Token } from './dto/token.dto';
+import { MailerService } from '@nestjs-modules/mailer';
 
 @Injectable()
 export class AuthService {
@@ -22,6 +23,7 @@ export class AuthService {
     @InjectRepository(User)
     private userRepository: Repository<User>,
     private jwtService: JwtService,
+    private mailsService: MailerService,
   ) {}
 
   async signUp(authCridentalsDto: AuthCridentalsDto): Promise<void> {
@@ -65,6 +67,14 @@ export class AuthService {
       this.logger.log(
         `method=signin, Login with user name ${username} successfully`,
       );
+      await this.mailsService.sendMail({
+        to: 'khoinhmse150853@fpt.edu.vn',
+        subject: 'Welcome to my website',
+        template: './welcome',
+        context: {
+          name: username,
+        },
+      });
       return { accessToken };
     } else {
       this.logger.error(
