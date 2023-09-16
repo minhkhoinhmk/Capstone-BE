@@ -26,6 +26,12 @@
 
 [Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
 
+## Requirements
+
+```bash
+$ npm install -g cross-env
+```
+
 ## Installation
 
 ```bash
@@ -48,7 +54,7 @@ Password: capstone
 $ nest g <controller/service> <foler> --no-spec
 ```
 
-## Running the app
+## Running the app (use watch mode if you are coding in local)
 
 ```bash
 # development

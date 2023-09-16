@@ -5,6 +5,12 @@ import { CharacterModule } from './character/character.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { configValidationSchema } from './config.schema';
 import { AuthModule } from './auth/auth.module';
+import { PostModule } from './post/post.module';
+import { RoleModule } from './role/role.module';
+import { UserModule } from './user/user.module';
+import { User } from './user/entity/user.entity';
+import { Post } from './post/entity/post.entity';
+import { Role } from './role/entity/role.entity';
 
 @Module({
   imports: [
@@ -30,12 +36,15 @@ import { AuthModule } from './auth/auth.module';
           database: configService.get('DB_DATABASE'),
           autoLoadEntities: true,
           synchronize: true,
-          entities: [Character],
+          entities: [Character, User, Post, Role],
         };
       },
     }),
     CharacterModule,
     AuthModule,
+    UserModule,
+    RoleModule,
+    PostModule,
   ],
 })
 export class AppModule {}
