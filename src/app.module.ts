@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Global, Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Character } from './character/entity/character.entity';
 import { CharacterModule } from './character/character.module';
@@ -7,11 +7,10 @@ import { configValidationSchema } from './config.schema';
 import { AuthModule } from './auth/auth.module';
 import { PaymentModule } from './payment/payment.module';
 import { MailerModule } from '@nestjs-modules/mailer';
-import { async } from 'rxjs';
-import { config } from 'process';
 import { join } from 'path';
 import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
 
+@Global()
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -46,14 +45,14 @@ import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handleba
       useFactory: async (config: ConfigService) => ({
         transport: {
           host: config.get('MAIL_HOST'),
-          sercure: false,
+          secure: false,
           auth: {
             user: config.get('MAIL_USER'),
             pass: config.get('MAIL_PASSWORD'),
           },
         },
         defaults: {
-          from: `"No Reply" <${config.get('MAIL_FROM')}"`,
+          from: `"No Reply" <${config.get('MAIL_FROM')}>`,
         },
         template: {
           dir: join(__dirname, 'src/templates/email'),
