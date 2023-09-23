@@ -28,7 +28,7 @@ import { ApiPaginatedResponse } from 'src/common/decorator/api-pagination-respon
 import { AuthGuard } from '@nestjs/passport';
 import { RolesGuard } from 'src/auth/role.guard';
 import { HasRoles } from 'src/auth/roles.decorator';
-import { Role } from 'src/auth/enum/role.enum';
+import { NameRole } from 'src/role/enum/name-role.enum';
 
 @Controller('character')
 @ApiTags('Character')
@@ -69,7 +69,7 @@ export class CharacterController {
   }
 
   @UseGuards(AuthGuard(), RolesGuard)
-  @HasRoles(Role.ADMIN)
+  @HasRoles(NameRole.Admin)
   @Post()
   @ApiCreatedResponse({
     description: 'Created Characters Successfully',
@@ -82,7 +82,7 @@ export class CharacterController {
   }
 
   @UseGuards(AuthGuard(), RolesGuard)
-  @HasRoles(Role.USER, Role.ADMIN)
+  @HasRoles(NameRole.Customer, NameRole.Admin)
   @ApiParam({ name: 'id', description: 'Id of character' })
   @ApiOkResponse({
     description: 'Get Character By ID Successfully',
@@ -98,7 +98,7 @@ export class CharacterController {
   }
 
   @UseGuards(AuthGuard(), RolesGuard)
-  @HasRoles(Role.ADMIN)
+  @HasRoles(NameRole.Admin)
   @ApiParam({ name: 'id', description: 'Id of character' })
   @ApiOkResponse({
     description: 'Delete Character Successfully',
@@ -113,7 +113,7 @@ export class CharacterController {
   }
 
   @UseGuards(AuthGuard(), RolesGuard)
-  @HasRoles(Role.ADMIN)
+  @HasRoles(NameRole.Admin)
   @ApiParam({ name: 'id', description: 'Id of character' })
   @ApiOkResponse({
     description: 'Update Character By ID Successfully',
