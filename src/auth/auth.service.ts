@@ -15,6 +15,7 @@ import { User } from 'src/user/entity/user.entity';
 import { Role } from 'src/role/entity/role.entity';
 import { NameRole } from 'src/role/enum/name-role.enum';
 import { CustomerRegisterResponse } from './dto/response/customer-register.response.dto';
+import { MailerService } from '@nestjs-modules/mailer';
 
 @Injectable()
 export class AuthService {
@@ -26,6 +27,7 @@ export class AuthService {
     private jwtService: JwtService,
     @InjectRepository(Role)
     private roleRepository: Repository<Role>,
+    private mailsService: MailerService,
   ) {}
 
   async signUpForCustomer(
@@ -57,6 +59,16 @@ export class AuthService {
 
     try {
       await this.userRepository.save(user);
+
+      await this.mailsService.sendMail({
+        to: email,
+        subject: 'OTP Verification',
+        template: './otp',
+        context: {
+          VERIFICATION_CODE: otp,
+        },
+      });
+
       this.logger.log(`method=signUp, Registered email ${email} successfully`);
     } catch (error) {
       if (error.code === '23505') {
