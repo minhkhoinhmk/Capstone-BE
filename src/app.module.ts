@@ -14,6 +14,7 @@ import { Role } from './role/entity/role.entity';
 import { MailerModule } from '@nestjs-modules/mailer';
 import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
 import { join } from 'path';
+import { ScheduleModule } from '@nestjs/schedule';
 
 @Global()
 @Module({
@@ -22,6 +23,7 @@ import { join } from 'path';
       envFilePath: [`.env.stage.${process.env.STAGE}`],
       validationSchema: configValidationSchema,
     }),
+    ScheduleModule.forRoot(),
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
