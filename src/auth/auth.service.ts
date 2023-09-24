@@ -16,6 +16,7 @@ import { Role } from 'src/role/entity/role.entity';
 import { NameRole } from 'src/role/enum/name-role.enum';
 import { CustomerRegisterResponse } from './dto/response/customer-register.response.dto';
 import { MailerService } from '@nestjs-modules/mailer';
+import { Cron } from '@nestjs/schedule';
 
 @Injectable()
 export class AuthService {
@@ -112,5 +113,25 @@ export class AuthService {
       where: { name: name },
     });
     return role;
+  }
+
+  @Cron('* * * * *')
+  async deleteNotConfirmedAccount() {
+    const queryBuilder = this.userRepository.createQueryBuilder('u');
+
+    queryBuilder.where('u.isConfirmedEmail = :isConfirmedEmail', {
+      isConfirmedEmail: false,
+    });
+
+    queryBuilder.andWhere('u.active = :active', { active: false });
+
+    const users = await queryBuilder.getMany();
+
+    for (const user of users) {
+      this.logger.log(
+        `method=deleteNotConfirmedAccount, remove user with id ${user.id}`,
+      );
+      await this.userRepository.remove(user);
+    }
   }
 }
