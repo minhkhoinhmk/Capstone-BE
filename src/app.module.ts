@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Global, Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Character } from './character/entity/character.entity';
 import { CharacterModule } from './character/character.module';
@@ -11,7 +11,11 @@ import { UserModule } from './user/user.module';
 import { User } from './user/entity/user.entity';
 import { Post } from './post/entity/post.entity';
 import { Role } from './role/entity/role.entity';
+import { MailerModule } from '@nestjs-modules/mailer';
+import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
+import { join } from 'path';
 
+@Global()
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -39,6 +43,30 @@ import { Role } from './role/entity/role.entity';
           entities: [Character, User, Post, Role],
         };
       },
+    }),
+    MailerModule.forRootAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: async (config: ConfigService) => ({
+        transport: {
+          host: config.get('MAIL_HOST'),
+          secure: false,
+          auth: {
+            user: config.get('MAIL_USER'),
+            pass: config.get('MAIL_PASSWORD'),
+          },
+        },
+        defaults: {
+          from: `"No Reply" <${config.get('MAIL_FROM')}>`,
+        },
+        template: {
+          dir: join(__dirname, 'src/templates/email'),
+          adapter: new HandlebarsAdapter(),
+          options: {
+            strict: true,
+          },
+        },
+      }),
     }),
     CharacterModule,
     AuthModule,
