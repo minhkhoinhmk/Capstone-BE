@@ -2,7 +2,7 @@ import {
   ConflictException,
   Injectable,
   Logger,
-  UnauthorizedException,
+  NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -84,6 +84,28 @@ export class AuthService {
     };
   }
 
+  async confirmCustomer(email: string, otp: string): Promise<void> {
+    const user = await this.getUserByEmail(email);
+
+    if (!user) {
+      this.logger.error(`method=confirmCustomer, email ${email} not found`);
+      throw new NotFoundException(`email ${email} not found`);
+    }
+
+    if (user.active && user.isConfirmedEmail) {
+      throw new NotFoundException(`Cusomer ${email} is already confirmed`);
+    }
+
+    if (user.otp === otp) {
+      this.logger.log(`method=confirmCustomer, account is active`);
+      user.active = true;
+      user.isConfirmedEmail = true;
+      await this.userRepository.save(user);
+    } else {
+      throw new NotFoundException(`otp ${otp} not found`);
+    }
+  }
+
   // async signin(authCredentialsDto: AuthCridentalsDto): Promise<Token> {
   //   const { username, password } = authCredentialsDto;
 
@@ -115,7 +137,14 @@ export class AuthService {
     return role;
   }
 
-  @Cron('* * * * *')
+  async getUserByEmail(email: string): Promise<User> {
+    const user = await this.userRepository.findOne({
+      where: { email: email },
+    });
+    return user;
+  }
+
+  @Cron('0 0 * * *')
   async deleteNotConfirmedAccount() {
     const queryBuilder = this.userRepository.createQueryBuilder('u');
 
