@@ -15,6 +15,7 @@ import { MailerModule } from '@nestjs-modules/mailer';
 import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
 import { join } from 'path';
 import { ScheduleModule } from '@nestjs/schedule';
+import { LearnerModule } from './learner/learner.module';
 
 @Global()
 @Module({
@@ -75,6 +76,7 @@ import { ScheduleModule } from '@nestjs/schedule';
     UserModule,
     RoleModule,
     PostModule,
+    LearnerModule,
   ],
 })
 export class AppModule {}

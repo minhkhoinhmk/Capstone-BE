@@ -8,6 +8,7 @@ import {
 } from 'typeorm';
 import { Post } from 'src/post/entity/post.entity';
 import { Role } from 'src/role/entity/role.entity';
+import { Learner } from 'src/learner/entity/learner.entity';
 
 @Entity()
 export class User {
@@ -48,7 +49,7 @@ export class User {
   @Column({ nullable: true })
   status: string;
 
-  @Column({ unique: true })
+  @Column({ unique: true, nullable: true })
   email: string;
 
   @Column()
@@ -65,6 +66,9 @@ export class User {
 
   @OneToMany(() => Post, (post) => post.user)
   posts: Post[];
+
+  @OneToMany(() => Learner, (learner) => learner.user)
+  learners: Learner[];
 
   @ManyToMany(() => Role, (roles) => roles.users)
   @JoinTable({

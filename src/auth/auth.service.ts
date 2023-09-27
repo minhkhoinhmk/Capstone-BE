@@ -7,7 +7,6 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CustomerRegisterRequest } from './dto/request/customer-register.request.dto';
-import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
 import { JwtPayload } from './jwt-payload.interface';
 import { Token } from './dto/response/token.dto';
@@ -17,6 +16,7 @@ import { NameRole } from 'src/role/enum/name-role.enum';
 import { CustomerRegisterResponse } from './dto/response/customer-register.response.dto';
 import { MailerService } from '@nestjs-modules/mailer';
 import { Cron } from '@nestjs/schedule';
+import { hashPassword } from 'src/utils/hash-password.util';
 
 @Injectable()
 export class AuthService {
@@ -37,9 +37,6 @@ export class AuthService {
     const { firstName, lastName, middleName, password, phoneNumber, email } =
       customerRegisterRequest;
 
-    const salt = await bcrypt.genSalt();
-    const hashedPassword = await bcrypt.hash(password, salt);
-
     const role = await this.getRoleByName(NameRole.Customer);
 
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
@@ -48,7 +45,7 @@ export class AuthService {
       firstName: firstName,
       lastName: lastName,
       middleName: middleName,
-      password: hashedPassword,
+      password: await hashPassword(password),
       phoneNumber: phoneNumber,
       email: email,
       active: false,
