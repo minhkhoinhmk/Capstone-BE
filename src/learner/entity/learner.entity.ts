@@ -31,7 +31,6 @@ export class Learner {
   @Column({
     length: 100,
     unique: true,
-    nullable: true,
   })
   userName: string;
 

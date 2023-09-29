@@ -9,13 +9,16 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { User } from 'src/user/entity/user.entity';
 import { RoleModule } from 'src/role/role.module';
 import { Role } from 'src/role/entity/role.entity';
+import { CustomerModule } from 'src/customer/customer.module';
 
 @Module({
   providers: [AuthService, JwtStrategy],
   controllers: [AuthController],
   imports: [
+    RoleModule,
+    CustomerModule,
+    TypeOrmModule.forFeature([User]),
     ConfigModule,
-    TypeOrmModule.forFeature([User, Role]),
     PassportModule.register({ defaultStrategy: 'jwt' }),
     JwtModule.registerAsync({
       inject: [ConfigService],
