@@ -20,7 +20,7 @@ export class AuthController {
     type: CustomerRegisterResponse,
   })
   @ApiConflictResponse({
-    description: 'User name was already exists',
+    description: 'Email was already exists',
   })
   @Post('/customer/signup')
   sigup(

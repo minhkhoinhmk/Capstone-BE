@@ -16,6 +16,7 @@ import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handleba
 import { join } from 'path';
 import { ScheduleModule } from '@nestjs/schedule';
 import { LearnerModule } from './learner/learner.module';
+import { CustomerModule } from './customer/customer.module';
 
 @Global()
 @Module({
@@ -77,6 +78,7 @@ import { LearnerModule } from './learner/learner.module';
     RoleModule,
     PostModule,
     LearnerModule,
+    CustomerModule,
   ],
 })
 export class AppModule {}

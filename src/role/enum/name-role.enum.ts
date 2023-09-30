@@ -3,4 +3,5 @@ export enum NameRole {
   Staff = 'Staff',
   Instructor = 'Instructor',
   Customer = 'Customer',
+  Learner = 'Learner',
 }

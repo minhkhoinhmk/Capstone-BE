@@ -17,18 +17,20 @@ import { CustomerRegisterResponse } from './dto/response/customer-register.respo
 import { MailerService } from '@nestjs-modules/mailer';
 import { Cron } from '@nestjs/schedule';
 import { hashPassword } from 'src/utils/hash-password.util';
+import { RoleRepository } from 'src/role/role.repository';
+import { CustomerRepository } from 'src/customer/customer.repository';
 
 @Injectable()
 export class AuthService {
-  private logger = new Logger('CharacterService', { timestamp: true });
+  private logger = new Logger('AuthService', { timestamp: true });
 
   constructor(
+    private customerRepository: CustomerRepository,
+    private jwtService: JwtService,
+    private mailsService: MailerService,
+    private roleRepository: RoleRepository,
     @InjectRepository(User)
     private userRepository: Repository<User>,
-    private jwtService: JwtService,
-    @InjectRepository(Role)
-    private roleRepository: Repository<Role>,
-    private mailsService: MailerService,
   ) {}
 
   async signUpForCustomer(
@@ -37,26 +39,18 @@ export class AuthService {
     const { firstName, lastName, middleName, password, phoneNumber, email } =
       customerRegisterRequest;
 
-    const role = await this.getRoleByName(NameRole.Customer);
+    const role = await this.roleRepository.getRoleByName(NameRole.Customer);
 
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
 
-    const user = this.userRepository.create({
-      firstName: firstName,
-      lastName: lastName,
-      middleName: middleName,
-      password: await hashPassword(password),
-      phoneNumber: phoneNumber,
-      email: email,
-      active: false,
-      otpCreatedDate: new Date(),
-      otp: otp,
-      isConfirmedEmail: false,
-      roles: [role],
-    });
+    const customer = await this.customerRepository.createCustomer(
+      customerRegisterRequest,
+      role,
+      otp,
+    );
 
     try {
-      await this.userRepository.save(user);
+      await this.customerRepository.saveCustomer(customer);
 
       await this.mailsService.sendMail({
         to: email,
@@ -77,27 +71,27 @@ export class AuthService {
     }
 
     return {
-      email: user.email,
+      email: customer.email,
     };
   }
 
   async confirmCustomer(email: string, otp: string): Promise<void> {
-    const user = await this.getUserByEmail(email);
+    const customer = await this.customerRepository.getCustomerByEmail(email);
 
-    if (!user) {
+    if (!customer) {
       this.logger.error(`method=confirmCustomer, email ${email} not found`);
       throw new NotFoundException(`email ${email} not found`);
     }
 
-    if (user.active && user.isConfirmedEmail) {
+    if (customer.active && customer.isConfirmedEmail) {
       throw new NotFoundException(`Cusomer ${email} is already confirmed`);
     }
 
-    if (user.otp === otp) {
+    if (customer.otp === otp) {
       this.logger.log(`method=confirmCustomer, account is active`);
-      user.active = true;
-      user.isConfirmedEmail = true;
-      await this.userRepository.save(user);
+      customer.active = true;
+      customer.isConfirmedEmail = true;
+      await this.customerRepository.saveCustomer(customer);
     } else {
       throw new NotFoundException(`otp ${otp} not found`);
     }
@@ -127,37 +121,29 @@ export class AuthService {
   //   }
   // }
 
-  async getRoleByName(name: NameRole): Promise<Role> {
-    const role = await this.roleRepository.findOne({
-      where: { name: name },
-    });
-    return role;
-  }
+  // async getRoleByName(name: NameRole): Promise<Role> {
+  //   const role = await this.roleRepository.findOne({
+  //     where: { name: name },
+  //   });
+  //   return role;
+  // }
 
-  async getUserByEmail(email: string): Promise<User> {
-    const user = await this.userRepository.findOne({
-      where: { email: email },
-    });
-    return user;
-  }
+  // async getUserByEmail(email: string): Promise<User> {
+  //   const user = await this.userRepository.findOne({
+  //     where: { email: email },
+  //   });
+  //   return user;
+  // }
 
   @Cron('0 0 * * *')
   async deleteNotConfirmedAccount() {
-    const queryBuilder = this.userRepository.createQueryBuilder('u');
+    const customers = await this.customerRepository.getCustomerNotConfirmed();
 
-    queryBuilder.where('u.isConfirmedEmail = :isConfirmedEmail', {
-      isConfirmedEmail: false,
-    });
-
-    queryBuilder.andWhere('u.active = :active', { active: false });
-
-    const users = await queryBuilder.getMany();
-
-    for (const user of users) {
+    for (const customer of customers) {
       this.logger.log(
-        `method=deleteNotConfirmedAccount, remove user with id ${user.id}`,
+        `method=deleteNotConfirmedAccount, remove user with id ${customer.id}`,
       );
-      await this.userRepository.remove(user);
+      await this.customerRepository.removeCustomer(customer);
     }
   }
 }
