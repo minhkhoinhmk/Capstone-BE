@@ -22,6 +22,13 @@ export class CustomerRepository {
     return customer;
   }
 
+  async getCustomerById(id: string): Promise<User> {
+    const customer = await this.userRepository.findOne({
+      where: { id: id },
+    });
+    return customer;
+  }
+
   async saveCustomer(customer: User): Promise<void> {
     await this.userRepository.save(customer);
   }

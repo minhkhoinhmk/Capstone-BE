@@ -146,4 +146,9 @@ export class AuthService {
       await this.customerRepository.removeCustomer(customer);
     }
   }
+
+  async decodeJwtToken(jwt: string): Promise<Object> {
+    const payload = this.jwtService.decode(jwt);
+    return payload;
+  }
 }

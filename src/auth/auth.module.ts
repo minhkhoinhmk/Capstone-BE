@@ -31,6 +31,6 @@ import { CustomerModule } from 'src/customer/customer.module';
       }),
     }),
   ],
-  exports: [JwtStrategy, PassportModule],
+  exports: [JwtStrategy, PassportModule, AuthService],
 })
 export class AuthModule {}

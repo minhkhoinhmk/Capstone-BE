@@ -9,6 +9,7 @@ import { RoleRepository } from 'src/role/role.repository';
 import { CustomerRepository } from 'src/customer/customer.repository';
 import { NameRole } from 'src/role/enum/name-role.enum';
 import { LearnerRepository } from './learner.repository';
+import { AuthService } from 'src/auth/auth.service';
 
 @Injectable()
 export class LearnerService {
@@ -18,13 +19,18 @@ export class LearnerService {
     private learnerRepository: LearnerRepository,
     private customerRepository: CustomerRepository,
     private roleRepository: RoleRepository,
+    private authService: AuthService,
   ) {}
 
   async createLearner(
     createLearnerRequest: CreateLearnerRequest,
   ): Promise<void> {
-    const customer = await this.customerRepository.getCustomerByEmail(
-      'khoinhmse150853@fpt.edu.vn',
+    const decodedJwt = await this.authService.decodeJwtToken(
+      createLearnerRequest.userJwt,
+    );
+
+    const customer = await this.customerRepository.getCustomerById(
+      decodedJwt['id'],
     );
 
     const role = await this.roleRepository.getRoleByName(NameRole.Learner);
