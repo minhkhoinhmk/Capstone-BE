@@ -10,6 +10,8 @@ import { User } from 'src/user/entity/user.entity';
 import { RoleModule } from 'src/role/role.module';
 import { Role } from 'src/role/entity/role.entity';
 import { CustomerModule } from 'src/customer/customer.module';
+import { JwtStore } from 'src/user/entity/jwt-store.entity';
+import { Learner } from 'src/learner/entity/learner.entity';
 
 @Module({
   providers: [AuthService, JwtStrategy],
@@ -17,7 +19,7 @@ import { CustomerModule } from 'src/customer/customer.module';
   imports: [
     RoleModule,
     CustomerModule,
-    TypeOrmModule.forFeature([User]),
+    TypeOrmModule.forFeature([User,Role, JwtStore, Learner]),
     ConfigModule,
     PassportModule.register({ defaultStrategy: 'jwt' }),
     JwtModule.registerAsync({

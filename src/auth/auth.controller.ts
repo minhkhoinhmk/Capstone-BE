@@ -10,6 +10,7 @@ import {
 import { Token } from './dto/response/token.dto';
 import { CustomerRegisterRequest } from './dto/request/customer-register.request.dto';
 import { CustomerRegisterResponse } from './dto/response/customer-register.response.dto';
+import { GuestLoginRequest } from './dto/request/guest-login.request.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -43,6 +44,20 @@ export class AuthController {
     @Query('otp') otp: string,
   ): Promise<void> {
     return this.authService.confirmCustomer(email, otp);
+  }
+
+  @ApiOkResponse({
+    description: 'Created Characters Successfully',
+    type: Token,
+  })
+  @ApiNotFoundResponse({
+    description: 'Invalid username or password',
+  })
+  @Post('/signin')
+  signin(
+    @Body() guestLoginRequest: GuestLoginRequest,
+  ): Promise<{ accessToken: string }> {
+    return this.authService.loginForGuest(guestLoginRequest);
   }
 
   // @ApiOkResponse({
