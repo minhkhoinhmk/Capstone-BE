@@ -9,6 +9,7 @@ import {
 import { Post } from 'src/post/entity/post.entity';
 import { Role } from 'src/role/entity/role.entity';
 import { Learner } from 'src/learner/entity/learner.entity';
+import { JwtStore } from './jwt-store.entity';
 
 @Entity()
 export class User {
@@ -77,4 +78,7 @@ export class User {
     inverseJoinColumn: { name: 'roleId' },
   })
   roles: Role[];
+
+  @OneToMany(() => JwtStore, (jwt) => jwt.user)
+  jwts: JwtStore[];
 }

@@ -17,6 +17,8 @@ import { join } from 'path';
 import { ScheduleModule } from '@nestjs/schedule';
 import { LearnerModule } from './learner/learner.module';
 import { CustomerModule } from './customer/customer.module';
+import { Learner } from './learner/entity/learner.entity';
+import { JwtStore } from './user/entity/jwt-store.entity';
 
 @Global()
 @Module({
@@ -44,7 +46,7 @@ import { CustomerModule } from './customer/customer.module';
           database: configService.get('DB_DATABASE'),
           autoLoadEntities: true,
           synchronize: true,
-          entities: [Character, User, Post, Role],
+          entities: [Character, User, Post, Role, Learner, JwtStore],
         };
       },
     }),

@@ -3,6 +3,8 @@ import {
   Injectable,
   Logger,
   NotFoundException,
+  UnauthorizedException,
+  BadRequestException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -19,6 +21,11 @@ import { Cron } from '@nestjs/schedule';
 import { hashPassword } from 'src/utils/hash-password.util';
 import { RoleRepository } from 'src/role/role.repository';
 import { CustomerRepository } from 'src/customer/customer.repository';
+import { Learner } from 'src/learner/entity/learner.entity';
+import { JwtStore } from 'src/user/entity/jwt-store.entity';
+import { GuestLoginRequest } from './dto/request/guest-login.request.dto';
+import emailValidator from 'deep-email-validator';
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class AuthService {
@@ -31,7 +38,71 @@ export class AuthService {
     private roleRepository: RoleRepository,
     @InjectRepository(User)
     private userRepository: Repository<User>,
+    @InjectRepository(Learner)
+    private learnerRepository: Repository<Learner>,
+    @InjectRepository(JwtStore)
+    private jwtStoreRepository: Repository<JwtStore>,
   ) {}
+
+  async loginForGuest(guestLoginRequest: GuestLoginRequest): Promise<Token> {
+    const { emailOrUsername, password } = guestLoginRequest;
+
+    const { valid } = await emailValidator(emailOrUsername);
+
+    const user = valid
+      ? await this.userRepository.findOne({
+          where: { email: emailOrUsername },
+          relations: {
+            roles: true,
+          },
+        })
+      : await this.learnerRepository.findOne({
+          where: { userName: emailOrUsername },
+          relations: {
+            role: true,
+          },
+        });
+
+    if (user && (await bcrypt.compare(password, user.password))) {
+      if (!user.active)
+        throw new BadRequestException(`This account is not activated`);
+
+      const tokensAndCount = await this.jwtStoreRepository.findAndCount({
+        where: { user },
+      });
+      if (tokensAndCount[1] >= 3)
+        throw new BadRequestException(
+          `This account is already logged in current 3 devices. Please logout before continue logging in`,
+        );
+
+      const payload: JwtPayload = {
+        id: user.id,
+        username: user.userName,
+        email: valid ? emailOrUsername : '',
+        role: valid ? NameRole.Customer : NameRole.Learner,
+      };
+      const accessToken = this.jwtService.sign(payload);
+
+      const token = this.jwtStoreRepository.create({
+        code: accessToken,
+        user,
+      });
+
+      await this.jwtStoreRepository.save(token);
+      this.logger.log(
+        `method=signin, Login with email/username ${emailOrUsername} successfully`,
+      );
+      return { accessToken };
+    } else {
+      this.logger.error(
+        `method=signin, email/username ${emailOrUsername} can not be authenticated`,
+      );
+      throw new UnauthorizedException(
+        'Please check your email/username and password',
+      );
+    }
+  }
+
 
   async signUpForCustomer(
     customerRegisterRequest: CustomerRegisterRequest,
