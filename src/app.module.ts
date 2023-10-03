@@ -16,7 +16,6 @@ import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handleba
 import { join } from 'path';
 import { ScheduleModule } from '@nestjs/schedule';
 import { LearnerModule } from './learner/learner.module';
-import { CustomerModule } from './customer/customer.module';
 import { Learner } from './learner/entity/learner.entity';
 import { JwtStore } from './user/entity/jwt-store.entity';
 
@@ -80,7 +79,6 @@ import { JwtStore } from './user/entity/jwt-store.entity';
     RoleModule,
     PostModule,
     LearnerModule,
-    CustomerModule,
   ],
 })
 export class AppModule {}

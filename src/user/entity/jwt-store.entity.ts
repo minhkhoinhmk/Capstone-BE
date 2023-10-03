@@ -1,11 +1,4 @@
-import {
-  Column,
-  Entity,
-  JoinColumn,
-  ManyToOne,
-  PrimaryGeneratedColumn,
-} from 'typeorm';
-import { User } from './user.entity';
+import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity()
 export class JwtStore {
@@ -15,7 +8,6 @@ export class JwtStore {
   @Column({ unique: true, nullable: true })
   code: string;
 
-  @ManyToOne(() => User, (user) => user.jwts)
-  @JoinColumn({ name: 'userId' })
-  user: User;
+  @Column()
+  userId: string;
 }

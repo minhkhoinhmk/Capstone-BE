@@ -1,13 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import {
-  IsBoolean,
-  IsEmail,
-  IsNotEmpty,
-  IsString,
-  Matches,
-  MaxLength,
-  MinLength,
-} from 'class-validator';
+import { IsNotEmpty, IsString } from 'class-validator';
 
 export class GuestLoginRequest {
   @IsString()
@@ -16,11 +8,6 @@ export class GuestLoginRequest {
   emailOrUsername: string;
 
   @IsString()
-  @MinLength(8)
-  @MaxLength(32)
-  @Matches(/((?=.*\d)|(?=.*\W+))(?![.\n])(?=.*[A-Z])(?=.*[a-z]).*$/, {
-    message: 'password must be stronger',
-  })
   @ApiProperty({ type: String, description: 'Password' })
   password: string;
 }
