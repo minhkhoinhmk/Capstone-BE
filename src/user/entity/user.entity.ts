@@ -4,12 +4,12 @@ import {
   JoinTable,
   ManyToMany,
   OneToMany,
+  PrimaryColumn,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { Post } from 'src/post/entity/post.entity';
 import { Role } from 'src/role/entity/role.entity';
 import { Learner } from 'src/learner/entity/learner.entity';
-import { JwtStore } from './jwt-store.entity';
 
 @Entity()
 export class User {
@@ -72,13 +72,5 @@ export class User {
   learners: Learner[];
 
   @ManyToMany(() => Role, (roles) => roles.users)
-  @JoinTable({
-    name: 'user_role',
-    joinColumn: { name: 'userId', referencedColumnName: 'id' },
-    inverseJoinColumn: { name: 'roleId' },
-  })
   roles: Role[];
-
-  @OneToMany(() => JwtStore, (jwt) => jwt.user)
-  jwts: JwtStore[];
 }

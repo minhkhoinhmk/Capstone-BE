@@ -47,7 +47,7 @@ export class AuthController {
   }
 
   @ApiOkResponse({
-    description: 'Created Characters Successfully',
+    description: 'Login Successfully',
     type: Token,
   })
   @ApiNotFoundResponse({
@@ -60,17 +60,11 @@ export class AuthController {
     return this.authService.loginForGuest(guestLoginRequest);
   }
 
-  // @ApiOkResponse({
-  //   description: 'Created Characters Successfully',
-  //   type: Token,
-  // })
-  // @ApiNotFoundResponse({
-  //   description: 'Invalid username or password',
-  // })
-  // @Post('/signin')
-  // signin(
-  //   @Body() authCridentalsDto: AuthCridentalsDto,
-  // ): Promise<{ accessToken: string }> {
-  //   return this.authService.signin(authCridentalsDto);
-  // }
+  @ApiOkResponse({
+    description: 'Logout Successfully',
+  })
+  @Get('/signout')
+  signout(@Query('code') code: string): Promise<void> {
+    return this.authService.logout(code);
+  }
 }

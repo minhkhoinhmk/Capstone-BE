@@ -29,7 +29,7 @@ export class Role {
   @JoinTable({
     name: 'user_role',
     joinColumn: { name: 'roleId', referencedColumnName: 'id' },
-    inverseJoinColumn: { name: 'userId' },
+    inverseJoinColumn: { name: 'userId', referencedColumnName: 'id' },
   })
   users: User[];
 }

@@ -1,36 +1,44 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { CustomerRegisterRequest } from 'src/auth/dto/request/customer-register.request.dto';
-import { Role } from 'src/role/entity/role.entity';
-import { User } from 'src/user/entity/user.entity';
-import { hashPassword } from 'src/utils/hash-password.util';
+import { User } from './entity/user.entity';
 import { Repository } from 'typeorm';
+import { hashPassword } from 'src/utils/hash-password.util';
+import { Role } from 'src/role/entity/role.entity';
+import { CustomerRegisterRequest } from 'src/auth/dto/request/customer-register.request.dto';
 
 @Injectable()
-export class CustomerRepository {
-  private logger = new Logger('CustomerRepository', { timestamp: true });
-
+export class UserRepository {
   constructor(
     @InjectRepository(User)
     private userRepository: Repository<User>,
   ) {}
 
-  async getCustomerByEmail(email: string): Promise<User> {
+  async getUserById(id: string): Promise<User> {
+    const user = await this.userRepository.findOne({
+      where: { id },
+      relations: {
+        roles: true,
+      },
+    });
+    return user;
+  }
+
+  async getUserByUserName(userName: string): Promise<User> {
+    const user = await this.userRepository.findOne({
+      where: { userName },
+    });
+    return user;
+  }
+
+  async getUserByEmail(email: string): Promise<User> {
     const customer = await this.userRepository.findOne({
       where: { email: email },
     });
     return customer;
   }
 
-  async getCustomerById(id: string): Promise<User> {
-    const customer = await this.userRepository.findOne({
-      where: { id: id },
-    });
-    return customer;
-  }
-
-  async saveCustomer(customer: User): Promise<void> {
-    await this.userRepository.save(customer);
+  async save(user: User): Promise<void> {
+    await this.userRepository.save(user);
   }
 
   async createCustomer(
@@ -58,7 +66,7 @@ export class CustomerRepository {
     return user;
   }
 
-  async getCustomerNotConfirmed(): Promise<User[]> {
+  async getUserNotConfirmed(): Promise<User[]> {
     const queryBuilder = this.userRepository.createQueryBuilder('u');
 
     queryBuilder.where('u.isConfirmedEmail = :isConfirmedEmail', {
@@ -72,7 +80,7 @@ export class CustomerRepository {
     return customers;
   }
 
-  async removeCustomer(customer: User): Promise<void> {
-    await this.userRepository.remove(customer);
+  async remove(user: User): Promise<void> {
+    await this.userRepository.remove(user);
   }
 }
