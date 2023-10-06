@@ -1,3 +1,4 @@
+import { CourseFeedback } from 'src/course-feedback/entity/course-feedbacl.entity';
 import { Role } from 'src/role/entity/role.entity';
 import { User } from 'src/user/entity/user.entity';
 import {
@@ -5,6 +6,7 @@ import {
   Entity,
   JoinColumn,
   ManyToOne,
+  OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 
@@ -42,6 +44,9 @@ export class Learner {
 
   @Column()
   active: boolean;
+
+  @OneToMany(() => CourseFeedback, (courseFeedback) => courseFeedback.learner)
+  courseFeedbacks: CourseFeedback[];
 
   @ManyToOne(() => User, (user) => user.learners)
   @JoinColumn({ name: 'userId' })

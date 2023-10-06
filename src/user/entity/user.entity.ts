@@ -10,6 +10,9 @@ import {
 import { Post } from 'src/post/entity/post.entity';
 import { Role } from 'src/role/entity/role.entity';
 import { Learner } from 'src/learner/entity/learner.entity';
+import { Course } from 'src/course/entity/course.entity';
+import Promotion from 'src/promotion/entity/promotion.entity';
+import { CourseFeedback } from 'src/course-feedback/entity/course-feedbacl.entity';
 
 @Entity()
 export class User {
@@ -70,6 +73,15 @@ export class User {
 
   @OneToMany(() => Learner, (learner) => learner.user)
   learners: Learner[];
+
+  @OneToMany(() => Course, (course) => course.user)
+  courses: Course[];
+
+  @OneToMany(() => Promotion, (promotion) => promotion.user)
+  promotions: Promotion[];
+
+  @OneToMany(() => CourseFeedback, (courseFeedback) => courseFeedback.user)
+  courseFeedbacks: CourseFeedback[];
 
   @ManyToMany(() => Role, (roles) => roles.users)
   roles: Role[];
