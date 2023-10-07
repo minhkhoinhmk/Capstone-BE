@@ -1,4 +1,5 @@
 import { Category } from 'src/category/entity/category.entity';
+import { ChapterLecture } from 'src/chapter-lecture/entity/chapter-lecture.entity';
 import { Combo } from 'src/combo/entity/combo.entity';
 import { CourseFeedback } from 'src/course-feedback/entity/course-feedbacl.entity';
 import Level from 'src/level/entity/level.entity';
@@ -60,6 +61,9 @@ export class Course {
 
   @OneToMany(() => CourseFeedback, (courseFeedback) => courseFeedback.course)
   courseFeedbacks: CourseFeedback[];
+
+  @OneToMany(() => ChapterLecture, (chapterLecture) => chapterLecture.course)
+  chapterLectures: ChapterLecture[];
 
   @ManyToOne(() => User, (user) => user.courses)
   @JoinColumn({ name: 'instructorId' })
