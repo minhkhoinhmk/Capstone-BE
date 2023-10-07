@@ -44,7 +44,7 @@ export class Course {
   publishedDate: Date;
 
   @Column()
-  totalBought: Date;
+  totalBought: number;
 
   @Column()
   thumbnailUrl: string;
