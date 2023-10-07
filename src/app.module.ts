@@ -25,6 +25,7 @@ import { CourseModule } from './course/course.module';
 import { PromotionModule } from './promotion/promotion.module';
 import { PromotionCourseModule } from './promotion-course/promotion-course.module';
 import { CourseFeedbackModule } from './course-feedback/course-feedback.module';
+import { ChapterLectureModule } from './chapter-lecture/chapter-lecture.module';
 
 @Global()
 @Module({
@@ -93,6 +94,7 @@ import { CourseFeedbackModule } from './course-feedback/course-feedback.module';
     PromotionModule,
     PromotionCourseModule,
     CourseFeedbackModule,
+    ChapterLectureModule,
   ],
 })
 export class AppModule {}
