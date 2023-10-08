@@ -24,7 +24,7 @@ export class Course {
   title: string;
 
   @Column()
-  desciption: string;
+  description: string;
 
   @Column()
   price: number;
@@ -36,7 +36,7 @@ export class Course {
   prepareMaterial: string;
 
   @Column()
-  status: boolean;
+  status: string;
 
   @Column()
   totalChapter: number;
@@ -53,10 +53,7 @@ export class Course {
   @Column()
   active: boolean;
 
-  @OneToMany(
-    () => PromotionCourse,
-    (promotionCourse) => promotionCourse.promotion,
-  )
+  @OneToMany(() => PromotionCourse, (promotionCourse) => promotionCourse.course)
   promotionCourses: PromotionCourse[];
 
   @OneToMany(() => CourseFeedback, (courseFeedback) => courseFeedback.course)

@@ -16,7 +16,7 @@ export class ChapterLecture {
   title: string;
 
   @Column()
-  desciption: string;
+  description: string;
 
   @Column()
   insertedDate: Date;
