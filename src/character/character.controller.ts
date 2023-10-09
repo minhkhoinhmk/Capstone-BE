@@ -36,10 +36,6 @@ export class CharacterController {
   constructor(private characterService: CharacterService) {}
 
   @Get()
-  @ApiPaginatedResponse({
-    model: Character,
-    description: 'Get Paginated Characters',
-  })
   @ApiQuery({
     name: 'isActive',
     description: 'Is Active field to filter',
