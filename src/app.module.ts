@@ -26,6 +26,9 @@ import { PromotionModule } from './promotion/promotion.module';
 import { PromotionCourseModule } from './promotion-course/promotion-course.module';
 import { CourseFeedbackModule } from './course-feedback/course-feedback.module';
 import { ChapterLectureModule } from './chapter-lecture/chapter-lecture.module';
+import { Cart } from './cart/entity/cart.entity';
+import { CartModule } from './cart/cart.module';
+import { CartItem } from './cart-item/entity/cart-item.entity';
 
 @Global()
 @Module({
@@ -53,7 +56,16 @@ import { ChapterLectureModule } from './chapter-lecture/chapter-lecture.module';
           database: configService.get('DB_DATABASE'),
           autoLoadEntities: true,
           synchronize: true,
-          entities: [Character, User, Post, Role, Learner, JwtStore],
+          entities: [
+            Character,
+            User,
+            Post,
+            Role,
+            Learner,
+            JwtStore,
+            Cart,
+            CartItem,
+          ],
         };
       },
     }),
@@ -95,6 +107,7 @@ import { ChapterLectureModule } from './chapter-lecture/chapter-lecture.module';
     PromotionCourseModule,
     CourseFeedbackModule,
     ChapterLectureModule,
+    CartModule,
   ],
 })
 export class AppModule {}

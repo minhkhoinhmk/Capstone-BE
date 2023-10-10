@@ -10,5 +10,6 @@ import { AuthModule } from 'src/auth/auth.module';
   imports: [TypeOrmModule.forFeature([Course]), AuthModule],
   providers: [CourseService, CourseRepository],
   controllers: [CourseController],
+  exports: [CourseRepository],
 })
 export class CourseModule {}

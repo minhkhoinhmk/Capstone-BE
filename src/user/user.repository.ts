@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from './entity/user.entity';
-import { Repository } from 'typeorm';
+import { FindOptionsRelations, Repository } from 'typeorm';
 import { hashPassword } from 'src/utils/hash-password.util';
 import { Role } from 'src/role/entity/role.entity';
 import { CustomerRegisterRequest } from 'src/auth/dto/request/customer-register.request.dto';
@@ -19,6 +19,17 @@ export class UserRepository {
       relations: {
         roles: true,
       },
+    });
+    return user;
+  }
+
+  async getUserByIdWithRelation(
+    id: string,
+    relations: FindOptionsRelations<User>,
+  ): Promise<User> {
+    const user = await this.userRepository.findOne({
+      where: { id },
+      relations,
     });
     return user;
   }

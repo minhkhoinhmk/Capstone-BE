@@ -4,6 +4,7 @@ import {
   JoinTable,
   ManyToMany,
   OneToMany,
+  OneToOne,
   PrimaryColumn,
   PrimaryGeneratedColumn,
 } from 'typeorm';
@@ -13,6 +14,7 @@ import { Learner } from 'src/learner/entity/learner.entity';
 import { Course } from 'src/course/entity/course.entity';
 import Promotion from 'src/promotion/entity/promotion.entity';
 import { CourseFeedback } from 'src/course-feedback/entity/course-feedbacl.entity';
+import { Cart } from 'src/cart/entity/cart.entity';
 
 @Entity()
 export class User {
@@ -85,4 +87,7 @@ export class User {
 
   @ManyToMany(() => Role, (roles) => roles.users)
   roles: Role[];
+
+  @OneToOne(() => Cart, (cart) => cart.user, { nullable: true })
+  cart: Cart;
 }

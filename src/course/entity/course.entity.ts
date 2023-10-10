@@ -1,3 +1,4 @@
+import { CartItem } from 'src/cart-item/entity/cart-item.entity';
 import { Category } from 'src/category/entity/category.entity';
 import { ChapterLecture } from 'src/chapter-lecture/entity/chapter-lecture.entity';
 import { Combo } from 'src/combo/entity/combo.entity';
@@ -76,4 +77,7 @@ export class Course {
 
   @ManyToMany(() => Combo, (combos) => combos.courses)
   combos: Combo[];
+
+  @OneToMany(() => CartItem, (cartItem) => cartItem.course)
+  cartItems: CartItem[];
 }

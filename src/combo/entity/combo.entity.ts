@@ -1,9 +1,11 @@
+import { CartItem } from 'src/cart-item/entity/cart-item.entity';
 import { Course } from 'src/course/entity/course.entity';
 import {
   Column,
   Entity,
   JoinTable,
   ManyToMany,
+  OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 
@@ -28,4 +30,7 @@ export class Combo {
     inverseJoinColumn: { name: 'courseId', referencedColumnName: 'id' },
   })
   courses: Course[];
+
+  @OneToMany(() => CartItem, (cartItem) => cartItem.course)
+  cartItems: CartItem[];
 }

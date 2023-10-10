@@ -98,4 +98,13 @@ export class CourseRepository {
       return false;
     }
   }
+
+  async getCourseById(id: string) {
+    return this.courseRepository.findOne({
+      where: { id },
+      relations: { cartItems: true },
+    });
+  }
+
+  async getPercentDiscount() {}
 }
