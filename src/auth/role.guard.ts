@@ -16,8 +16,8 @@ export class RolesGuard implements CanActivate {
       return true;
     }
     const { user } = context.switchToHttp().getRequest();
-    let userRoles: NameRole[] = [];
-    let isAuthorized: boolean = false;
+    const userRoles: NameRole[] = [];
+    let isAuthorized = false;
 
     if (user.roles) {
       for (const role of user.roles as Role[]) {

@@ -23,15 +23,11 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     const { id } = payload;
     const user = await this.userRepository.getUserById(id);
 
-    if (!user) {
-      const leaner = await this.leanerRepository.getLeanerById(id);
-      if (!leaner) {
-        throw new UnauthorizedException();
-      } else {
-        return leaner;
-      }
-    } else {
-      return user;
-    }
+    if (user) return user;
+
+    const learner = await this.leanerRepository.getLeanerById(id);
+    if (!learner) throw new UnauthorizedException();
+
+    return learner;
   }
 }
