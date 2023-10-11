@@ -1,4 +1,4 @@
-import { Body, Controller, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Post, Req, UseGuards } from '@nestjs/common';
 import { LearnerService } from './learner.service';
 import { ApiConflictResponse, ApiCreatedResponse } from '@nestjs/swagger';
 import { CreateLearnerRequest } from './dto/request/create-learner.dto';
@@ -20,7 +20,13 @@ export class LearnerController {
   @UseGuards(AuthGuard(), RolesGuard)
   @HasRoles(NameRole.Customer)
   @Post('/create')
-  sigup(@Body() createLearnerRequest: CreateLearnerRequest): Promise<void> {
-    return this.learnerService.createLearner(createLearnerRequest);
+  sigup(
+    @Body() createLearnerRequest: CreateLearnerRequest,
+    @Req() request: Request,
+  ): Promise<void> {
+    return this.learnerService.createLearner(
+      createLearnerRequest,
+      request['user']['id'],
+    );
   }
 }
