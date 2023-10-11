@@ -21,7 +21,7 @@ export class LearnerRepository {
     customer: User,
     role: Role,
   ): Promise<Learner> {
-    const { firstName, lastName, middleName, userName, password, userJwt } =
+    const { firstName, lastName, middleName, userName, password } =
       createLearnerRequest;
 
     const learner = await this.learnerRepository.create({

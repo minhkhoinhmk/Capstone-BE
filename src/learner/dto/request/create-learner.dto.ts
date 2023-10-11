@@ -27,9 +27,4 @@ export class CreateLearnerRequest {
   @IsNotEmpty()
   @ApiProperty({ type: String, description: 'Username' })
   userName: string;
-
-  @IsString()
-  @IsNotEmpty()
-  @ApiProperty({ type: String, description: 'Jwt of user' })
-  userJwt: string;
 }
