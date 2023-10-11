@@ -172,11 +172,6 @@ export class AuthService {
     }
   }
 
-  async decodeJwtToken(jwt: string): Promise<Object> {
-    const payload = this.jwtService.decode(jwt);
-    return payload;
-  }
-
   async logout(code: string): Promise<void> {
     this.logger.log('method=logout, logout successfully');
     this.jwtStoreRepository.removeJwtStoreByCode(code);

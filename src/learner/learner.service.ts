@@ -24,6 +24,7 @@ export class LearnerService {
 
   async createLearner(
     createLearnerRequest: CreateLearnerRequest,
+    id: string,
   ): Promise<void> {
     if (
       (await this.userRepository.getUserByUserName(
@@ -38,11 +39,7 @@ export class LearnerService {
       );
       throw new ConflictException('User name already exists');
     } else {
-      const decodedJwt = await this.authService.decodeJwtToken(
-        createLearnerRequest.userJwt,
-      );
-
-      const customer = await this.userRepository.getUserById(decodedJwt['id']);
+      const customer = await this.userRepository.getUserById(id);
 
       const role = await this.roleRepository.getRoleByName(NameRole.Learner);
 
