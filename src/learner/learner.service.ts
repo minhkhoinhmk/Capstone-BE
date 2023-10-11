@@ -49,7 +49,7 @@ export class LearnerService {
         role,
       );
 
-      this.logger.log(`method=createLearner, create learner successfully`);
+      this.logger.log(`method=createLearner, create learner successfully!`);
 
       if (
         (await this.learnerRepository.countLearnerOfEachCustomer(customer)) > 1
