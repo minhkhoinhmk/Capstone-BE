@@ -3,6 +3,7 @@ import { Course } from './entity/course.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { PageOptionsDto } from 'src/common/pagination/dto/pageOptionsDto';
+import SortField from './type/enum/SortField';
 
 @Injectable()
 export class CourseRepository {
@@ -14,48 +15,33 @@ export class CourseRepository {
   ) {}
 
   async filter(
-    searchCriteria: any,
+    searchCriteria: {
+      levels: string[];
+      categories: string[];
+      search: string;
+      sortField: SortField;
+    },
     pageOptionsDto: PageOptionsDto,
-  ): Promise<{ count; entites }> {
+  ): Promise<{ count: number; entites: Course[] }> {
     const queryBuilder = this.courseRepository.createQueryBuilder('c');
+    const { categories, levels, search, sortField } = searchCriteria;
 
-    if (searchCriteria.categories) {
-      const categories: string[] = await this.convertAnyToArrayOfString(
-        searchCriteria.categories,
-      );
+    categories.length > 0 &&
       queryBuilder.andWhere('c.category IN (:...categories)', { categories });
-    }
 
-    if (searchCriteria.levels) {
-      const levels: string[] = await this.convertAnyToArrayOfString(
-        searchCriteria.levels,
-      );
+    levels.length > 0 &&
       queryBuilder.andWhere('c.level IN (:...levels)', { levels });
-    }
 
-    if (searchCriteria.search) {
-      const search = searchCriteria.search;
-      if (search) {
-        queryBuilder.andWhere('c.title LIKE :search', {
-          search: `%${search}%`,
-        });
-      }
-    }
+    search &&
+      queryBuilder.andWhere('c.title LIKE :search', {
+        search: `%${search}%`,
+      });
 
-    if (searchCriteria.sortField) {
-      if (await this.checkSortField(searchCriteria.sortField)) {
-        queryBuilder.orderBy(
-          `c.${searchCriteria.sortField}`,
-          pageOptionsDto.order,
-        );
-      } else {
-        throw new BadRequestException(
-          'Sort field not valid: ' + searchCriteria.sortField,
-        );
-      }
-    } else {
-      queryBuilder.orderBy(`c.publishedDate`, 'DESC');
-    }
+    if (sortField) {
+      if (this.checkSortField(sortField))
+        queryBuilder.orderBy(`c.${sortField}`, pageOptionsDto.order);
+      else throw new BadRequestException(`Sort field not valid: ${sortField}`);
+    } else queryBuilder.orderBy(`c.publishedDate`, 'DESC');
 
     queryBuilder.andWhere('c.active = :active', {
       active: true,
@@ -69,14 +55,13 @@ export class CourseRepository {
     queryBuilder.leftJoinAndSelect('c.user', 'user');
 
     queryBuilder.skip(pageOptionsDto.skip).take(pageOptionsDto.take);
-
-    const entites = queryBuilder.getMany();
-    const count = queryBuilder.getCount();
+    const entites = await queryBuilder.getMany();
+    const count = await queryBuilder.getCount();
 
     return { count, entites };
   }
 
-  async convertAnyToArrayOfString(input: any): Promise<string[]> {
+  convertAnyToArrayOfString(input: any): string[] {
     if (Array.isArray(input)) {
       // If 'input' is already an array, ensure that all elements are strings
       return input.filter((item) => typeof item === 'string');
@@ -89,8 +74,8 @@ export class CourseRepository {
     }
   }
 
-  async checkSortField(field: string): Promise<boolean> {
-    const enums: string[] = ['price', 'publishedDate'];
+  checkSortField(field: SortField): boolean {
+    const enums: string[] = [SortField.PRICE, SortField.PUBLISHED_DATE];
 
     if (enums.includes(field)) {
       return true;
@@ -105,6 +90,4 @@ export class CourseRepository {
       relations: { cartItems: true },
     });
   }
-
-  async getPercentDiscount() {}
 }
