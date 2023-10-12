@@ -5,6 +5,7 @@ import { SearchCourseReponse } from './dto/reponse/search-course-response.dto';
 import { PageOptionsDto } from 'src/common/pagination/dto/pageOptionsDto';
 import { PageDto } from 'src/common/pagination/dto/pageDto';
 import { PageMetaDto } from 'src/common/pagination/dto/pageMetaDto';
+import { SearchCourseRequest } from './dto/request/search-course-request.dto';
 
 @Injectable()
 export class CourseService {
@@ -13,27 +14,27 @@ export class CourseService {
   constructor(private courseRepository: CourseRepository) {}
 
   async searchAndFilter(
-    searchCriteria: any,
-    pageOptionsDto: PageOptionsDto,
+    searchCourseRequest: SearchCourseRequest,
   ): Promise<PageDto<SearchCourseReponse>> {
-    let courses: Course[];
-    let responses: SearchCourseReponse[] = [];
+    let courses: Course[] = [];
+    const responses: SearchCourseReponse[] = [];
+    const { pageOptions, ...searchCriteria } = searchCourseRequest;
 
     const { count, entites } = await this.courseRepository.filter(
       searchCriteria,
-      pageOptionsDto,
+      pageOptions,
     );
 
-    courses = await entites;
+    courses = entites;
 
     for (const course of courses) {
-      const totalLength = (await this.sumTotalLength(course))
-        ? await this.sumTotalLength(course)
+      const totalLength = this.sumTotalLength(course)
+        ? this.sumTotalLength(course)
         : 0;
-      const ratedStar = (await this.countRatedStar(course))
-        ? await this.countRatedStar(course)
+      const ratedStar = this.countRatedStar(course)
+        ? this.countRatedStar(course)
         : 0;
-      const sumDiscount = await this.getDiscount(course);
+      const sumDiscount = this.getDiscount(course);
       const discounntPrice = course.price - course.price * (sumDiscount / 100);
 
       responses.push({
@@ -58,10 +59,12 @@ export class CourseService {
       });
     }
 
-    const itemCount = await count;
+    const itemCount = count;
 
-    const pageMetaDto = new PageMetaDto({ itemCount, pageOptionsDto });
-    ``;
+    const pageMetaDto = new PageMetaDto({
+      itemCount,
+      pageOptionsDto: searchCourseRequest.pageOptions,
+    });
 
     this.logger.log(
       `method=searchAndFilter, totalItem=${pageMetaDto.itemCount}`,
@@ -70,7 +73,7 @@ export class CourseService {
     return new PageDto(responses, pageMetaDto);
   }
 
-  async countRatedStar(course: Course): Promise<number> {
+  countRatedStar(course: Course): number {
     const allRatedStar = course.courseFeedbacks.reduce(
       (accumulator, currentValue) => {
         return { ratedStar: accumulator.ratedStar + currentValue.ratedStar };
@@ -80,7 +83,7 @@ export class CourseService {
     return allRatedStar.ratedStar / course.courseFeedbacks.length;
   }
 
-  async sumTotalLength(course: Course): Promise<number> {
+  sumTotalLength(course: Course): number {
     const totalLength = course.chapterLectures.reduce(
       (accumulator, currentValue) => {
         return {
@@ -93,7 +96,7 @@ export class CourseService {
     return totalLength.totalLength;
   }
 
-  async getDiscount(course: Course): Promise<number> {
+  getDiscount(course: Course): number {
     let sumDiscount = 0;
 
     course.promotionCourses.forEach((promotionCourse) => {
