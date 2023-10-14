@@ -67,4 +67,14 @@ export class AuthController {
   signout(@Query('code') code: string): Promise<void> {
     return this.authService.logout(code);
   }
+
+  @ApiOkResponse({
+    description: 'Resend Otp Successfully',
+  })
+  @ApiNotFoundResponse({ description: 'User not found' })
+  @ApiParam({ name: 'email', description: 'Email of customer' })
+  @Get('/resend')
+  resendOtp(@Query('email') email: string): Promise<void> {
+    return this.authService.resendOtp(email);
+  }
 }
