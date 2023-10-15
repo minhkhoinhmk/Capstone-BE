@@ -99,12 +99,11 @@ export class AuthService {
   async signUpForCustomer(
     customerRegisterRequest: CustomerRegisterRequest,
   ): Promise<CustomerRegisterResponse> {
-    const { firstName, lastName, middleName, password, phoneNumber, email } =
-      customerRegisterRequest;
+    const { email } = customerRegisterRequest;
 
     const role = await this.roleRepository.getRoleByName(NameRole.Customer);
 
-    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    const otp = this.createOtp();
 
     const customer = await this.userRepository.createCustomer(
       customerRegisterRequest,
@@ -115,14 +114,7 @@ export class AuthService {
     try {
       await this.userRepository.save(customer);
 
-      await this.mailsService.sendMail({
-        to: email,
-        subject: 'OTP Verification',
-        template: './otp',
-        context: {
-          VERIFICATION_CODE: otp,
-        },
-      });
+      await this.sendEmail(email, otp);
 
       this.logger.log(`method=signUp, Registered email ${email} successfully`);
     } catch (error) {
@@ -175,5 +167,38 @@ export class AuthService {
   async logout(code: string): Promise<void> {
     this.logger.log('method=logout, logout successfully');
     this.jwtStoreRepository.removeJwtStoreByCode(code);
+  }
+
+  async resendOtp(email: string): Promise<void> {
+    const otp = this.createOtp();
+
+    const user = await this.userRepository.getUserByEmail(email);
+    if (!user) {
+      throw new NotFoundException(`User with email ${email} not found`);
+    }
+    user.otp = otp;
+
+    await this.userRepository.save(user);
+
+    await this.sendEmail(email, otp);
+
+    this.logger.log(
+      `method=resendOtp, resend otp successfully, email: ${email}`,
+    );
+  }
+
+  createOtp(): string {
+    return Math.floor(100000 + Math.random() * 900000).toString();
+  }
+
+  async sendEmail(email: string, otp: string): Promise<void> {
+    await this.mailsService.sendMail({
+      to: email,
+      subject: 'OTP Verification',
+      template: './otp',
+      context: {
+        VERIFICATION_CODE: otp,
+      },
+    });
   }
 }
