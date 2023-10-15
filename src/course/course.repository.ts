@@ -54,7 +54,9 @@ export class CourseRepository {
     queryBuilder.leftJoinAndSelect('c.level', 'level');
     queryBuilder.leftJoinAndSelect('c.user', 'user');
 
-    queryBuilder.skip(pageOptionsDto.skip).take(pageOptionsDto.take);
+    queryBuilder
+      .skip((pageOptionsDto.page - 1) * pageOptionsDto.take)
+      .take(pageOptionsDto.take);
     const entites = await queryBuilder.getMany();
     const count = await queryBuilder.getCount();
 
