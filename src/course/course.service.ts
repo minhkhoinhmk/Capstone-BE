@@ -6,6 +6,7 @@ import { PageOptionsDto } from 'src/common/pagination/dto/pageOptionsDto';
 import { PageDto } from 'src/common/pagination/dto/pageDto';
 import { PageMetaDto } from 'src/common/pagination/dto/pageMetaDto';
 import { SearchCourseRequest } from './dto/request/search-course-request.dto';
+import { CourseDetailResponse } from './dto/reponse/course-detail-response.dto';
 
 @Injectable()
 export class CourseService {
@@ -73,6 +74,43 @@ export class CourseService {
     return new PageDto(responses, pageMetaDto);
   }
 
+  async getDetail(courseId: string): Promise<CourseDetailResponse> {
+    const course = await this.courseRepository.getCourseDetailById(courseId);
+
+    const totalLength = this.sumTotalLength(course)
+      ? this.sumTotalLength(course)
+      : 0;
+    const ratedStar = this.countRatedStar(course)
+      ? this.countRatedStar(course)
+      : 0;
+    const sumDiscount = this.getDiscount(course);
+    const discounntPrice = course.price - course.price * (sumDiscount / 100);
+
+    const response = {
+      id: course.id,
+      title: course.title,
+      description: course.description,
+      price: course.price,
+      discount: sumDiscount,
+      discountPrice: discounntPrice,
+      ratedStar: ratedStar,
+      authorId: course.user.id,
+      author: `${course.user.firstName} ${course.user.middleName} ${course.user.lastName}`,
+      totalLength: totalLength,
+      shortDescription: course.shortDescription,
+      prepareMaterial: course.prepareMaterial,
+      status: course.status,
+      totalChapter: course.totalChapter,
+      publishedDate: course.publishedDate,
+      totalBought: course.totalBought,
+      thumbnailUrl: course.thumbnailUrl,
+      active: course.active,
+      level: course.level.name,
+    };
+
+    return response;
+  }
+
   countRatedStar(course: Course): number {
     const allRatedStar = course.courseFeedbacks.reduce(
       (accumulator, currentValue) => {
@@ -80,7 +118,7 @@ export class CourseService {
       },
       { ratedStar: 0 },
     );
-    return allRatedStar.ratedStar / course.courseFeedbacks.length;
+    return Math.ceil(allRatedStar.ratedStar / course.courseFeedbacks.length);
   }
 
   sumTotalLength(course: Course): number {
