@@ -8,13 +8,30 @@ import { createReadStream } from 'fs';
 import { stat } from 'fs/promises';
 import { join } from 'path';
 import * as rangeParser from 'range-parser';
+import { ConfigService } from '@nestjs/config';
+import { S3 } from 'aws-sdk';
 
 @Injectable()
 export class VideoService {
   private logger = new Logger('CourseFeedbackService', { timestamp: true });
 
+  constructor(private readonly configService: ConfigService) {}
+
   async getVideoStreamById() {
-    const stream = createReadStream(join(process.cwd(), 'src/test.mp4'));
+    const s3 = new S3({
+      accessKeyId: this.configService.get('AWS_S3_ACCESS_KEY_ID'),
+      secretAccessKey: this.configService.get('AWS_S3_SECRET_ACCESS_KEY'),
+      region: this.configService.get('AWS_S3_REGION'),
+    });
+
+    var options = {
+      Bucket: this.configService.get('AWS_S3_PUBLIC_BUCKET_NAME'),
+      Key: 'test2.mp4',
+    };
+
+    var stream = s3.getObject(options).createReadStream();
+
+    // const stream = createReadStream(join(process.cwd(), 'src/test.mp4'));
 
     return new StreamableFile(stream, {
       disposition: `inline; filename="src/test.mp4"`,
@@ -46,7 +63,21 @@ export class VideoService {
 
     const { start, end } = this.parseRange(range, fileSize);
 
-    const stream = createReadStream(videoPath, { start, end });
+    // const stream = createReadStream(videoPath, { start, end });
+
+    const s3 = new S3({
+      accessKeyId: this.configService.get('AWS_S3_ACCESS_KEY_ID'),
+      secretAccessKey: this.configService.get('AWS_S3_SECRET_ACCESS_KEY'),
+      region: this.configService.get('AWS_S3_REGION'),
+    });
+
+    var options = {
+      Bucket: this.configService.get('AWS_S3_PUBLIC_BUCKET_NAME'),
+      Key: 'test2.mp4',
+      Range: range,
+    };
+
+    var stream = s3.getObject(options).createReadStream();
 
     const streamableFile = new StreamableFile(stream, {
       disposition: `inline; filename="src/test.mp4"`,
