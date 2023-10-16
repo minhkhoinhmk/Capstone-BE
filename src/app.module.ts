@@ -29,6 +29,7 @@ import { ChapterLectureModule } from './chapter-lecture/chapter-lecture.module';
 import { Cart } from './cart/entity/cart.entity';
 import { CartModule } from './cart/cart.module';
 import { CartItem } from './cart-item/entity/cart-item.entity';
+import { VideoModule } from './video/video.module';
 
 @Global()
 @Module({
@@ -108,6 +109,7 @@ import { CartItem } from './cart-item/entity/cart-item.entity';
     CourseFeedbackModule,
     ChapterLectureModule,
     CartModule,
+    VideoModule,
   ],
 })
 export class AppModule {}
