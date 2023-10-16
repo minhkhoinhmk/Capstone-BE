@@ -63,6 +63,25 @@ export class CourseRepository {
     return { count, entites };
   }
 
+  async getCourseDetailById(courseId: string): Promise<Course> {
+    const queryBuilder = this.courseRepository.createQueryBuilder('c');
+
+    queryBuilder.andWhere('c.id = :courseId', {
+      courseId: `${courseId}`,
+    });
+
+    queryBuilder.leftJoinAndSelect('c.promotionCourses', 'promotionCourses');
+    queryBuilder.leftJoinAndSelect('promotionCourses.promotion', 'promotion');
+    queryBuilder.leftJoinAndSelect('c.courseFeedbacks', 'courseFeedbacks');
+    queryBuilder.leftJoinAndSelect('c.chapterLectures', 'chapterLectures');
+    queryBuilder.leftJoinAndSelect('c.level', 'level');
+    queryBuilder.leftJoinAndSelect('c.user', 'user');
+
+    const course = await queryBuilder.getOne();
+
+    return course;
+  }
+
   convertAnyToArrayOfString(input: any): string[] {
     if (Array.isArray(input)) {
       // If 'input' is already an array, ensure that all elements are strings
