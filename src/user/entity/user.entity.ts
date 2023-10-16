@@ -1,15 +1,18 @@
 import {
   Column,
   Entity,
+  JoinColumn,
   JoinTable,
   ManyToMany,
   OneToMany,
+  OneToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { ApiProperty } from '@nestjs/swagger';
 import { UUID } from 'typeorm/driver/mongodb/bson.typings';
 import { Post } from 'src/post/entity/post.entity';
 import { Role } from 'src/role/entity/role.entity';
+import PublicFile from 'src/files/publicFile.entity';
 
 @Entity()
 export class User {
@@ -45,10 +48,6 @@ export class User {
   @Column()
   password: string;
 
-  @ApiProperty({ type: String, description: 'avatar URL of the User' })
-  @Column()
-  avatar: string;
-
   @ApiProperty({ type: String, description: 'phoneNumber of the User' })
   @Column()
   phoneNumber: string;
@@ -71,4 +70,12 @@ export class User {
     inverseJoinColumn: { name: 'roleId' },
   })
   roles: Role[];
+
+  @ApiProperty({ type: String, description: 'avatar URL of the User' })
+  @JoinColumn()
+  @OneToOne(() => PublicFile, {
+    eager: true,
+    nullable: true,
+  })
+  public avatar?: PublicFile;
 }

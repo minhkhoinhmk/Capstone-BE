@@ -1,16 +1,15 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { Character } from './character/entity/character.entity';
-import { CharacterModule } from './character/character.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { configValidationSchema } from './config.schema';
-import { AuthModule } from './auth/auth.module';
 import { PostModule } from './post/post.module';
 import { RoleModule } from './role/role.module';
 import { UserModule } from './user/user.module';
 import { User } from './user/entity/user.entity';
 import { Post } from './post/entity/post.entity';
 import { Role } from './role/entity/role.entity';
+import PublicFile from './files/publicFile.entity';
+import { FilesModule } from './files/files.module';
 
 @Module({
   imports: [
@@ -36,15 +35,14 @@ import { Role } from './role/entity/role.entity';
           database: configService.get('DB_DATABASE'),
           autoLoadEntities: true,
           synchronize: true,
-          entities: [Character, User, Post, Role],
+          entities: [User, Post, Role, PublicFile],
         };
       },
     }),
-    CharacterModule,
-    AuthModule,
     UserModule,
     RoleModule,
     PostModule,
+    FilesModule,
   ],
 })
 export class AppModule {}
