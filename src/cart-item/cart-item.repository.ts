@@ -19,7 +19,7 @@ export class CartItemRepository {
     cart,
     course = null,
     combo = null,
-    promotionCourseId,
+    promotionCourseId = null,
   }: {
     cart: Cart;
     course?: Course;

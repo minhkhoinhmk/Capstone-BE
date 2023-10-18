@@ -71,4 +71,11 @@ export class CartController {
   getTotalPrice() {
     return this.cartService.getTotalPrice();
   }
+
+  @UseGuards(AuthGuard(), RolesGuard)
+  @HasRoles(NameRole.Customer)
+  @Get('/valid')
+  checkCartIsValid() {
+    return this.cartService.checkCartIsValid();
+  }
 }

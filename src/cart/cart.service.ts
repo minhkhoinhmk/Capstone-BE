@@ -16,6 +16,8 @@ import { User } from 'src/user/entity/user.entity';
 import { CartItemRepository } from 'src/cart-item/cart-item.repository';
 import { CartItem } from 'src/cart-item/entity/cart-item.entity';
 import { Cart } from './entity/cart.entity';
+import { CourseService } from 'src/course/course.service';
+import { Course } from 'src/course/entity/course.entity';
 
 @Injectable({ scope: Scope.REQUEST })
 export class CartService {
@@ -25,6 +27,7 @@ export class CartService {
     private cartRepository: CartRepository,
     private userRepository: UserRepository,
     private courseRepository: CourseRepository,
+    private courseService: CourseService,
     private cartItemRepository: CartItemRepository,
     @Inject(REQUEST) private request: Request,
   ) {}
@@ -38,14 +41,17 @@ export class CartService {
 
     const cart = await this.getOrCreateCart(customer);
 
+    const course = await this.courseRepository.getCourseById(courseId);
+
+    if (!course || !course.active)
+      throw new BadRequestException('Course is not existing');
+
     if (this.isCourseExistCartItem(courseId, customer.cart.cartItems)) {
       this.logger.error(
         `method=addCourseToCartItem, course is existing in cart item`,
       );
       throw new ConflictException('course is exsistent in cart item');
     }
-
-    const course = await this.courseRepository.getCourseById(courseId);
 
     // Check can apply promotionCourseId
 
@@ -55,7 +61,7 @@ export class CartService {
       promotionCourseId,
     });
 
-    this.cartItemRepository.saveCartItem(cartItem);
+    await this.cartItemRepository.saveCartItem(cartItem);
 
     return;
   }
@@ -64,6 +70,23 @@ export class CartService {
     const customer = await this.getCustomerWithCart();
     const cart = await this.getOrCreateCart(customer);
     cart.cartItems = cart.cartItems ? cart.cartItems : [];
+
+    cart.cartItems.forEach((cartItem) => {
+      const responseCourse: any = this.courseService.configCourseResponse(
+        cartItem.course,
+      );
+      if (cartItem.promotionCourse) {
+        const discountPercent =
+          cartItem.promotionCourse.promotion.discountPercent;
+        responseCourse.discount = discountPercent;
+        responseCourse.discountPrice =
+          responseCourse.price - discountPercent * responseCourse.price;
+      } else {
+        responseCourse.discount = 0;
+        responseCourse.discountPrice = responseCourse.price;
+      }
+      cartItem.course = responseCourse;
+    });
     return cart;
   }
 
@@ -92,6 +115,45 @@ export class CartService {
   async getTotalPrice() {
     const customer = await this.getCustomerWithCart();
     return this.caculatePrice(customer.cart);
+  }
+
+  async checkCartIsValid() {
+    const customer = await this.getCustomerWithCart();
+    const messageErrors: string[] = [];
+
+    customer.cart.cartItems = customer.cart.cartItems.filter((cartItem) => {
+      const { course, promotionCourse, combo } = cartItem;
+      const isCourseValid = course.active;
+
+      if (!isCourseValid) {
+        messageErrors.push(`Khóa học ${course.title} không còn hiệu lực`);
+        return false;
+      }
+
+      if (!promotionCourse) return true;
+
+      const date = new Date();
+      const isPromotionCourseValid =
+        promotionCourse.active &&
+        promotionCourse.effectiveDate <= date &&
+        promotionCourse.expiredDate >= date &&
+        promotionCourse.promotion.active;
+
+      if (!isPromotionCourseValid) {
+        cartItem.promotionCourse = null;
+        this.cartItemRepository.saveCartItem(cartItem);
+        messageErrors.push(
+          `Mã giảm giá cho khóa học ${course.title} không còn hiệu lực`,
+        );
+      }
+
+      return true;
+    });
+
+    if (messageErrors.length > 0) {
+      await this.cartRepository.saveCart(customer.cart);
+    }
+    return messageErrors;
   }
 
   caculatePrice = (cart: Cart) => {
@@ -124,7 +186,9 @@ export class CartService {
   }
 
   getOrCreateCart = async (customer: User) =>
-    !customer.cart ? this.cartRepository.saveCart(customer) : customer.cart;
+    !customer.cart
+      ? this.cartRepository.createAndSaveCart(customer)
+      : customer.cart;
 
   getCustomerWithCart = async () =>
     this.userRepository.getUserByIdWithRelation(
@@ -132,7 +196,17 @@ export class CartService {
       {
         cart: {
           cartItems: {
-            course: true,
+            course: {
+              courseFeedbacks: true,
+              chapterLectures: true,
+              level: true,
+              promotionCourses: {
+                promotion: {
+                  user: { roles: true },
+                },
+              },
+              user: true,
+            },
             promotionCourse: {
               promotion: true,
             },

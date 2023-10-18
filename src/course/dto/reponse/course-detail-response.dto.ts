@@ -20,6 +20,9 @@ export class CourseDetailResponse {
   discountPrice: number;
 
   @ApiProperty()
+  promotionCourseByStaffId: string | null;
+
+  @ApiProperty()
   ratedStar: number;
 
   @ApiProperty()

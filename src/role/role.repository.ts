@@ -14,7 +14,6 @@ export class RoleRepository {
   ) {}
 
   async getRoleByName(name: NameRole): Promise<Role> {
-    console.log(name);
     const role = await this.roleRepository.findOne({
       where: { name: name },
     });

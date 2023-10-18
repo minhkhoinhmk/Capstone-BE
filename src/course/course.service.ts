@@ -2,11 +2,11 @@ import { Injectable, Logger } from '@nestjs/common';
 import { CourseRepository } from './course.repository';
 import { Course } from './entity/course.entity';
 import { SearchCourseReponse } from './dto/reponse/search-course-response.dto';
-import { PageOptionsDto } from 'src/common/pagination/dto/pageOptionsDto';
 import { PageDto } from 'src/common/pagination/dto/pageDto';
 import { PageMetaDto } from 'src/common/pagination/dto/pageMetaDto';
 import { SearchCourseRequest } from './dto/request/search-course-request.dto';
 import { CourseDetailResponse } from './dto/reponse/course-detail-response.dto';
+import { NameRole } from 'src/role/enum/name-role.enum';
 
 @Injectable()
 export class CourseService {
@@ -29,35 +29,7 @@ export class CourseService {
     courses = entites;
 
     for (const course of courses) {
-      const totalLength = this.sumTotalLength(course)
-        ? this.sumTotalLength(course)
-        : 0;
-      const ratedStar = this.countRatedStar(course)
-        ? this.countRatedStar(course)
-        : 0;
-      const sumDiscount = this.getDiscount(course);
-      const discounntPrice = course.price - course.price * (sumDiscount / 100);
-
-      responses.push({
-        id: course.id,
-        title: course.title,
-        description: course.description,
-        price: course.price,
-        discount: sumDiscount,
-        discountPrice: discounntPrice,
-        ratedStar: ratedStar,
-        author: `${course.user.firstName} ${course.user.middleName} ${course.user.lastName}`,
-        totalLength: totalLength,
-        shortDescription: course.shortDescription,
-        prepareMaterial: course.prepareMaterial,
-        status: course.status,
-        totalChapter: course.totalChapter,
-        publishedDate: course.publishedDate,
-        totalBought: course.totalBought,
-        thumbnailUrl: course.thumbnailUrl,
-        active: course.active,
-        level: course.level.name,
-      });
+      responses.push(this.configCourseResponse(course));
     }
 
     const itemCount = count;
@@ -83,7 +55,8 @@ export class CourseService {
     const ratedStar = this.countRatedStar(course)
       ? this.countRatedStar(course)
       : 0;
-    const sumDiscount = this.getDiscount(course);
+    const { sumDiscount, promotionCourseByStaffId } =
+      this.getDiscountOfStaff(course);
     const discounntPrice = course.price - course.price * (sumDiscount / 100);
 
     const response = {
@@ -93,6 +66,7 @@ export class CourseService {
       price: course.price,
       discount: sumDiscount,
       discountPrice: discounntPrice,
+      promotionCourseByStaffId,
       ratedStar: ratedStar,
       authorId: course.user.id,
       author: `${course.user.firstName} ${course.user.middleName} ${course.user.lastName}`,
@@ -134,18 +108,67 @@ export class CourseService {
     return totalLength.totalLength;
   }
 
-  getDiscount(course: Course): number {
+  getDiscountOfStaff(course: Course): {
+    sumDiscount: number;
+    promotionCourseByStaffId: string | null;
+  } {
     let sumDiscount = 0;
+    let promotionCourseByStaffId = null;
+    const currentDate = new Date();
 
     course.promotionCourses.forEach((promotionCourse) => {
+      const isStaff = promotionCourse.promotion.user.roles.some(
+        (role) => role.name === NameRole.Staff,
+      );
       if (
-        new Date() <= promotionCourse.expiredDate &&
-        new Date() >= promotionCourse.effectiveDate
+        currentDate <= promotionCourse.expiredDate &&
+        currentDate >= promotionCourse.effectiveDate &&
+        promotionCourse.active &&
+        promotionCourse.promotion.active &&
+        isStaff
       ) {
         sumDiscount = sumDiscount + promotionCourse.promotion.discountPercent;
+        promotionCourseByStaffId = promotionCourse.id;
       }
     });
 
-    return sumDiscount;
+    return { promotionCourseByStaffId, sumDiscount };
+  }
+
+  configCourseResponse(course: Course): SearchCourseReponse {
+    const totalLength = this.sumTotalLength(course)
+      ? this.sumTotalLength(course)
+      : 0;
+    const ratedStar = this.countRatedStar(course)
+      ? this.countRatedStar(course)
+      : 0;
+    const { sumDiscount, promotionCourseByStaffId } =
+      this.getDiscountOfStaff(course);
+    const discounntPrice = course.price - course.price * (sumDiscount / 100);
+
+    const courseResponse: SearchCourseReponse = {
+      id: course.id,
+      title: course.title,
+      description: course.description,
+      price: course.price,
+
+      discount: sumDiscount,
+      discountPrice: discounntPrice,
+      promotionCourseByStaffId,
+      ratedStar: ratedStar,
+      author: `${course.user.firstName} ${course.user.middleName} ${course.user.lastName}`, ///
+      totalLength: totalLength,
+      shortDescription: course.shortDescription,
+      prepareMaterial: course.prepareMaterial,
+      status: course.status,
+      totalChapter: course.totalChapter,
+      publishedDate: course.publishedDate,
+      totalBought: course.totalBought,
+      thumbnailUrl: course.thumbnailUrl,
+      active: course.active,
+      level: course.level.name,
+    };
+
+    return courseResponse;
   }
 }
