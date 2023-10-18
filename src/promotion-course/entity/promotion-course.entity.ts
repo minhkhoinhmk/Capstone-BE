@@ -24,7 +24,7 @@ export class PromotionCourse {
   @Column()
   active: boolean;
 
-  @Column()
+  @Column({ unique: true })
   code: string;
 
   @ManyToOne(() => Promotion, (promotion) => promotion.promotionCourses)

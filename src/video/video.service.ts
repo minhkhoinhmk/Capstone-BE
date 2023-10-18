@@ -4,37 +4,42 @@ import {
   Logger,
   StreamableFile,
 } from '@nestjs/common';
-import { createReadStream } from 'fs';
 import { stat } from 'fs/promises';
 import { join } from 'path';
 import * as rangeParser from 'range-parser';
 import { ConfigService } from '@nestjs/config';
-import { S3 } from 'aws-sdk';
+import { S3Service } from 'src/s3/s3.service';
+import { v4 as uuidv4 } from 'uuid';
+import { COURSE_PATH } from 'src/common/s3/s3.constants';
 
 @Injectable()
 export class VideoService {
   private logger = new Logger('CourseFeedbackService', { timestamp: true });
+  private fileSize: number;
 
-  constructor(private readonly configService: ConfigService) {}
+  constructor(
+    private readonly configService: ConfigService,
+    private readonly s3Service: S3Service,
+  ) {}
 
-  async getVideoStreamById() {
-    const s3 = new S3({
-      accessKeyId: this.configService.get('AWS_S3_ACCESS_KEY_ID'),
-      secretAccessKey: this.configService.get('AWS_S3_SECRET_ACCESS_KEY'),
-      region: this.configService.get('AWS_S3_REGION'),
-    });
-
+  async getVideoStream(id: string) {
     var options = {
       Bucket: this.configService.get('AWS_S3_PUBLIC_BUCKET_NAME'),
-      Key: 'test2.mp4',
+      Key: id,
     };
 
-    var stream = s3.getObject(options).createReadStream();
+    this.fileSize = (
+      await (await this.s3Service.headObject(options)).promise()
+    ).ContentLength;
 
-    // const stream = createReadStream(join(process.cwd(), 'src/test.mp4'));
+    console.log(`this.fileSize: ${this.fileSize}`);
+
+    var stream = (await this.s3Service.getObject(options)).createReadStream();
+
+    this.logger.log(`method=getVideoStream, stream fully loaded`);
 
     return new StreamableFile(stream, {
-      disposition: `inline; filename="src/test.mp4"`,
+      disposition: `inline; filename="${options.Key}"`,
       type: 'video/mp4',
     });
   }
@@ -57,38 +62,42 @@ export class VideoService {
     return `bytes ${rangeStart}-${rangeEnd}/${fileSize}`;
   }
 
-  async getPartialVideoStream(range: string) {
-    const videoPath = join(process.cwd(), 'src/test.mp4');
-    const fileSize = await this.getFileSize(videoPath);
-
-    const { start, end } = this.parseRange(range, fileSize);
-
-    // const stream = createReadStream(videoPath, { start, end });
-
-    const s3 = new S3({
-      accessKeyId: this.configService.get('AWS_S3_ACCESS_KEY_ID'),
-      secretAccessKey: this.configService.get('AWS_S3_SECRET_ACCESS_KEY'),
-      region: this.configService.get('AWS_S3_REGION'),
-    });
-
+  async getPartialVideoStream(range: string, id: string) {
     var options = {
       Bucket: this.configService.get('AWS_S3_PUBLIC_BUCKET_NAME'),
-      Key: 'test2.mp4',
+      Key: id,
       Range: range,
     };
 
-    var stream = s3.getObject(options).createReadStream();
+    const { start, end } = this.parseRange(range, this.fileSize);
+
+    console.log(this.fileSize);
+
+    var stream = (await this.s3Service.getObject(options)).createReadStream();
 
     const streamableFile = new StreamableFile(stream, {
-      disposition: `inline; filename="src/test.mp4"`,
+      disposition: `inline; filename="${options.Key}"`,
       type: 'video/mp4',
     });
 
-    const contentRange = this.getContentRange(start, end, fileSize);
+    const contentRange = this.getContentRange(start, end, this.fileSize);
+
+    this.logger.log(
+      `method=getPartialVideoStream, stream partialy loaded, range=${range}`,
+    );
 
     return {
       streamableFile,
       contentRange,
     };
+  }
+
+  async pushToS3(buffer: Buffer, substringAfterDot: string): Promise<void> {
+    const uuid = uuidv4();
+
+    await this.s3Service.putObject(
+      buffer,
+      `${COURSE_PATH}${uuid}.${substringAfterDot}`,
+    );
   }
 }
