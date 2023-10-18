@@ -47,12 +47,15 @@ export class CourseRepository {
       active: true,
     });
 
-    queryBuilder.leftJoinAndSelect('c.promotionCourses', 'promotionCourses');
-    queryBuilder.leftJoinAndSelect('promotionCourses.promotion', 'promotion');
-    queryBuilder.leftJoinAndSelect('c.courseFeedbacks', 'courseFeedbacks');
-    queryBuilder.leftJoinAndSelect('c.chapterLectures', 'chapterLectures');
-    queryBuilder.leftJoinAndSelect('c.level', 'level');
-    queryBuilder.leftJoinAndSelect('c.user', 'user');
+    queryBuilder
+      .leftJoinAndSelect('c.promotionCourses', 'promotionCourses')
+      .leftJoinAndSelect('promotionCourses.promotion', 'promotion')
+      .leftJoinAndSelect('promotion.user', 'promotionUser')
+      .leftJoinAndSelect('promotionUser.roles', 'promotionUserRoles')
+      .leftJoinAndSelect('c.courseFeedbacks', 'courseFeedbacks')
+      .leftJoinAndSelect('c.chapterLectures', 'chapterLectures')
+      .leftJoinAndSelect('c.level', 'level')
+      .leftJoinAndSelect('c.user', 'user');
 
     queryBuilder
       .skip((pageOptionsDto.page - 1) * pageOptionsDto.take)
@@ -72,6 +75,8 @@ export class CourseRepository {
 
     queryBuilder.leftJoinAndSelect('c.promotionCourses', 'promotionCourses');
     queryBuilder.leftJoinAndSelect('promotionCourses.promotion', 'promotion');
+    queryBuilder.leftJoinAndSelect('promotion.user', 'promotionUser');
+    queryBuilder.leftJoinAndSelect('promotionUser.roles', 'promotionUserRoles');
     queryBuilder.leftJoinAndSelect('c.courseFeedbacks', 'courseFeedbacks');
     queryBuilder.leftJoinAndSelect('c.chapterLectures', 'chapterLectures');
     queryBuilder.leftJoinAndSelect('c.level', 'level');

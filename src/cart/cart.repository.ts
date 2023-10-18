@@ -13,9 +13,17 @@ export class CartRepository {
     private cartRepository: Repository<Cart>,
   ) {}
 
-  async saveCart(user: User) {
-    const cart = this.cartRepository.create({ user });
+  async createCart(user: User) {
+    return this.cartRepository.create({ user });
+  }
+
+  async saveCart(cart: Cart) {
     return this.cartRepository.save(cart);
+  }
+
+  async createAndSaveCart(user: User) {
+    const cart = await this.createCart(user);
+    return this.saveCart(cart);
   }
 
   async emptyCart(cart: Cart) {

@@ -55,6 +55,7 @@ export class AuthService {
       }
     }
 
+    // Check user isConfirmedEmail and learner is not check that
     if (user && (await bcrypt.compare(password, user.password))) {
       if (!user.active)
         throw new BadRequestException(`This account is not activated`);
