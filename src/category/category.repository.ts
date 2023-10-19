@@ -13,7 +13,10 @@ export class CategoryRepository {
   ) {}
 
   async getAllCategories() {
-    return this.categoryRepository.find({});
+    return this.categoryRepository.find({
+      where: { active: true },
+      relations: { courses: true },
+    });
   }
 
   async getCategoryById(id: string) {
