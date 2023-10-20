@@ -31,6 +31,7 @@ import { CartModule } from './cart/cart.module';
 import { CartItem } from './cart-item/entity/cart-item.entity';
 import { VideoModule } from './video/video.module';
 import { S3Module } from './s3/s3.module';
+import { PaymentModule } from './payment/payment.module';
 
 @Global()
 @Module({
@@ -112,6 +113,7 @@ import { S3Module } from './s3/s3.module';
     CartModule,
     VideoModule,
     S3Module,
+    PaymentModule,
   ],
 })
 export class AppModule {}
