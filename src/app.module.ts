@@ -32,6 +32,13 @@ import { CartItem } from './cart-item/entity/cart-item.entity';
 import { VideoModule } from './video/video.module';
 import { S3Module } from './s3/s3.module';
 import { PaymentModule } from './payment/payment.module';
+import { Order } from './order/entity/order.entity';
+import { OrderDetail } from './order-detail/entity/order-detail.entity';
+import { OrderStatus } from './order-status/entity/order-status.entity';
+import { PaymentMethod } from './payment-method/entity/payment-method.entity';
+import { OrderStatusModule } from './order-status/order-status.module';
+import { PaymentMethodModule } from './payment-method/payment-method.module';
+import { OrderModule } from './order/order.module';
 
 @Global()
 @Module({
@@ -68,6 +75,10 @@ import { PaymentModule } from './payment/payment.module';
             JwtStore,
             Cart,
             CartItem,
+            Order,
+            OrderDetail,
+            OrderStatus,
+            PaymentMethod,
           ],
         };
       },
@@ -114,6 +125,9 @@ import { PaymentModule } from './payment/payment.module';
     VideoModule,
     S3Module,
     PaymentModule,
+    OrderStatusModule,
+    PaymentMethodModule,
+    OrderModule,
   ],
 })
 export class AppModule {}
