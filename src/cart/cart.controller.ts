@@ -19,10 +19,12 @@ import {
   ApiConflictResponse,
   ApiCreatedResponse,
   ApiParam,
+  ApiTags,
 } from '@nestjs/swagger';
 import { Cart } from './entity/cart.entity';
 
 @Controller('cart')
+@ApiTags('Cart')
 export class CartController {
   constructor(private cartService: CartService) {}
 

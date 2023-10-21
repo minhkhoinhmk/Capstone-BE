@@ -15,8 +15,10 @@ import {
 import { VideoService } from './video.service';
 import { Response } from 'express';
 import { FileInterceptor } from '@nestjs/platform-express';
+import { ApiTags } from '@nestjs/swagger';
 
 @Controller('video')
+@ApiTags('Video')
 export class VideoController {
   constructor(private readonly videosService: VideoService) {}
 

@@ -4,10 +4,11 @@ import { AuthGuard } from '@nestjs/passport';
 import { RolesGuard } from 'src/auth/role.guard';
 import { HasRoles } from 'src/auth/roles.decorator';
 import { NameRole } from 'src/role/enum/name-role.enum';
-import { ApiCreatedResponse } from '@nestjs/swagger';
+import { ApiCreatedResponse, ApiTags } from '@nestjs/swagger';
 import { Order } from './entity/order.entity';
 
 @Controller('order')
+@ApiTags('Order')
 export class OrderController {
   constructor(private orderService: OrderService) {}
 

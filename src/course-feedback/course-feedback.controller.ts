@@ -5,8 +5,10 @@ import { ApiPaginatedResponse } from 'src/common/decorator/api-pagination-respon
 import { PageOptionsDto } from 'src/common/pagination/dto/pageOptionsDto';
 import { PageDto } from 'src/common/pagination/dto/pageDto';
 import { CourseFeedbackResponse } from './dto/response/course-feedback-response.dto';
+import { ApiTags } from '@nestjs/swagger';
 
 @Controller('course-feedback')
+@ApiTags('Course Feedback')
 export class CourseFeedbackController {
   constructor(private courseFeedbackService: CourseFeedbackService) {}
 

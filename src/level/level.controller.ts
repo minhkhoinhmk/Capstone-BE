@@ -1,8 +1,10 @@
 import { Controller, Get, Param } from '@nestjs/common';
 import Level from './entity/level.entity';
 import { LevelService } from './level.service';
+import { ApiTags } from '@nestjs/swagger';
 
 @Controller('level')
+@ApiTags('Level')
 export class LevelController {
   constructor(private levelService: LevelService) {}
 

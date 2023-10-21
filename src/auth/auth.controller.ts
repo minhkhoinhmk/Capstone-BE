@@ -6,6 +6,7 @@ import {
   ApiNotFoundResponse,
   ApiOkResponse,
   ApiParam,
+  ApiTags,
 } from '@nestjs/swagger';
 import { Token } from './dto/response/token.dto';
 import { CustomerRegisterRequest } from './dto/request/customer-register.request.dto';
@@ -13,6 +14,7 @@ import { CustomerRegisterResponse } from './dto/response/customer-register.respo
 import { GuestLoginRequest } from './dto/request/guest-login.request.dto';
 
 @Controller('auth')
+@ApiTags('Auth')
 export class AuthController {
   constructor(private authService: AuthService) {}
 

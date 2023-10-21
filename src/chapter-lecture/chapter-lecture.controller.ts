@@ -1,8 +1,10 @@
 import { Controller, Get, Param } from '@nestjs/common';
 import { ChapterLectureService } from './chapter-lecture.service';
 import { ChapterLecture } from './entity/chapter-lecture.entity';
+import { ApiTags } from '@nestjs/swagger';
 
 @Controller('chapter-lecture')
+@ApiTags('Chapter Lecture')
 export class ChapterLectureController {
   constructor(private chapterLectureService: ChapterLectureService) {}
 
