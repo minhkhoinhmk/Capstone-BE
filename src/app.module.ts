@@ -39,6 +39,7 @@ import { PaymentMethod } from './payment-method/entity/payment-method.entity';
 import { OrderStatusModule } from './order-status/order-status.module';
 import { PaymentMethodModule } from './payment-method/payment-method.module';
 import { OrderModule } from './order/order.module';
+import { TransactionModule } from './transaction/transaction.module';
 
 @Global()
 @Module({
@@ -128,6 +129,7 @@ import { OrderModule } from './order/order.module';
     OrderStatusModule,
     PaymentMethodModule,
     OrderModule,
+    TransactionModule,
   ],
 })
 export class AppModule {}

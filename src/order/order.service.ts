@@ -6,7 +6,6 @@ import { REQUEST } from '@nestjs/core';
 import { CartItemRepository } from 'src/cart-item/cart-item.repository';
 import { CourseService } from 'src/course/course.service';
 
-import { CartRepository } from 'src/cart/cart.repository';
 import { CartService } from 'src/cart/cart.service';
 import { NamePaymentMethod } from 'src/payment-method/enum/name-payment-method.enum';
 import { Order } from './entity/order.entity';
@@ -14,8 +13,6 @@ import { OrderRepository } from './order.repository';
 import { OrderStatusRepository } from 'src/order-status/order-status.repository';
 import { NameOrderStatus } from 'src/order-status/enum/name-order-status.enum';
 import { PaymentMethodRepository } from 'src/payment-method/payment-method.repository';
-import { OrderDetail } from 'src/order-detail/entity/order-detail.entity';
-import { CreateOrderDetailBody } from 'src/order-detail/types/create-order-detail-body';
 import { OrderDetailRepository } from 'src/order-detail/order-detail.repository';
 
 @Injectable({ scope: Scope.REQUEST })
