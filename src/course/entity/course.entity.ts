@@ -4,6 +4,7 @@ import { ChapterLecture } from 'src/chapter-lecture/entity/chapter-lecture.entit
 import { Combo } from 'src/combo/entity/combo.entity';
 import { CourseFeedback } from 'src/course-feedback/entity/course-feedbacl.entity';
 import Level from 'src/level/entity/level.entity';
+import { OrderDetail } from 'src/order-detail/entity/order-detail.entity';
 import { PromotionCourse } from 'src/promotion-course/entity/promotion-course.entity';
 import { User } from 'src/user/entity/user.entity';
 import {
@@ -80,4 +81,7 @@ export class Course {
 
   @OneToMany(() => CartItem, (cartItem) => cartItem.course)
   cartItems: CartItem[];
+
+  @OneToMany(() => OrderDetail, (orderDetail) => orderDetail.course)
+  orderDetails: OrderDetail[];
 }

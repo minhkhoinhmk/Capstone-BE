@@ -19,6 +19,6 @@ import { AuthModule } from 'src/auth/auth.module';
   ],
   providers: [CartService, CartRepository],
   controllers: [CartController],
-  exports: [CartRepository],
+  exports: [CartRepository, CartService],
 })
 export class CartModule {}

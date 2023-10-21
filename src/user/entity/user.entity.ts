@@ -15,6 +15,7 @@ import { Course } from 'src/course/entity/course.entity';
 import Promotion from 'src/promotion/entity/promotion.entity';
 import { CourseFeedback } from 'src/course-feedback/entity/course-feedbacl.entity';
 import { Cart } from 'src/cart/entity/cart.entity';
+import { Order } from 'src/order/entity/order.entity';
 
 @Entity()
 export class User {
@@ -84,6 +85,9 @@ export class User {
 
   @OneToMany(() => CourseFeedback, (courseFeedback) => courseFeedback.user)
   courseFeedbacks: CourseFeedback[];
+
+  @OneToMany(() => Order, (order) => order.user)
+  orders: Course[];
 
   @ManyToMany(() => Role, (roles) => roles.users)
   roles: Role[];

@@ -1,5 +1,6 @@
 import { CartItem } from 'src/cart-item/entity/cart-item.entity';
 import { Course } from 'src/course/entity/course.entity';
+import { OrderDetail } from 'src/order-detail/entity/order-detail.entity';
 import Promotion from 'src/promotion/entity/promotion.entity';
 import {
   Column,
@@ -37,4 +38,7 @@ export class PromotionCourse {
 
   @OneToMany(() => CartItem, (cartItem) => cartItem.promotionCourse)
   cartItems: CartItem[];
+
+  @OneToMany(() => OrderDetail, (orderDetail) => orderDetail.promotionCourse)
+  orderDetails: OrderDetail[];
 }
