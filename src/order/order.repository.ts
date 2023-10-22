@@ -23,6 +23,18 @@ export class OrderRepository {
     return this.orderRepository.save(order);
   }
 
+  async getOrderById(orderId: string): Promise<Order> {
+    return this.orderRepository.findOne({
+      where: { id: orderId },
+      relations: {
+        user: true,
+        paymentMethod: true,
+        orderStatus: true,
+        orderDetails: true,
+      },
+    });
+  }
+
   // async createAndSaveCart(user: User) {
   //   const cart = await this.createCart(user);
   //   return this.saveCart(cart);

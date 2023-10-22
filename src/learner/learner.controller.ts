@@ -1,6 +1,10 @@
 import { Body, Controller, Post, Req, UseGuards } from '@nestjs/common';
 import { LearnerService } from './learner.service';
-import { ApiConflictResponse, ApiCreatedResponse } from '@nestjs/swagger';
+import {
+  ApiConflictResponse,
+  ApiCreatedResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 import { CreateLearnerRequest } from './dto/request/create-learner.dto';
 import { AuthGuard } from '@nestjs/passport';
 import { RolesGuard } from 'src/auth/role.guard';
@@ -9,6 +13,7 @@ import { NameRole } from 'src/role/enum/name-role.enum';
 import { Request } from 'express';
 
 @Controller('learner')
+@ApiTags('Learner')
 export class LearnerController {
   constructor(private learnerService: LearnerService) {}
 
