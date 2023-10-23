@@ -66,4 +66,11 @@ export class LearnerRepository {
     });
     return learner;
   }
+
+  async getLearnerByUserId(userId: string): Promise<Learner[]> {
+    const learner = await this.learnerRepository.find({
+      where: { user: { id: userId }, active: true },
+    });
+    return learner;
+  }
 }

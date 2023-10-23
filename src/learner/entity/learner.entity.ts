@@ -1,5 +1,7 @@
 import { CourseFeedback } from 'src/course-feedback/entity/course-feedbacl.entity';
+import { LearnerCourse } from 'src/learner-course/entity/learner-course.entity';
 import { Role } from 'src/role/entity/role.entity';
+import { UserLecture } from 'src/user-lecture/entity/user-lecture.entity';
 import { User } from 'src/user/entity/user.entity';
 import {
   Column,
@@ -47,6 +49,12 @@ export class Learner {
 
   @OneToMany(() => CourseFeedback, (courseFeedback) => courseFeedback.learner)
   courseFeedbacks: CourseFeedback[];
+
+  @OneToMany(() => LearnerCourse, (learnerCourse) => learnerCourse.learner)
+  learnerCourses: LearnerCourse[];
+
+  @OneToMany(() => UserLecture, (userLecture) => userLecture.learner)
+  userLectures: UserLecture[];
 
   @ManyToOne(() => User, (user) => user.learners)
   @JoinColumn({ name: 'userId' })

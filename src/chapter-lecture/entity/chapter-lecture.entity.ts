@@ -1,9 +1,11 @@
 import { Course } from 'src/course/entity/course.entity';
+import { UserLecture } from 'src/user-lecture/entity/user-lecture.entity';
 import {
   Column,
   Entity,
   JoinColumn,
   ManyToOne,
+  OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 
@@ -45,4 +47,7 @@ export class ChapterLecture {
   @ManyToOne(() => Course, (course) => course.chapterLectures)
   @JoinColumn({ name: 'courseId' })
   course: Course;
+
+  @OneToMany(() => UserLecture, (userLecture) => userLecture.chapterLecture)
+  userLectures: UserLecture[];
 }

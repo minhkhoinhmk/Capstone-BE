@@ -87,19 +87,6 @@ export class CourseRepository {
     return course;
   }
 
-  convertAnyToArrayOfString(input: any): string[] {
-    if (Array.isArray(input)) {
-      // If 'input' is already an array, ensure that all elements are strings
-      return input.filter((item) => typeof item === 'string');
-    } else if (typeof input === 'string') {
-      // If 'input' is a single string, convert it to an array with one element
-      return [input];
-    } else {
-      // Handle other cases or return an empty array if needed
-      return [];
-    }
-  }
-
   checkSortField(field: SortField): boolean {
     const enums: string[] = [SortField.PRICE, SortField.PUBLISHED_DATE];
 
