@@ -14,7 +14,7 @@ import { AuthModule } from 'src/auth/auth.module';
     TypeOrmModule.forFeature([Cart]),
     forwardRef(() => AuthModule),
     UserModule,
-    CourseModule,
+    forwardRef(() => CourseModule),
     CartItemModule,
   ],
   providers: [CartService, CartRepository],

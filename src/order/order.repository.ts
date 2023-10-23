@@ -5,6 +5,7 @@ import { Order } from './entity/order.entity';
 import { User } from 'src/user/entity/user.entity';
 import { PaymentMethod } from 'src/payment-method/entity/payment-method.entity';
 import { CreateOrderBody } from './types/create-order-body';
+import { NameOrderStatus } from 'src/order-status/enum/name-order-status.enum';
 
 @Injectable()
 export class OrderRepository {
@@ -44,4 +45,15 @@ export class OrderRepository {
   //   cart.cartItems = [];
   //   return await this.cartRepository.save(cart);
   // }
+
+  async getCoursesByUserId(userId: string): Promise<Order[]> {
+    return await this.orderRepository.find({
+      where: {
+        user: { id: userId },
+        active: true,
+        orderStatus: { statusName: NameOrderStatus.Success },
+      },
+      relations: { orderDetails: { course: true } },
+    });
+  }
 }

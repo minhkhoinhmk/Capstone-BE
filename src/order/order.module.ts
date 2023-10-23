@@ -18,7 +18,7 @@ import { OrderDetailModule } from 'src/order-detail/order-detail.module';
     TypeOrmModule.forFeature([Order]),
     forwardRef(() => AuthModule),
     UserModule,
-    CourseModule,
+    forwardRef(() => CourseModule),
     CartItemModule,
     OrderStatusModule,
     PaymentMethodModule,

@@ -1,8 +1,9 @@
-import { Body, Controller, Post, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Post, Req, UseGuards } from '@nestjs/common';
 import { LearnerService } from './learner.service';
 import {
   ApiConflictResponse,
   ApiCreatedResponse,
+  ApiOkResponse,
   ApiTags,
 } from '@nestjs/swagger';
 import { CreateLearnerRequest } from './dto/request/create-learner.dto';
@@ -11,6 +12,7 @@ import { RolesGuard } from 'src/auth/role.guard';
 import { HasRoles } from 'src/auth/roles.decorator';
 import { NameRole } from 'src/role/enum/name-role.enum';
 import { Request } from 'express';
+import { FilterLearnerByUserResponse } from './dto/response/filter-by-user.dto';
 
 @Controller('learner')
 @ApiTags('Learner')
@@ -34,5 +36,19 @@ export class LearnerController {
       createLearnerRequest,
       request['user']['id'],
     );
+  }
+
+  @ApiOkResponse({
+    description: 'Get Learner Successfully',
+    type: FilterLearnerByUserResponse,
+    isArray: true,
+  })
+  @UseGuards(AuthGuard(), RolesGuard)
+  @HasRoles(NameRole.Customer)
+  @Get('/user')
+  getLearnersByUserId(
+    @Req() request: Request,
+  ): Promise<FilterLearnerByUserResponse[]> {
+    return this.learnerService.getLearnerByUserId(request['user']['id']);
   }
 }

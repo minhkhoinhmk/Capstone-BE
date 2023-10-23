@@ -3,6 +3,7 @@ import { Category } from 'src/category/entity/category.entity';
 import { ChapterLecture } from 'src/chapter-lecture/entity/chapter-lecture.entity';
 import { Combo } from 'src/combo/entity/combo.entity';
 import { CourseFeedback } from 'src/course-feedback/entity/course-feedbacl.entity';
+import { LearnerCourse } from 'src/learner-course/entity/learner-course.entity';
 import Level from 'src/level/entity/level.entity';
 import { OrderDetail } from 'src/order-detail/entity/order-detail.entity';
 import { PromotionCourse } from 'src/promotion-course/entity/promotion-course.entity';
@@ -63,6 +64,9 @@ export class Course {
 
   @OneToMany(() => ChapterLecture, (chapterLecture) => chapterLecture.course)
   chapterLectures: ChapterLecture[];
+
+  @OneToMany(() => LearnerCourse, (learnerCourse) => learnerCourse.learner)
+  learnerCourses: LearnerCourse[];
 
   @ManyToOne(() => User, (user) => user.courses)
   @JoinColumn({ name: 'instructorId' })

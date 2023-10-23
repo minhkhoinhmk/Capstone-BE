@@ -40,6 +40,8 @@ import { OrderStatusModule } from './order-status/order-status.module';
 import { PaymentMethodModule } from './payment-method/payment-method.module';
 import { OrderModule } from './order/order.module';
 import { TransactionModule } from './transaction/transaction.module';
+import { LearnerCourseModule } from './learner-course/learner-course.module';
+import { UserLectureModule } from './user-lecture/user-lecture.module';
 
 @Global()
 @Module({
@@ -130,6 +132,8 @@ import { TransactionModule } from './transaction/transaction.module';
     PaymentMethodModule,
     OrderModule,
     TransactionModule,
+    LearnerCourseModule,
+    UserLectureModule,
   ],
 })
 export class AppModule {}

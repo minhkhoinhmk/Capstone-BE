@@ -10,6 +10,7 @@ import { NameRole } from 'src/role/enum/name-role.enum';
 import { LearnerRepository } from './learner.repository';
 import { AuthService } from 'src/auth/auth.service';
 import { UserRepository } from 'src/user/user.repository';
+import { FilterLearnerByUserResponse } from './dto/response/filter-by-user.dto';
 
 @Injectable()
 export class LearnerService {
@@ -59,6 +60,30 @@ export class LearnerService {
       } else {
         await this.learnerRepository.saveLearner(learner);
       }
+    }
+  }
+
+  async getLearnerByUserId(
+    userId: string,
+  ): Promise<FilterLearnerByUserResponse[]> {
+    const learners = await this.learnerRepository.getLearnerByUserId(userId);
+    let responses: FilterLearnerByUserResponse[] = [];
+
+    for (const learner of learners) {
+      responses.push({
+        id: learner.id,
+        firstName: learner.firstName,
+        middleName: learner.middleName,
+        lastName: learner.lastName,
+        active: learner.active,
+        userName: learner.userName,
+      });
+
+      this.logger.log(
+        `method=getLearnerByUserId, userId=${userId}, length=${responses.length}`,
+      );
+
+      return responses;
     }
   }
 }

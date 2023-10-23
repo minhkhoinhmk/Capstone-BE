@@ -16,6 +16,7 @@ import Promotion from 'src/promotion/entity/promotion.entity';
 import { CourseFeedback } from 'src/course-feedback/entity/course-feedbacl.entity';
 import { Cart } from 'src/cart/entity/cart.entity';
 import { Order } from 'src/order/entity/order.entity';
+import { UserLecture } from 'src/user-lecture/entity/user-lecture.entity';
 
 @Entity()
 export class User {
@@ -94,4 +95,7 @@ export class User {
 
   @OneToOne(() => Cart, (cart) => cart.user, { nullable: true })
   cart: Cart;
+
+  @OneToMany(() => UserLecture, (userLecture) => userLecture.user)
+  userLectures: UserLecture[];
 }
