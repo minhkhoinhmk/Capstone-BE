@@ -1,4 +1,12 @@
-import { Body, Controller, Get, Post, Req, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Post,
+  Query,
+  Req,
+  UseGuards,
+} from '@nestjs/common';
 import { LearnerService } from './learner.service';
 import {
   ApiConflictResponse,
@@ -13,6 +21,10 @@ import { HasRoles } from 'src/auth/roles.decorator';
 import { NameRole } from 'src/role/enum/name-role.enum';
 import { Request } from 'express';
 import { FilterLearnerByUserResponse } from './dto/response/filter-by-user.dto';
+import { FilterCourseByUserResponse } from 'src/course/dto/reponse/filter-by-user.dto';
+import { ApiPaginatedResponse } from 'src/common/decorator/api-pagination-response';
+import { PageOptionsDto } from 'src/common/pagination/dto/pageOptionsDto';
+import { PageDto } from 'src/common/pagination/dto/pageDto';
 
 @Controller('learner')
 @ApiTags('Learner')
@@ -50,5 +62,21 @@ export class LearnerController {
     @Req() request: Request,
   ): Promise<FilterLearnerByUserResponse[]> {
     return this.learnerService.getLearnerByUserId(request['user']['id']);
+  }
+
+  @ApiPaginatedResponse(FilterCourseByUserResponse)
+  @UseGuards(AuthGuard(), RolesGuard)
+  @HasRoles(NameRole.Learner)
+  @Post('/course/user')
+  getCourseForLearnersByUserId(
+    @Query('search') search: string,
+    @Req() request: Request,
+    @Body() pageOption: PageOptionsDto,
+  ): Promise<PageDto<FilterCourseByUserResponse>> {
+    return this.learnerService.getCoursesForLearner(
+      search,
+      request['user']['id'],
+      pageOption,
+    );
   }
 }

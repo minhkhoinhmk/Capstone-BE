@@ -11,6 +11,14 @@ import { LearnerRepository } from './learner.repository';
 import { AuthService } from 'src/auth/auth.service';
 import { UserRepository } from 'src/user/user.repository';
 import { FilterLearnerByUserResponse } from './dto/response/filter-by-user.dto';
+import { LearnerCourseRepository } from 'src/learner-course/learner-course.repository';
+import { Course } from 'src/course/entity/course.entity';
+import { CourseMapper } from 'src/course/mapper/course.mapper';
+import { CourseRepository } from 'src/course/course.repository';
+import { FilterCourseByUserResponse } from 'src/course/dto/reponse/filter-by-user.dto';
+import { PageOptionsDto } from 'src/common/pagination/dto/pageOptionsDto';
+import { PageDto } from 'src/common/pagination/dto/pageDto';
+import { PageMetaDto } from 'src/common/pagination/dto/pageMetaDto';
 
 @Injectable()
 export class LearnerService {
@@ -21,6 +29,9 @@ export class LearnerService {
     private roleRepository: RoleRepository,
     private userRepository: UserRepository,
     private authService: AuthService,
+    private learnerCourseRepository: LearnerCourseRepository,
+    private courserMapper: CourseMapper,
+    private courseRepository: CourseRepository,
   ) {}
 
   async createLearner(
@@ -85,5 +96,39 @@ export class LearnerService {
 
       return responses;
     }
+  }
+
+  async getCoursesForLearner(
+    search: string,
+    userId: string,
+    pageOption: PageOptionsDto,
+  ): Promise<PageDto<FilterCourseByUserResponse>> {
+    const { count, entites } =
+      await this.learnerCourseRepository.getCourseByLearnerId(
+        search,
+        userId,
+        pageOption,
+      );
+    let responses: FilterCourseByUserResponse[] = [];
+
+    for (const leanerCourse of entites) {
+      const course = await this.courseRepository.getCourseById(
+        leanerCourse.course.id,
+      );
+      responses.push(
+        this.courserMapper.filterCourseByUserResponseFromCourse(course),
+      );
+    }
+
+    const itemCount = count;
+
+    const pageMetaDto = new PageMetaDto({
+      itemCount,
+      pageOptionsDto: pageOption,
+    });
+
+    this.logger.log(`method=getCoursesForLearner, totalItems=${count}`);
+
+    return new PageDto(responses, pageMetaDto);
   }
 }
