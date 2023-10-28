@@ -42,6 +42,7 @@ import { OrderModule } from './order/order.module';
 import { TransactionModule } from './transaction/transaction.module';
 import { LearnerCourseModule } from './learner-course/learner-course.module';
 import { UserLectureModule } from './user-lecture/user-lecture.module';
+import { ImageModule } from './image/image.module';
 
 @Global()
 @Module({
@@ -134,6 +135,7 @@ import { UserLectureModule } from './user-lecture/user-lecture.module';
     TransactionModule,
     LearnerCourseModule,
     UserLectureModule,
+    ImageModule,
   ],
 })
 export class AppModule {}
