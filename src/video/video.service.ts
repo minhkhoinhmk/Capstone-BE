@@ -14,7 +14,7 @@ import { COURSE_PATH } from 'src/common/s3/s3.constants';
 
 @Injectable()
 export class VideoService {
-  private logger = new Logger('CourseFeedbackService', { timestamp: true });
+  private logger = new Logger('VideoService', { timestamp: true });
   private fileSize: number;
 
   constructor(
