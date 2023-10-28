@@ -7,16 +7,17 @@ import { CourseRepository } from './course.repository';
 import { AuthModule } from 'src/auth/auth.module';
 import { PromotionCourseModule } from 'src/promotion-course/promotion-course.module';
 import { OrderModule } from 'src/order/order.module';
+import { CourseMapper } from './mapper/course.mapper';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([Course]),
-    AuthModule,
+    forwardRef(() => AuthModule),
     PromotionCourseModule,
     forwardRef(() => OrderModule),
   ],
-  providers: [CourseService, CourseRepository],
+  providers: [CourseService, CourseRepository, CourseMapper],
   controllers: [CourseController],
-  exports: [CourseRepository, CourseService],
+  exports: [CourseRepository, CourseService, CourseMapper],
 })
 export class CourseModule {}

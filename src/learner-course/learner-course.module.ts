@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
 import { LearnerCourseService } from './learner-course.service';
 import { LearnerCourseController } from './learner-course.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
@@ -11,11 +11,12 @@ import { AuthModule } from 'src/auth/auth.module';
 @Module({
   imports: [
     TypeOrmModule.forFeature([LearnerCourse]),
-    LearnerModule,
+    forwardRef(() => LearnerModule),
     CourseModule,
-    AuthModule,
+    forwardRef(() => AuthModule),
   ],
   providers: [LearnerCourseService, LearnerCourseRepository],
   controllers: [LearnerCourseController],
+  exports: [LearnerCourseRepository],
 })
 export class LearnerCourseModule {}

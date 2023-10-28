@@ -33,7 +33,7 @@ export class CourseRepository {
       queryBuilder.andWhere('c.level IN (:...levels)', { levels });
 
     search &&
-      queryBuilder.andWhere('c.title LIKE :search', {
+      queryBuilder.andWhere('c.title ILIKE :search', {
         search: `%${search}%`,
       });
 
