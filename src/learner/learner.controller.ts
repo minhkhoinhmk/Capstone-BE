@@ -21,7 +21,7 @@ import { HasRoles } from 'src/auth/roles.decorator';
 import { NameRole } from 'src/role/enum/name-role.enum';
 import { Request } from 'express';
 import { FilterLearnerByUserResponse } from './dto/response/filter-by-user.dto';
-import { FilterCourseByUserResponse } from 'src/course/dto/reponse/filter-by-user.dto';
+import { FilterCourseByCustomerResponse } from 'src/course/dto/reponse/filter-by-customer.dto';
 import { ApiPaginatedResponse } from 'src/common/decorator/api-pagination-response';
 import { PageOptionsDto } from 'src/common/pagination/dto/pageOptionsDto';
 import { PageDto } from 'src/common/pagination/dto/pageDto';
@@ -64,7 +64,7 @@ export class LearnerController {
     return this.learnerService.getLearnerByUserId(request['user']['id']);
   }
 
-  @ApiPaginatedResponse(FilterCourseByUserResponse)
+  @ApiPaginatedResponse(FilterCourseByCustomerResponse)
   @UseGuards(AuthGuard(), RolesGuard)
   @HasRoles(NameRole.Learner)
   @Post('/course/user')
@@ -72,7 +72,7 @@ export class LearnerController {
     @Query('search') search: string,
     @Req() request: Request,
     @Body() pageOption: PageOptionsDto,
-  ): Promise<PageDto<FilterCourseByUserResponse>> {
+  ): Promise<PageDto<FilterCourseByCustomerResponse>> {
     return this.learnerService.getCoursesForLearner(
       search,
       request['user']['id'],

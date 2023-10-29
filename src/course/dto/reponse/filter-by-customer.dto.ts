@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Expose } from 'class-transformer';
 
-export class FilterCourseByUserResponse {
+export class FilterCourseByCustomerResponse {
   @ApiProperty()
   @Expose()
   id: string;

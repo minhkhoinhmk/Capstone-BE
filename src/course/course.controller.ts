@@ -19,7 +19,7 @@ import { RolesGuard } from 'src/auth/role.guard';
 import { HasRoles } from 'src/auth/roles.decorator';
 import { NameRole } from 'src/role/enum/name-role.enum';
 import { Course } from './entity/course.entity';
-import { FilterCourseByUserResponse } from './dto/reponse/filter-by-user.dto';
+import { FilterCourseByCustomerResponse } from './dto/reponse/filter-by-customer.dto';
 
 @Controller('course')
 @ApiTags('Courses')
@@ -52,7 +52,7 @@ export class CourseController {
   @HasRoles(NameRole.Customer)
   async getCoursesByUserId(
     @Req() request: Request,
-  ): Promise<FilterCourseByUserResponse[]> {
+  ): Promise<FilterCourseByCustomerResponse[]> {
     return await this.courseService.getCoursesByUserId(request['user']['id']);
   }
 }

@@ -8,7 +8,7 @@ import { SearchCourseRequest } from './dto/request/search-course-request.dto';
 import { CourseDetailResponse } from './dto/reponse/course-detail-response.dto';
 import { NameRole } from 'src/role/enum/name-role.enum';
 import { OrderRepository } from 'src/order/order.repository';
-import { FilterCourseByUserResponse } from './dto/reponse/filter-by-user.dto';
+import { FilterCourseByCustomerResponse } from './dto/reponse/filter-by-customer.dto';
 import { OrderDetail } from 'src/order-detail/entity/order-detail.entity';
 import { CourseMapper } from './mapper/course.mapper';
 
@@ -182,16 +182,16 @@ export class CourseService {
 
   async getCoursesByUserId(
     userId: string,
-  ): Promise<FilterCourseByUserResponse[]> {
+  ): Promise<FilterCourseByCustomerResponse[]> {
     const orders = await this.orderRepoasitory.getCoursesByUserId(userId);
-    let response: FilterCourseByUserResponse[] = [];
+    let response: FilterCourseByCustomerResponse[] = [];
 
     for (const order of orders) {
       const courseIds = this.getCourseId(order.orderDetails);
       for (const courseId of courseIds) {
         const course = await this.courseRepository.getCourseById(courseId);
         response.push(
-          this.courserMapper.filterCourseByUserResponseFromCourse(course),
+          this.courserMapper.filterCourseByCustomerResponseFromCourse(course),
         );
       }
     }

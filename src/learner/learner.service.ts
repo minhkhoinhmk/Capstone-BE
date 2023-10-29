@@ -8,17 +8,17 @@ import { CreateLearnerRequest } from './dto/request/create-learner.dto';
 import { RoleRepository } from 'src/role/role.repository';
 import { NameRole } from 'src/role/enum/name-role.enum';
 import { LearnerRepository } from './learner.repository';
-import { AuthService } from 'src/auth/auth.service';
 import { UserRepository } from 'src/user/user.repository';
 import { FilterLearnerByUserResponse } from './dto/response/filter-by-user.dto';
 import { LearnerCourseRepository } from 'src/learner-course/learner-course.repository';
-import { Course } from 'src/course/entity/course.entity';
 import { CourseMapper } from 'src/course/mapper/course.mapper';
 import { CourseRepository } from 'src/course/course.repository';
-import { FilterCourseByUserResponse } from 'src/course/dto/reponse/filter-by-user.dto';
+import { FilterCourseByCustomerResponse } from 'src/course/dto/reponse/filter-by-customer.dto';
 import { PageOptionsDto } from 'src/common/pagination/dto/pageOptionsDto';
 import { PageDto } from 'src/common/pagination/dto/pageDto';
 import { PageMetaDto } from 'src/common/pagination/dto/pageMetaDto';
+import { UserLectureRepository } from 'src/user-lecture/user-lecture.repository';
+import { response } from 'express';
 
 @Injectable()
 export class LearnerService {
@@ -28,10 +28,10 @@ export class LearnerService {
     private learnerRepository: LearnerRepository,
     private roleRepository: RoleRepository,
     private userRepository: UserRepository,
-    private authService: AuthService,
     private learnerCourseRepository: LearnerCourseRepository,
     private courserMapper: CourseMapper,
     private courseRepository: CourseRepository,
+    private userLectureRepository: UserLectureRepository,
   ) {}
 
   async createLearner(
@@ -102,22 +102,42 @@ export class LearnerService {
     search: string,
     userId: string,
     pageOption: PageOptionsDto,
-  ): Promise<PageDto<FilterCourseByUserResponse>> {
+  ): Promise<PageDto<FilterCourseByCustomerResponse>> {
     const { count, entites } =
       await this.learnerCourseRepository.getCourseByLearnerId(
         search,
         userId,
         pageOption,
       );
-    let responses: FilterCourseByUserResponse[] = [];
+    let responses: FilterCourseByCustomerResponse[] = [];
+    let completedCount = 0;
 
     for (const leanerCourse of entites) {
       const course = await this.courseRepository.getCourseById(
         leanerCourse.course.id,
       );
+
+      for (const chapter of course.chapterLectures) {
+        if (
+          await this.userLectureRepository.checkChapterLectureIsCompletedForLearner(
+            chapter.id,
+            userId,
+          )
+        ) {
+          completedCount++;
+        }
+      }
+
+      console.log(completedCount);
+
       responses.push(
-        this.courserMapper.filterCourseByUserResponseFromCourse(course),
+        this.courserMapper.filterCourseByLearnerResponseFromCourse(
+          course,
+          Math.floor((completedCount / course.chapterLectures.length) * 100),
+        ),
       );
+
+      completedCount = 0;
     }
 
     const itemCount = count;

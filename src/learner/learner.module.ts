@@ -9,6 +9,7 @@ import { AuthModule } from 'src/auth/auth.module';
 import { UserModule } from 'src/user/user.module';
 import { CourseModule } from 'src/course/course.module';
 import { LearnerCourseModule } from 'src/learner-course/learner-course.module';
+import { UserLectureModule } from 'src/user-lecture/user-lecture.module';
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { LearnerCourseModule } from 'src/learner-course/learner-course.module';
     UserModule,
     CourseModule,
     LearnerCourseModule,
+    UserLectureModule,
   ],
   providers: [LearnerService, LearnerRepository],
   controllers: [LearnerController],

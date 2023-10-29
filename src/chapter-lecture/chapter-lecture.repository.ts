@@ -12,7 +12,9 @@ export class ChapterLectureRepository {
     private chapterLectureRepository: Repository<ChapterLecture>,
   ) {}
 
-  async getChapterLectureByUserId(courseId: string): Promise<ChapterLecture[]> {
+  async getChapterLectureByCourseId(
+    courseId: string,
+  ): Promise<ChapterLecture[]> {
     const chapterLectures = await this.chapterLectureRepository.find({
       where: { course: { id: courseId } },
     });
