@@ -21,4 +21,14 @@ export class ChapterLectureRepository {
 
     return chapterLectures;
   }
+
+  async getChapterLectureById(
+    chapterLectureId: string,
+  ): Promise<ChapterLecture> {
+    const chapterLecture = await this.chapterLectureRepository.findOne({
+      where: { id: chapterLectureId },
+    });
+
+    return chapterLecture;
+  }
 }
