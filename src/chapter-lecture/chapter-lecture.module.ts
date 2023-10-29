@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ChapterLecture } from './entity/chapter-lecture.entity';
 import { ChapterLectureService } from './chapter-lecture.service';
@@ -13,9 +13,9 @@ import { UserModule } from 'src/user/user.module';
 @Module({
   imports: [
     TypeOrmModule.forFeature([ChapterLecture]),
-    UserLectureModule,
-    AuthModule,
-    LearnerModule,
+    forwardRef(() => UserLectureModule),
+    forwardRef(() => AuthModule),
+    forwardRef(() => LearnerModule),
     UserModule,
   ],
   providers: [
@@ -24,5 +24,6 @@ import { UserModule } from 'src/user/user.module';
     ChapterLectureMapper,
   ],
   controllers: [ChapterLectureController],
+  exports: [ChapterLectureRepository],
 })
 export class ChapterLectureModule {}
