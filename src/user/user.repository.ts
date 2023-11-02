@@ -4,7 +4,7 @@ import { User } from './entity/user.entity';
 import { FindOptionsRelations, Repository } from 'typeorm';
 import { hashPassword } from 'src/utils/hash-password.util';
 import { Role } from 'src/role/entity/role.entity';
-import { CustomerRegisterRequest } from 'src/auth/dto/request/customer-register.request.dto';
+import { UserRegisterRequest } from 'src/auth/dto/request/customer-register.request.dto';
 
 @Injectable()
 export class UserRepository {
@@ -44,6 +44,7 @@ export class UserRepository {
   async getUserByEmail(email: string): Promise<User> {
     const customer = await this.userRepository.findOne({
       where: { email: email },
+      relations: { roles: true },
     });
     return customer;
   }
@@ -53,7 +54,7 @@ export class UserRepository {
   }
 
   async createCustomer(
-    customerRegisterRequest: CustomerRegisterRequest,
+    customerRegisterRequest: UserRegisterRequest,
     role: Role,
     otp: string,
   ): Promise<User> {
