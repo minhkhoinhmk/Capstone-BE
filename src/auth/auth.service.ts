@@ -6,7 +6,7 @@ import {
   UnauthorizedException,
   BadRequestException,
 } from '@nestjs/common';
-import { CustomerRegisterRequest } from './dto/request/customer-register.request.dto';
+import { UserRegisterRequest } from './dto/request/customer-register.request.dto';
 import { JwtService } from '@nestjs/jwt';
 import { JwtPayload } from './jwt-payload.interface';
 import { Token } from './dto/response/token.dto';
@@ -97,17 +97,19 @@ export class AuthService {
     }
   }
 
-  async signUpForCustomer(
-    customerRegisterRequest: CustomerRegisterRequest,
+  async signUp(
+    userrRegisterRequest: UserRegisterRequest,
   ): Promise<CustomerRegisterResponse> {
-    const { email } = customerRegisterRequest;
+    const { email } = userrRegisterRequest;
 
-    const role = await this.roleRepository.getRoleByName(NameRole.Customer);
+    const role = await this.roleRepository.getRoleByName(
+      userrRegisterRequest.role,
+    );
 
     const otp = this.createOtp();
 
     const customer = await this.userRepository.createCustomer(
-      customerRegisterRequest,
+      userrRegisterRequest,
       role,
       otp,
     );
@@ -117,13 +119,14 @@ export class AuthService {
 
       await this.sendEmail(email, otp);
 
-      this.logger.log(`method=signUp, Registered email ${email} successfully`);
+      this.logger.log(
+        `method=signUp, Registered email=${email},  role=${userrRegisterRequest.role} successfully`,
+      );
     } catch (error) {
       if (error.code === '23505') {
         this.logger.error(`method=signUp, email ${email} already exists`);
         throw new ConflictException('email already exists');
       }
-      console.log(error);
     }
 
     return {
@@ -131,23 +134,31 @@ export class AuthService {
     };
   }
 
-  async confirmCustomer(email: string, otp: string): Promise<void> {
-    const customer = await this.userRepository.getUserByEmail(email);
+  async confirmUser(email: string, otp: string): Promise<void> {
+    const user = await this.userRepository.getUserByEmail(email);
 
-    if (!customer) {
-      this.logger.error(`method=confirmCustomer, email ${email} not found`);
+    if (!user) {
+      this.logger.error(`method=confirmUser, email ${email} not found`);
       throw new NotFoundException(`email ${email} not found`);
     }
 
-    if (customer.active && customer.isConfirmedEmail) {
-      throw new NotFoundException(`Cusomer ${email} is already confirmed`);
+    if (user.isConfirmedEmail) {
+      throw new NotFoundException(`User ${email} is already confirmed`);
     }
 
-    if (customer.otp === otp) {
-      this.logger.log(`method=confirmCustomer, account is active`);
-      customer.active = true;
-      customer.isConfirmedEmail = true;
-      await this.userRepository.save(customer);
+    if (user.otp === otp) {
+      if (user.roles.some((role) => role.name === NameRole.Customer)) {
+        this.logger.log(`method=confirmUser, customer account is active`);
+        user.active = true;
+        user.isConfirmedEmail = true;
+        await this.userRepository.save(user);
+      } else if (user.roles.some((role) => role.name === NameRole.Instructor)) {
+        this.logger.log(
+          `method=confirmCustomer, instructor account is confirmed`,
+        );
+        user.isConfirmedEmail = true;
+        await this.userRepository.save(user);
+      }
     } else {
       throw new NotFoundException(`otp ${otp} not found`);
     }

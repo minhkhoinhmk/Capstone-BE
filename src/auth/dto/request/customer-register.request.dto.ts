@@ -1,15 +1,16 @@
 import { ApiProperty } from '@nestjs/swagger';
 import {
-  IsBoolean,
   IsEmail,
+  IsEnum,
   IsNotEmpty,
   IsString,
   Matches,
   MaxLength,
   MinLength,
 } from 'class-validator';
+import { NameRole } from 'src/role/enum/name-role.enum';
 
-export class CustomerRegisterRequest {
+export class UserRegisterRequest {
   @IsString()
   @IsNotEmpty()
   @ApiProperty({ type: String, description: 'First Name' })
@@ -44,4 +45,9 @@ export class CustomerRegisterRequest {
   @IsEmail()
   @ApiProperty({ type: String, description: 'Email' })
   email: string;
+
+  @IsEnum(NameRole)
+  @IsNotEmpty()
+  @ApiProperty({ enum: NameRole, description: 'Role' })
+  role: NameRole;
 }

@@ -72,6 +72,9 @@ export class User {
   @Column({ nullable: true })
   isConfirmedEmail: boolean;
 
+  @Column({ nullable: true })
+  certificateUrl: string;
+
   @OneToMany(() => Post, (post) => post.user)
   posts: Post[];
 

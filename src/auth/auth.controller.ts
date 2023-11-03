@@ -9,7 +9,7 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { Token } from './dto/response/token.dto';
-import { CustomerRegisterRequest } from './dto/request/customer-register.request.dto';
+import { UserRegisterRequest } from './dto/request/customer-register.request.dto';
 import { CustomerRegisterResponse } from './dto/response/customer-register.response.dto';
 import { GuestLoginRequest } from './dto/request/guest-login.request.dto';
 
@@ -27,9 +27,9 @@ export class AuthController {
   })
   @Post('/customer/signup')
   sigup(
-    @Body() customerRegisterRequest: CustomerRegisterRequest,
+    @Body() customerRegisterRequest: UserRegisterRequest,
   ): Promise<CustomerRegisterResponse> {
-    return this.authService.signUpForCustomer(customerRegisterRequest);
+    return this.authService.signUp(customerRegisterRequest);
   }
 
   @ApiOkResponse({
@@ -45,7 +45,7 @@ export class AuthController {
     @Query('email') email: string,
     @Query('otp') otp: string,
   ): Promise<void> {
-    return this.authService.confirmCustomer(email, otp);
+    return this.authService.confirmUser(email, otp);
   }
 
   @ApiOkResponse({
