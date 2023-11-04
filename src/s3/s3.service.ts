@@ -26,7 +26,7 @@ export class S3Service {
     return await s3.headObject(options);
   }
 
-  async putObject(dataBuffer: Buffer, key: string) {
+  async putObject(dataBuffer: Buffer, key: string, type: string) {
     const s3 = this.s3Connection();
     const result = await s3
       .upload({
@@ -35,6 +35,7 @@ export class S3Service {
         Body: dataBuffer,
         Key: key,
         ContentDisposition: 'inline',
+        ContentType: type,
       })
       .promise();
   }

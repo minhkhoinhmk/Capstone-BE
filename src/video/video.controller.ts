@@ -4,12 +4,10 @@ import {
   Headers,
   Header,
   Res,
-  Logger,
   Post,
   UseInterceptors,
   Req,
   UploadedFile,
-  Param,
   Query,
 } from '@nestjs/common';
 import { VideoService } from './video.service';
@@ -54,9 +52,11 @@ export class VideoController {
 
     if (parts.length > 1) {
       const substringAfterDot = parts[parts.length - 1];
-      console.log(substringAfterDot);
-      await this.videosService.pushToS3(file.buffer, substringAfterDot);
+      await this.videosService.pushToS3(
+        file.buffer,
+        substringAfterDot,
+        file.mimetype,
+      );
     }
-    // await this.videosService.pushToS3(file.buffer);
   }
 }
