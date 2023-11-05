@@ -128,8 +128,6 @@ export class LearnerService {
         }
       }
 
-      console.log(completedCount);
-
       responses.push(
         this.courserMapper.filterCourseByLearnerResponseFromCourse(
           course,

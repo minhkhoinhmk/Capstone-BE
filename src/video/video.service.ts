@@ -92,12 +92,17 @@ export class VideoService {
     };
   }
 
-  async pushToS3(buffer: Buffer, substringAfterDot: string): Promise<void> {
+  async pushToS3(
+    buffer: Buffer,
+    substringAfterDot: string,
+    type: string,
+  ): Promise<void> {
     const uuid = uuidv4();
 
     await this.s3Service.putObject(
       buffer,
       `${COURSE_PATH}${uuid}.${substringAfterDot}`,
+      type,
     );
   }
 }
