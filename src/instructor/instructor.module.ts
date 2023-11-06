@@ -3,10 +3,11 @@ import { InstructorService } from './instructor.service';
 import { InstructorController } from './instructor.controller';
 import { S3Module } from 'src/s3/s3.module';
 import { UserModule } from 'src/user/user.module';
+import { NotificationModule } from 'src/notification/notification.module';
 
 @Module({
   providers: [InstructorService],
   controllers: [InstructorController],
-  imports: [S3Module, UserModule],
+  imports: [S3Module, UserModule, NotificationModule],
 })
 export class InstructorModule {}
