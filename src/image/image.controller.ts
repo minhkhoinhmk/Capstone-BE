@@ -1,8 +1,10 @@
 import { Controller, Get, Query, Res } from '@nestjs/common';
 import { ImageService } from './image.service';
 import { Response } from 'express';
+import { ApiTags } from '@nestjs/swagger';
 
 @Controller('image')
+@ApiTags('Image')
 export class ImageController {
   constructor(private readonly imageService: ImageService) {}
 
