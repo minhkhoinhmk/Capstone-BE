@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import {
   COURSE_PATH,
   INSTRUCTOR_CERTIFICATION_PATH,
@@ -9,6 +9,11 @@ import { UserRepository } from 'src/user/user.repository';
 import { InstructorStatus } from './enum/instructor-status.enum';
 import { NotificationService } from 'src/notification/notification.service';
 import { NotificationPayload } from 'src/notification/dto/request/notification-payload.dto';
+import { CategoryRepository } from 'src/category/category.repository';
+import { LevelRepository } from 'src/level/level.repository';
+import { CreateCourseRequest } from 'src/course/dto/request/create-course-request.dto';
+import { Course } from 'src/course/entity/course.entity';
+import { CourseRepository } from 'src/course/course.repository';
 
 @Injectable()
 export class InstructorService {
@@ -18,6 +23,9 @@ export class InstructorService {
     private readonly s3Service: S3Service,
     private readonly userRepository: UserRepository,
     private readonly notificationService: NotificationService,
+    private readonly categoryRepository: CategoryRepository,
+    private readonly levelRepository: LevelRepository,
+    private readonly courseRepository: CourseRepository,
   ) {}
 
   async uploadCertification(
@@ -57,6 +65,34 @@ export class InstructorService {
         `method=uploadCertification, uploadCertification failed: ${error.message}`,
       );
       return { staus: false };
+    }
+  }
+
+  async createCourse(
+    createCourseRequest: CreateCourseRequest,
+  ): Promise<Course> {
+    try {
+      const level = await this.levelRepository.getLevelById(
+        createCourseRequest.levelId,
+      );
+      const category = await this.categoryRepository.getCategoryById(
+        createCourseRequest.categoryId,
+      );
+
+      const course = new Course();
+      (course.title = createCourseRequest.title),
+        (course.level = level),
+        (course.category = category);
+
+      this.logger.log(`method=createCourse, created course successfully`);
+
+      return await this.courseRepository.saveCourse(course);
+    } catch (error) {
+      this.logger.log(`method=createCourse, failed to create course`);
+
+      throw new NotFoundException(
+        `Category with id ${createCourseRequest.categoryId} or level with id ${createCourseRequest.levelId} not found`,
+      );
     }
   }
 }

@@ -1,4 +1,5 @@
 import {
+  Body,
   Controller,
   Post,
   Query,
@@ -9,8 +10,12 @@ import {
 import { InstructorService } from './instructor.service';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { UploadStatus } from 'src/s3/dto/upload-status.dto';
+import { ApiBody, ApiCreatedResponse, ApiTags } from '@nestjs/swagger';
+import { Course } from 'src/course/entity/course.entity';
+import { CreateCourseRequest } from 'src/course/dto/request/create-course-request.dto';
 
 @Controller('instructor')
+@ApiTags('Intstructor')
 export class InstructorController {
   constructor(private readonly instructorService: InstructorService) {}
 
@@ -32,5 +37,19 @@ export class InstructorController {
         file.mimetype,
       );
     }
+  }
+
+  @Post('/course/create')
+  @ApiCreatedResponse({
+    description: 'Create Course Successfully',
+    type: Course,
+  })
+  @ApiBody({
+    type: CreateCourseRequest,
+  })
+  async createCourse(
+    @Body() createCourseRequest: CreateCourseRequest,
+  ): Promise<Course> {
+    return await this.instructorService.createCourse(createCourseRequest);
   }
 }

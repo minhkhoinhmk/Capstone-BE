@@ -25,47 +25,47 @@ export class Course {
   @Expose()
   id: string;
 
-  @Column()
+  @Column({ nullable: true })
   @Expose()
   title: string;
 
-  @Column()
+  @Column({ nullable: true })
   @Expose()
   description: string;
 
-  @Column()
+  @Column({ nullable: true })
   @Expose()
   price: number;
 
-  @Column()
+  @Column({ nullable: true })
   @Expose()
   shortDescription: string;
 
-  @Column()
+  @Column({ nullable: true })
   @Expose()
   prepareMaterial: string;
 
-  @Column()
+  @Column({ nullable: true })
   @Expose()
   status: string;
 
-  @Column()
+  @Column({ nullable: true })
   @Expose()
   totalChapter: number;
 
-  @Column()
+  @Column({ nullable: true })
   @Expose()
   publishedDate: Date;
 
-  @Column()
+  @Column({ nullable: true })
   @Expose()
   totalBought: number;
 
-  @Column()
+  @Column({ nullable: true })
   @Expose()
   thumbnailUrl: string;
 
-  @Column()
+  @Column({ nullable: true })
   @Expose()
   active: boolean;
 

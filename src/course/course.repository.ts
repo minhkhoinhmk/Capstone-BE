@@ -4,6 +4,8 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { PageOptionsDto } from 'src/common/pagination/dto/pageOptionsDto';
 import SortField from './type/enum/SortField';
+import Level from 'src/level/entity/level.entity';
+import { Category } from 'aws-sdk/clients/cloudformation';
 
 @Injectable()
 export class CourseRepository {
@@ -102,5 +104,9 @@ export class CourseRepository {
       where: { id },
       relations: { cartItems: true, chapterLectures: true },
     });
+  }
+
+  async saveCourse(course: Course): Promise<Course> {
+    return this.courseRepository.save(course);
   }
 }
