@@ -35,16 +35,14 @@ export class PromotionCourseRepository {
       relations: {
         promotion: {
           user: {
-            roles: true,
+            role: true,
           },
         },
       },
     });
 
     return promotionCourses.filter((promotionCourse) => {
-      return promotionCourse.promotion.user.roles.some(
-        (role) => role.name === userNameRole,
-      );
+      return promotionCourse.promotion.user.role.name === userNameRole;
     });
   }
 

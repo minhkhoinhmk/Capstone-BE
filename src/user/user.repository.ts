@@ -17,7 +17,7 @@ export class UserRepository {
     const user = await this.userRepository.findOne({
       where: { id },
       relations: {
-        roles: true,
+        role: true,
       },
     });
     return user;
@@ -44,7 +44,7 @@ export class UserRepository {
   async getUserByEmail(email: string): Promise<User> {
     const customer = await this.userRepository.findOne({
       where: { email: email },
-      relations: { roles: true },
+      relations: { role: true },
     });
     return customer;
   }
@@ -72,7 +72,7 @@ export class UserRepository {
       otpCreatedDate: new Date(),
       otp: otp,
       isConfirmedEmail: false,
-      roles: [role],
+      role: role,
     });
 
     return user;

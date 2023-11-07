@@ -4,6 +4,7 @@ import {
   JoinTable,
   ManyToMany,
   OneToMany,
+  OneToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { NameRole } from '../enum/name-role.enum';
@@ -22,14 +23,6 @@ export class Role {
   @Column({ unique: true })
   name: NameRole;
 
-  @OneToMany(() => Learner, (learner) => learner.role)
-  learners: Learner[];
-
-  @ManyToMany(() => User, (users) => users.roles)
-  @JoinTable({
-    name: 'user_role',
-    joinColumn: { name: 'roleId', referencedColumnName: 'id' },
-    inverseJoinColumn: { name: 'userId', referencedColumnName: 'id' },
-  })
+  @OneToMany(() => User, (user) => user.role)
   users: User[];
 }
