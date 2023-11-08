@@ -11,6 +11,7 @@ import { OrderRepository } from 'src/order/order.repository';
 import { FilterCourseByCustomerResponse } from './dto/reponse/filter-by-customer.dto';
 import { OrderDetail } from 'src/order-detail/entity/order-detail.entity';
 import { CourseMapper } from './mapper/course.mapper';
+import { Role } from 'src/role/entity/role.entity';
 
 @Injectable()
 export class CourseService {
@@ -125,9 +126,8 @@ export class CourseService {
     const currentDate = new Date();
 
     course.promotionCourses.forEach((promotionCourse) => {
-      const isStaff = promotionCourse.promotion.user.roles.some(
-        (role) => role.name === NameRole.Staff,
-      );
+      const isStaff =
+        promotionCourse.promotion.user.role.name === NameRole.Staff;
       if (
         currentDate <= promotionCourse.expiredDate &&
         currentDate >= promotionCourse.effectiveDate &&
@@ -184,6 +184,8 @@ export class CourseService {
     userId: string,
   ): Promise<FilterCourseByCustomerResponse[]> {
     const orders = await this.orderRepoasitory.getCoursesByUserId(userId);
+
+    console.log(userId);
     let response: FilterCourseByCustomerResponse[] = [];
 
     for (const order of orders) {

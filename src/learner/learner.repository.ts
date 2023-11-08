@@ -6,6 +6,7 @@ import { CreateLearnerRequest } from './dto/request/create-learner.dto';
 import { User } from 'src/user/entity/user.entity';
 import { Role } from 'src/role/entity/role.entity';
 import { hashPassword } from 'src/utils/hash-password.util';
+import { NameRole } from 'src/role/enum/name-role.enum';
 
 @Injectable()
 export class LearnerRepository {
@@ -32,7 +33,7 @@ export class LearnerRepository {
       password: await hashPassword(password),
       active: true,
       user: customer,
-      role,
+      role: NameRole.Learner,
     });
 
     return learner;
@@ -53,9 +54,6 @@ export class LearnerRepository {
   async getLeanerById(id: string): Promise<Learner> {
     const learner = await this.learnerRepository.findOne({
       where: { id },
-      relations: {
-        role: true,
-      },
     });
     return learner;
   }

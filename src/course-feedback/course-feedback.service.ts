@@ -6,12 +6,17 @@ import { PageOptionsDto } from 'src/common/pagination/dto/pageOptionsDto';
 import { PageMetaDto } from 'src/common/pagination/dto/pageMetaDto';
 import { CourseFeedbackResponse } from './dto/response/course-feedback-response.dto';
 import { NameRole } from 'src/role/enum/name-role.enum';
+import { Role } from 'src/role/entity/role.entity';
+import { RoleRepository } from 'src/role/role.repository';
 
 @Injectable()
 export class CourseFeedbackService {
   private logger = new Logger('CourseFeedbackService', { timestamp: true });
 
-  constructor(private courseFeedbackRepository: CourseFeedbackRepository) {}
+  constructor(
+    private courseFeedbackRepository: CourseFeedbackRepository,
+    private readonly roleRepository: RoleRepository,
+  ) {}
 
   async getCourseFeedbackByCourseId(
     courseId: string,
@@ -36,14 +41,12 @@ export class CourseFeedbackService {
     });
 
     for (const feedback of courseFeedbacks) {
-      let roles: NameRole[] = [];
+      let role: Role;
 
       if (feedback.user) {
-        feedback.user.roles.forEach((role) => {
-          roles.push(role.name);
-        });
+        role = feedback.user.role;
       } else if (feedback.learner) {
-        roles.push(feedback.learner.role.name);
+        role = await this.roleRepository.getRoleByName(NameRole.Learner);
       }
 
       responses.push({
@@ -55,7 +58,7 @@ export class CourseFeedbackService {
         updatedDate: feedback.updatedDate,
         updatedBy: feedback.updatedBy,
         active: feedback.active,
-        role: roles,
+        role: role,
       });
     }
 

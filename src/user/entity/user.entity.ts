@@ -1,8 +1,10 @@
 import {
   Column,
   Entity,
+  JoinColumn,
   JoinTable,
   ManyToMany,
+  ManyToOne,
   OneToMany,
   OneToOne,
   PrimaryColumn,
@@ -93,8 +95,9 @@ export class User {
   @OneToMany(() => Order, (order) => order.user)
   orders: Course[];
 
-  @ManyToMany(() => Role, (roles) => roles.users)
-  roles: Role[];
+  @ManyToOne(() => Role, (role) => role.users)
+  @JoinColumn({ name: 'roleId' })
+  role: Role;
 
   @OneToOne(() => Cart, (cart) => cart.user, { nullable: true })
   cart: Cart;

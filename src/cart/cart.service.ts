@@ -202,7 +202,7 @@ export class CartService {
               level: true,
               promotionCourses: {
                 promotion: {
-                  user: { roles: true },
+                  user: { role: true },
                 },
               },
               user: true,

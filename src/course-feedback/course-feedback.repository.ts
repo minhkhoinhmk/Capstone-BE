@@ -19,7 +19,7 @@ export class CourseFeedbackRepository {
   ): Promise<{ count: number; entites: CourseFeedback[] }> {
     const courseFeedbacks = await this.courseFeedbackRepository.find({
       where: { course: { id: courseId } },
-      relations: { user: { roles: true }, learner: { role: true } },
+      relations: { user: { role: true }, learner: true },
       skip: (pageOptionsDto.page - 1) * pageOptionsDto.take,
       take: pageOptionsDto.take,
     });

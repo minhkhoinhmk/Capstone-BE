@@ -53,7 +53,7 @@ export class CourseRepository {
       .leftJoinAndSelect('c.promotionCourses', 'promotionCourses')
       .leftJoinAndSelect('promotionCourses.promotion', 'promotion')
       .leftJoinAndSelect('promotion.user', 'promotionUser')
-      .leftJoinAndSelect('promotionUser.roles', 'promotionUserRoles')
+      .leftJoinAndSelect('promotionUser.role', 'promotionUserRoles')
       .leftJoinAndSelect('c.courseFeedbacks', 'courseFeedbacks')
       .leftJoinAndSelect('c.chapterLectures', 'chapterLectures')
       .leftJoinAndSelect('c.level', 'level')
@@ -78,7 +78,7 @@ export class CourseRepository {
     queryBuilder.leftJoinAndSelect('c.promotionCourses', 'promotionCourses');
     queryBuilder.leftJoinAndSelect('promotionCourses.promotion', 'promotion');
     queryBuilder.leftJoinAndSelect('promotion.user', 'promotionUser');
-    queryBuilder.leftJoinAndSelect('promotionUser.roles', 'promotionUserRoles');
+    queryBuilder.leftJoinAndSelect('promotionUser.role', 'promotionUserRoles');
     queryBuilder.leftJoinAndSelect('c.courseFeedbacks', 'courseFeedbacks');
     queryBuilder.leftJoinAndSelect('c.chapterLectures', 'chapterLectures');
     queryBuilder.leftJoinAndSelect('c.level', 'level');

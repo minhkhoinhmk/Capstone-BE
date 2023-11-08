@@ -21,6 +21,7 @@ import * as validator from 'validator';
 import { JwtStorerRepository } from 'src/user/jwt-store.repository';
 import { UserRepository } from 'src/user/user.repository';
 import { LearnerRepository } from 'src/learner/learner.repository';
+import { User } from 'aws-sdk/clients/budgets';
 
 @Injectable()
 export class AuthService {
@@ -72,7 +73,8 @@ export class AuthService {
         id: user.id,
         username: user.userName,
         email: valid ? emailOrUsername : '',
-        role: valid ? NameRole.Customer : NameRole.Learner,
+        role:
+          user.role === NameRole.Learner ? NameRole.Learner : user.role.name,
       };
 
       const accessToken = this.jwtService.sign(payload);
@@ -147,12 +149,12 @@ export class AuthService {
     }
 
     if (user.otp === otp) {
-      if (user.roles.some((role) => role.name === NameRole.Customer)) {
+      if (user.role.name === NameRole.Customer) {
         this.logger.log(`method=confirmUser, customer account is active`);
         user.active = true;
         user.isConfirmedEmail = true;
         await this.userRepository.save(user);
-      } else if (user.roles.some((role) => role.name === NameRole.Instructor)) {
+      } else if (user.role.name === NameRole.Instructor) {
         this.logger.log(
           `method=confirmCustomer, instructor account is confirmed`,
         );

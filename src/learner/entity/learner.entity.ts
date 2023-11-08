@@ -47,6 +47,9 @@ export class Learner {
   @Column()
   active: boolean;
 
+  @Column()
+  role: string;
+
   @OneToMany(() => CourseFeedback, (courseFeedback) => courseFeedback.learner)
   courseFeedbacks: CourseFeedback[];
 
@@ -59,8 +62,4 @@ export class Learner {
   @ManyToOne(() => User, (user) => user.learners)
   @JoinColumn({ name: 'userId' })
   user: User;
-
-  @ManyToOne(() => Role, (role) => role.learners)
-  @JoinColumn({ name: 'roleId' })
-  role: Role;
 }

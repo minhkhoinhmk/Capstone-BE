@@ -1,4 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { Role } from 'src/role/entity/role.entity';
 import { NameRole } from 'src/role/enum/name-role.enum';
 
 export class CourseFeedbackResponse {
@@ -27,5 +28,5 @@ export class CourseFeedbackResponse {
   active: boolean;
 
   @ApiProperty()
-  role: NameRole[];
+  role: Role;
 }
