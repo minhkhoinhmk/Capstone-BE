@@ -25,6 +25,7 @@ import { ApiPaginatedResponse } from 'src/common/decorator/api-pagination-respon
 import { FilterTrsanctionResponse } from './dto/response/filter-transaction.response.dto';
 import { PageOptionsDto } from 'src/common/pagination/dto/pageOptionsDto';
 import { PageDto } from 'src/common/pagination/dto/pageDto';
+import { Request } from 'express';
 
 @Controller('transaction')
 @ApiTags('Transaction')

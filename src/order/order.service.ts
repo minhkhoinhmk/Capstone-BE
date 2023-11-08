@@ -1,8 +1,6 @@
-import { Inject, Injectable, Logger, Scope } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { UserRepository } from 'src/user/user.repository';
 import { CourseRepository } from 'src/course/course.repository';
-import { Request } from 'express';
-import { REQUEST } from '@nestjs/core';
 import { CartItemRepository } from 'src/cart-item/cart-item.repository';
 import { CourseService } from 'src/course/course.service';
 
@@ -14,8 +12,12 @@ import { OrderStatusRepository } from 'src/order-status/order-status.repository'
 import { NameOrderStatus } from 'src/order-status/enum/name-order-status.enum';
 import { PaymentMethodRepository } from 'src/payment-method/payment-method.repository';
 import { OrderDetailRepository } from 'src/order-detail/order-detail.repository';
+import { UpdateTransactionRequest } from './dto/request/update-order.request.dto';
+import { User } from 'src/user/entity/user.entity';
+import { Cron, CronExpression } from '@nestjs/schedule';
+import { DateTime, Interval } from 'luxon';
 
-@Injectable({ scope: Scope.REQUEST })
+@Injectable()
 export class OrderService {
   private logger = new Logger('OrderService', { timestamp: true });
 
@@ -30,11 +32,10 @@ export class OrderService {
     private cartItemRepository: CartItemRepository,
     private paymentMethodRepository: PaymentMethodRepository,
     private orderStatusRepository: OrderStatusRepository,
-    @Inject(REQUEST) private request: Request,
   ) {}
 
-  async createOrder(): Promise<Order> {
-    const customer = await this.cartService.getCustomerWithCart();
+  async createOrder(user: User): Promise<Order> {
+    const customer = await this.cartService.getCustomerWithCart(user);
     const caculatePrice = this.cartService.caculatePrice(customer.cart);
     const orderStatus = await this.orderStatusRepository.getOrderStatusByName(
       NameOrderStatus.Pending,
@@ -54,6 +55,7 @@ export class OrderService {
         orderStatus,
         note: '',
         active: true,
+        insertedDate: new Date(),
       }),
     );
 
@@ -86,5 +88,57 @@ export class OrderService {
     order.orderDetails = orderDetails;
 
     return order;
+  }
+
+  async updateOrder(body: UpdateTransactionRequest) {
+    const order = await this.orderRepository.getOrderById(body.orderId);
+
+    if (body.nameOrderStatus) {
+      order.orderStatus = await this.orderStatusRepository.getOrderStatusByName(
+        body.nameOrderStatus,
+      );
+
+      if (body.nameOrderStatus === NameOrderStatus.Success) {
+        order.orderDetails.forEach((orderDetail) => {
+          const totalBought = orderDetail.course.totalBought;
+          orderDetail.course.totalBought = totalBought + 1;
+          this.courseRepository.saveCourse(orderDetail.course);
+        });
+      }
+    }
+
+    return this.orderRepository.saveOrder(order);
+  }
+
+  async findOrdersByUser(user: User) {
+    const orders = await this.orderRepository.getOrdersByUser(user);
+    return orders;
+  }
+
+  // @Cron('0 0 * * *')
+  @Cron(CronExpression.EVERY_30_SECONDS)
+  async deletePedingOrder() {
+    const ordersPending = await this.getOrdersPending();
+
+    for (const order of ordersPending) {
+      if (this.diffMinutes(order.insertedDate, new Date()) >= 30) {
+        this.logger.log(
+          `method=deletePedingOrder, remove order with id ${order.id}`,
+        );
+        await this.orderRepository.removeOrder(order);
+      }
+    }
+  }
+
+  diffMinutes(firstDate: Date, secondDate: Date) {
+    const diffTimes = secondDate.getTime() - firstDate.getTime();
+    return diffTimes / (1000 * 60);
+  }
+
+  async getOrdersPending(): Promise<Order[]> {
+    const orderStatus = await this.orderStatusRepository.getOrderStatusByName(
+      NameOrderStatus.Pending,
+    );
+    return this.orderRepository.getOrdersByOrderStatus(orderStatus);
   }
 }

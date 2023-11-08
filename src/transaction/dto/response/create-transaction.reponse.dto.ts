@@ -11,7 +11,7 @@ export class CreateTrsanctionResponse {
   paymentAmount: number;
 
   @ApiProperty()
-  bankTranNo: string;
+  bankTranNo: string | null;
 
   @ApiProperty()
   cardType: string;

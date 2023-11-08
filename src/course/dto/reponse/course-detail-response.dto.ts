@@ -32,6 +32,12 @@ export class CourseDetailResponse {
   author: string;
 
   @ApiProperty()
+  categoryId: string;
+
+  @ApiProperty()
+  category: string;
+
+  @ApiProperty()
   totalLength: number;
 
   @ApiProperty()

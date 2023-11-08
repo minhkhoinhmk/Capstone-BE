@@ -48,6 +48,8 @@ export class LearnerRepository {
       where: { user: customer },
     });
 
+    console.log(count);
+
     return count;
   }
 
@@ -66,9 +68,9 @@ export class LearnerRepository {
   }
 
   async getLearnerByUserId(userId: string): Promise<Learner[]> {
-    const learner = await this.learnerRepository.find({
+    const learners = await this.learnerRepository.find({
       where: { user: { id: userId }, active: true },
     });
-    return learner;
+    return learners;
   }
 }

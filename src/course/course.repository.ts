@@ -5,7 +5,6 @@ import { Repository } from 'typeorm';
 import { PageOptionsDto } from 'src/common/pagination/dto/pageOptionsDto';
 import SortField from './type/enum/SortField';
 import Level from 'src/level/entity/level.entity';
-import { Category } from 'aws-sdk/clients/cloudformation';
 
 @Injectable()
 export class CourseRepository {
@@ -82,6 +81,7 @@ export class CourseRepository {
     queryBuilder.leftJoinAndSelect('c.courseFeedbacks', 'courseFeedbacks');
     queryBuilder.leftJoinAndSelect('c.chapterLectures', 'chapterLectures');
     queryBuilder.leftJoinAndSelect('c.level', 'level');
+    queryBuilder.leftJoinAndSelect('c.category', 'category');
     queryBuilder.leftJoinAndSelect('c.user', 'user');
 
     const course = await queryBuilder.getOne();

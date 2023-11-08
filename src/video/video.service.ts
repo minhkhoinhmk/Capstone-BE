@@ -23,7 +23,7 @@ export class VideoService {
   ) {}
 
   async getVideoStream(id: string) {
-    var options = {
+    const options = {
       Bucket: this.configService.get('AWS_S3_PUBLIC_BUCKET_NAME'),
       Key: id,
     };
@@ -34,7 +34,7 @@ export class VideoService {
 
     console.log(`this.fileSize: ${this.fileSize}`);
 
-    var stream = (await this.s3Service.getObject(options)).createReadStream();
+    const stream = (await this.s3Service.getObject(options)).createReadStream();
 
     this.logger.log(`method=getVideoStream, stream fully loaded`);
 
@@ -63,7 +63,7 @@ export class VideoService {
   }
 
   async getPartialVideoStream(range: string, id: string) {
-    var options = {
+    const options = {
       Bucket: this.configService.get('AWS_S3_PUBLIC_BUCKET_NAME'),
       Key: id,
       Range: range,
@@ -73,7 +73,7 @@ export class VideoService {
 
     console.log(this.fileSize);
 
-    var stream = (await this.s3Service.getObject(options)).createReadStream();
+    const stream = (await this.s3Service.getObject(options)).createReadStream();
 
     const streamableFile = new StreamableFile(stream, {
       disposition: `inline; filename="${options.Key}"`,

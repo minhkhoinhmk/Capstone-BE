@@ -34,7 +34,7 @@ export class ChapterLectureService {
     const chapterLectures =
       await this.chapterLectureRepository.getChapterLectureByCourseId(courseId);
 
-    let learnerChapterResponse: LearnerChapterResponse[] = [];
+    const learnerChapterResponse: LearnerChapterResponse[] = [];
 
     if (await this.learnerRepository.getLeanerById(userId)) {
       for (const chapter of chapterLectures) {

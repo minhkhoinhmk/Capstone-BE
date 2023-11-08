@@ -18,12 +18,12 @@ export class S3Service {
 
   async getObject(options: any) {
     const s3 = this.s3Connection();
-    return await s3.getObject(options);
+    return s3.getObject(options);
   }
 
   async headObject(options: any) {
     const s3 = this.s3Connection();
-    return await s3.headObject(options);
+    return s3.headObject(options);
   }
 
   async putObject(dataBuffer: Buffer, key: string, type: string) {

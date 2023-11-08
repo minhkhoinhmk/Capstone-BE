@@ -12,6 +12,7 @@ import { FilterCourseByCustomerResponse } from './dto/reponse/filter-by-customer
 import { OrderDetail } from 'src/order-detail/entity/order-detail.entity';
 import { CourseMapper } from './mapper/course.mapper';
 import { Role } from 'src/role/entity/role.entity';
+import { User } from 'src/user/entity/user.entity';
 
 @Injectable()
 export class CourseService {
@@ -19,7 +20,7 @@ export class CourseService {
 
   constructor(
     private courseRepository: CourseRepository,
-    private orderRepoasitory: OrderRepository,
+    private orderRepository: OrderRepository,
     private courserMapper: CourseMapper,
   ) {}
 
@@ -66,7 +67,7 @@ export class CourseService {
       : 0;
     const { sumDiscount, promotionCourseByStaffId } =
       this.getDiscountOfStaff(course);
-    const discounntPrice = course.price - course.price * (sumDiscount / 100);
+    const discountPrice = course.price - course.price * (sumDiscount / 100);
 
     const response = {
       id: course.id,
@@ -74,11 +75,13 @@ export class CourseService {
       description: course.description,
       price: course.price,
       discount: sumDiscount,
-      discountPrice: discounntPrice,
+      discountPrice: discountPrice,
       promotionCourseByStaffId,
       ratedStar: ratedStar,
       authorId: course.user.id,
       author: `${course.user.firstName} ${course.user.middleName} ${course.user.lastName}`,
+      categoryId: course.category.id,
+      category: course.category.name,
       totalLength: totalLength,
       shortDescription: course.shortDescription,
       prepareMaterial: course.prepareMaterial,
@@ -152,7 +155,7 @@ export class CourseService {
       : 0;
     const { sumDiscount, promotionCourseByStaffId } =
       this.getDiscountOfStaff(course);
-    const discounntPrice = course.price - course.price * (sumDiscount / 100);
+    const discountPrice = course.price - course.price * (sumDiscount / 100);
 
     const courseResponse: SearchCourseReponse = {
       id: course.id,
@@ -161,7 +164,7 @@ export class CourseService {
       price: course.price,
 
       discount: sumDiscount,
-      discountPrice: discounntPrice,
+      discountPrice: discountPrice,
       promotionCourseByStaffId,
       ratedStar: ratedStar,
       author: `${course.user.firstName} ${course.user.middleName} ${course.user.lastName}`, ///
@@ -183,10 +186,8 @@ export class CourseService {
   async getCoursesByUserId(
     userId: string,
   ): Promise<FilterCourseByCustomerResponse[]> {
-    const orders = await this.orderRepoasitory.getCoursesByUserId(userId);
-
-    console.log(userId);
-    let response: FilterCourseByCustomerResponse[] = [];
+    const orders = await this.orderRepository.getCoursesByUserId(userId);
+    const response: FilterCourseByCustomerResponse[] = [];
 
     for (const order of orders) {
       const courseIds = this.getCourseId(order.orderDetails);
@@ -204,12 +205,24 @@ export class CourseService {
   }
 
   getCourseId(orderDetails: OrderDetail[]): string[] {
-    let results: string[] = [];
+    const results: string[] = [];
 
     for (const detail of orderDetails) {
       results.push(detail.course.id);
     }
 
     return results;
+  }
+
+  async checkCourseIsOwnedByCourseId(courseId: string, user: User) {
+    let status = false;
+    const orders = await this.orderRepository.getCoursesByUserId(user.id);
+
+    for (const order of orders)
+      order.orderDetails.forEach((orderDetail) => {
+        if (orderDetail.course.id === courseId) status = true;
+      });
+
+    return { status };
   }
 }

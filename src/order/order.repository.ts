@@ -6,6 +6,9 @@ import { User } from 'src/user/entity/user.entity';
 import { PaymentMethod } from 'src/payment-method/entity/payment-method.entity';
 import { CreateOrderBody } from './types/create-order-body';
 import { NameOrderStatus } from 'src/order-status/enum/name-order-status.enum';
+import { OrderStatus } from 'src/order-status/entity/order-status.entity';
+import { OrderDetailRepository } from 'src/order-detail/order-detail.repository';
+import { TransactionRepository } from 'src/transaction/transaction.repository';
 
 @Injectable()
 export class OrderRepository {
@@ -14,6 +17,8 @@ export class OrderRepository {
   constructor(
     @InjectRepository(Order)
     private orderRepository: Repository<Order>,
+    private orderDetailRepository: OrderDetailRepository,
+    private transactionRepository: TransactionRepository,
   ) {}
 
   createOrder(body: CreateOrderBody) {
@@ -31,20 +36,22 @@ export class OrderRepository {
         user: true,
         paymentMethod: true,
         orderStatus: true,
-        orderDetails: true,
+        orderDetails: { course: true },
       },
     });
   }
 
-  // async createAndSaveCart(user: User) {
-  //   const cart = await this.createCart(user);
-  //   return this.saveCart(cart);
-  // }
-
-  // async emptyCart(cart: Cart) {
-  //   cart.cartItems = [];
-  //   return await this.cartRepository.save(cart);
-  // }
+  async getOrdersByUser(user: User): Promise<Order[]> {
+    return this.orderRepository.find({
+      where: { user },
+      relations: {
+        user: true,
+        paymentMethod: true,
+        orderStatus: true,
+        orderDetails: { course: true },
+      },
+    });
+  }
 
   async getCoursesByUserId(userId: string): Promise<Order[]> {
     return await this.orderRepository.find({
@@ -55,5 +62,34 @@ export class OrderRepository {
       },
       relations: { orderDetails: { course: true } },
     });
+  }
+
+  async getOrdersByOrderStatus(orderStatus: OrderStatus): Promise<Order[]> {
+    const orders = await this.orderRepository.find({
+      where: {
+        orderStatus: { statusName: orderStatus.statusName },
+      },
+      relations: {
+        orderDetails: true,
+        transaction: true,
+      },
+    });
+    return orders;
+  }
+
+  async removeOrder(order: Order) {
+    const listPromises = [];
+    order.orderDetails.forEach((orderDetail) =>
+      listPromises.push(
+        this.orderDetailRepository.removeOrderDetail(orderDetail),
+      ),
+    );
+
+    await Promise.all(listPromises);
+
+    if (order.transaction)
+      await this.transactionRepository.removeTransaction(order.transaction);
+
+    return this.orderRepository.remove(order);
   }
 }

@@ -7,6 +7,7 @@ import { RolesGuard } from 'src/auth/role.guard';
 import { HasRoles } from 'src/auth/roles.decorator';
 import { NameRole } from 'src/role/enum/name-role.enum';
 import { LearnerChapterResponse } from './dto/response/learner-chapter-reponse.dto';
+import { Request } from 'express';
 
 @Controller('chapter-lecture')
 @ApiTags('Chapter Lecture')

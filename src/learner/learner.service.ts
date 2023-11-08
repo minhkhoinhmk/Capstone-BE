@@ -38,14 +38,7 @@ export class LearnerService {
     createLearnerRequest: CreateLearnerRequest,
     id: string,
   ): Promise<void> {
-    if (
-      (await this.userRepository.getUserByUserName(
-        createLearnerRequest.userName,
-      )) ||
-      (await this.learnerRepository.getLearnerByUserName(
-        createLearnerRequest.userName,
-      ))
-    ) {
+    if (await this.checkUsernameIsExist(createLearnerRequest.userName)) {
       this.logger.error(
         `method=createLearner, userName=${createLearnerRequest.userName} was existed`,
       );
@@ -64,7 +57,7 @@ export class LearnerService {
       this.logger.log(`method=createLearner, create learner successfully!`);
 
       if (
-        (await this.learnerRepository.countLearnerOfEachCustomer(customer)) > 1
+        (await this.learnerRepository.countLearnerOfEachCustomer(customer)) >= 3
       ) {
         this.logger.error(`method=createLearner, learner accounts are full`);
         throw new BadRequestException(`Learner accounts are full`);
@@ -78,7 +71,7 @@ export class LearnerService {
     userId: string,
   ): Promise<FilterLearnerByUserResponse[]> {
     const learners = await this.learnerRepository.getLearnerByUserId(userId);
-    let responses: FilterLearnerByUserResponse[] = [];
+    const responses: FilterLearnerByUserResponse[] = [];
 
     for (const learner of learners) {
       responses.push({
@@ -89,13 +82,13 @@ export class LearnerService {
         active: learner.active,
         userName: learner.userName,
       });
-
-      this.logger.log(
-        `method=getLearnerByUserId, userId=${userId}, length=${responses.length}`,
-      );
-
-      return responses;
     }
+
+    this.logger.log(
+      `method=getLearnerByUserId, userId=${userId}, length=${responses.length}`,
+    );
+
+    return responses;
   }
 
   async getCoursesForLearner(
@@ -109,7 +102,7 @@ export class LearnerService {
         userId,
         pageOption,
       );
-    let responses: FilterCourseByCustomerResponse[] = [];
+    const responses: FilterCourseByCustomerResponse[] = [];
     let completedCount = 0;
 
     for (const leanerCourse of entites) {
@@ -148,5 +141,13 @@ export class LearnerService {
     this.logger.log(`method=getCoursesForLearner, totalItems=${count}`);
 
     return new PageDto(responses, pageMetaDto);
+  }
+
+  async checkUsernameIsExist(userName: string) {
+    const isExist = Boolean(
+      (await this.userRepository.getUserByUserName(userName)) ||
+        (await this.learnerRepository.getLearnerByUserName(userName)),
+    );
+    return isExist;
   }
 }

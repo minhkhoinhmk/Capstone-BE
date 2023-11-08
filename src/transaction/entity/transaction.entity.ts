@@ -19,7 +19,7 @@ export class Transaction {
   @Column()
   bankCode: string;
 
-  @Column()
+  @Column({ nullable: true })
   bankTranNo: string;
 
   @Column()
@@ -32,7 +32,7 @@ export class Transaction {
   @Column()
   status: string;
 
-  @OneToOne(() => Order)
+  @OneToOne(() => Order, (order) => order.transaction)
   @JoinColumn({ name: 'orderId' })
   order: Order;
 }

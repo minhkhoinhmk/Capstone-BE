@@ -12,8 +12,10 @@ import { OrderStatusModule } from 'src/order-status/order-status.module';
 import { PaymentMethodModule } from 'src/payment-method/payment-method.module';
 import { CartModule } from 'src/cart/cart.module';
 import { OrderDetailModule } from 'src/order-detail/order-detail.module';
+import { TransactionModule } from 'src/transaction/transaction.module';
 
 @Module({
+  providers: [OrderService, OrderRepository],
   imports: [
     TypeOrmModule.forFeature([Order]),
     forwardRef(() => AuthModule),
@@ -24,8 +26,9 @@ import { OrderDetailModule } from 'src/order-detail/order-detail.module';
     PaymentMethodModule,
     CartModule,
     OrderDetailModule,
+    TransactionModule,
+    // forwardRef(() => TransactionModule),
   ],
-  providers: [OrderService, OrderRepository],
   controllers: [OrderController],
   exports: [OrderService, OrderRepository],
 })

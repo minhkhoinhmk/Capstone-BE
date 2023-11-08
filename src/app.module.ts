@@ -72,6 +72,7 @@ import { NotificationModule } from './notification/notification.module';
           database: configService.get('DB_DATABASE'),
           autoLoadEntities: true,
           synchronize: true,
+          timezone: 'Asia/Ho_Chi_Minh',
           entities: [
             Character,
             User,
