@@ -6,6 +6,7 @@ import { RolesGuard } from 'src/auth/role.guard';
 import { HasRoles } from 'src/auth/roles.decorator';
 import { NameRole } from 'src/role/enum/name-role.enum';
 import { UserLectureService } from './user-lecture.service';
+import { Request } from 'express';
 
 @Controller('user-lecture')
 @ApiTags('User Lecture')

@@ -6,6 +6,7 @@ import {
   Get,
   Param,
   Post,
+  Req,
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
@@ -22,6 +23,8 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { Cart } from './entity/cart.entity';
+import { User } from 'src/user/entity/user.entity';
+import { Request } from 'express';
 
 @Controller('cart')
 @ApiTags('Cart')
@@ -37,16 +40,22 @@ export class CartController {
   @UseGuards(AuthGuard(), RolesGuard)
   @HasRoles(NameRole.Customer)
   @Post('/add')
-  addCartItem(@Body() addCartItemRequest: AddCartItemRequest): Promise<void> {
-    return this.cartService.addCourseToCartItem(addCartItemRequest);
+  addCartItem(
+    @Body() addCartItemRequest: AddCartItemRequest,
+    @Req() request: Request,
+  ): Promise<void> {
+    return this.cartService.addCourseToCartItem(
+      addCartItemRequest,
+      request['user'] as User,
+    );
   }
 
   @UseGuards(AuthGuard(), RolesGuard)
   @HasRoles(NameRole.Customer)
   @UseInterceptors(ClassSerializerInterceptor)
   @Get()
-  getCart(): Promise<Cart> {
-    return this.cartService.getCart();
+  getCart(@Req() request: Request): Promise<Cart> {
+    return this.cartService.getCart(request['user'] as User);
   }
 
   @ApiParam({
@@ -56,28 +65,31 @@ export class CartController {
   @UseGuards(AuthGuard(), RolesGuard)
   @HasRoles(NameRole.Customer)
   @Delete(':cartItemId')
-  deleteCartItem(@Param('cartItemId') cartItemId: string): Promise<void> {
-    return this.cartService.deleteCartItem(cartItemId);
+  deleteCartItem(
+    @Param('cartItemId') cartItemId: string,
+    @Req() request: Request,
+  ): Promise<void> {
+    return this.cartService.deleteCartItem(cartItemId, request['user'] as User);
   }
 
   @UseGuards(AuthGuard(), RolesGuard)
   @HasRoles(NameRole.Customer)
   @Delete()
-  deleteAllCartItem(): Promise<void> {
-    return this.cartService.deleteAllCartItems();
+  deleteAllCartItem(@Req() request: Request): Promise<void> {
+    return this.cartService.deleteAllCartItems(request['user'] as User);
   }
 
   @UseGuards(AuthGuard(), RolesGuard)
   @HasRoles(NameRole.Customer)
   @Get('/total')
-  getTotalPrice() {
-    return this.cartService.getTotalPrice();
+  getTotalPrice(@Req() request: Request) {
+    return this.cartService.getTotalPrice(request['user'] as User);
   }
 
   @UseGuards(AuthGuard(), RolesGuard)
   @HasRoles(NameRole.Customer)
   @Get('/valid')
-  checkCartIsValid() {
-    return this.cartService.checkCartIsValid();
+  checkCartIsValid(@Req() request: Request) {
+    return this.cartService.checkCartIsValid(request['user'] as User);
   }
 }

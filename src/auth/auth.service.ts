@@ -13,7 +13,7 @@ import { Token } from './dto/response/token.dto';
 import { NameRole } from 'src/role/enum/name-role.enum';
 import { CustomerRegisterResponse } from './dto/response/customer-register.response.dto';
 import { MailerService } from '@nestjs-modules/mailer';
-import { Cron } from '@nestjs/schedule';
+import { Cron, CronExpression } from '@nestjs/schedule';
 import { RoleRepository } from 'src/role/role.repository';
 import { GuestLoginRequest } from './dto/request/guest-login.request.dto';
 import * as bcrypt from 'bcrypt';
@@ -58,7 +58,7 @@ export class AuthService {
 
     // Check user isConfirmedEmail and learner is not check that
     if (user && (await bcrypt.compare(password, user.password))) {
-      if (!user.active)
+      if (!user.active || !user.isConfirmedEmail)
         throw new BadRequestException(`This account is not activated`);
 
       const tokensAndCount = await this.jwtStoreRepository.getTokenAndCount(

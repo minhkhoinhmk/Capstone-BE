@@ -40,7 +40,7 @@ export class LearnerController {
   @UseGuards(AuthGuard(), RolesGuard)
   @HasRoles(NameRole.Customer)
   @Post('/create')
-  sigup(
+  signup(
     @Body() createLearnerRequest: CreateLearnerRequest,
     @Req() request: Request,
   ): Promise<void> {

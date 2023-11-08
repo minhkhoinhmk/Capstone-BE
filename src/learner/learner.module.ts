@@ -23,6 +23,6 @@ import { UserLectureModule } from 'src/user-lecture/user-lecture.module';
   ],
   providers: [LearnerService, LearnerRepository],
   controllers: [LearnerController],
-  exports: [LearnerRepository],
+  exports: [LearnerRepository, LearnerService],
 })
 export class LearnerModule {}

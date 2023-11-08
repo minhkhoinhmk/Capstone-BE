@@ -5,6 +5,7 @@ import { FindOptionsRelations, Repository } from 'typeorm';
 import { hashPassword } from 'src/utils/hash-password.util';
 import { Role } from 'src/role/entity/role.entity';
 import { UserRegisterRequest } from 'src/auth/dto/request/customer-register.request.dto';
+import { UserUpdateRequest } from './dto/request/user-update.request.dto';
 
 @Injectable()
 export class UserRepository {
@@ -49,8 +50,8 @@ export class UserRepository {
     return customer;
   }
 
-  async save(user: User): Promise<void> {
-    await this.userRepository.save(user);
+  async save(user: User): Promise<User> {
+    return await this.userRepository.save(user);
   }
 
   async createCustomer(
@@ -61,7 +62,7 @@ export class UserRepository {
     const { firstName, lastName, middleName, password, phoneNumber, email } =
       customerRegisterRequest;
 
-    const user = await this.userRepository.create({
+    const user = this.userRepository.create({
       firstName: firstName,
       lastName: lastName,
       middleName: middleName,
@@ -94,5 +95,15 @@ export class UserRepository {
 
   async remove(user: User): Promise<void> {
     await this.userRepository.remove(user);
+  }
+
+  async updateUser(
+    user: User,
+    body?: UserUpdateRequest,
+    password?: string,
+  ): Promise<User> {
+    body && Object.assign(user, body);
+    password && (user.password = password);
+    return this.save(user);
   }
 }

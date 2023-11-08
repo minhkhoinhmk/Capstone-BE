@@ -6,12 +6,14 @@ import {
   JoinColumn,
   ManyToOne,
   OneToMany,
+  OneToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
 import { ApiProperty } from '@nestjs/swagger';
 import { Exclude } from 'class-transformer';
 import { PaymentMethod } from 'src/payment-method/entity/payment-method.entity';
+import { Transaction } from 'src/transaction/entity/transaction.entity';
 import { OrderStatus } from 'src/order-status/entity/order-status.entity';
 import { OrderDetail } from 'src/order-detail/entity/order-detail.entity';
 
@@ -65,4 +67,7 @@ export class Order {
 
   @OneToMany(() => OrderDetail, (orderDetail) => orderDetail.order)
   orderDetails: OrderDetail[];
+
+  @OneToOne(() => Transaction, (transaction) => transaction.order)
+  transaction: Transaction;
 }

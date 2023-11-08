@@ -61,4 +61,8 @@ export class TransactionRepository {
       relations: { order: { user: true } },
     });
   }
+
+  async removeTransaction(transaction: Transaction) {
+    return await this.transactionlRepository.remove(transaction);
+  }
 }

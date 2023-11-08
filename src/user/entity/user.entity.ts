@@ -19,6 +19,7 @@ import { CourseFeedback } from 'src/course-feedback/entity/course-feedbacl.entit
 import { Cart } from 'src/cart/entity/cart.entity';
 import { Order } from 'src/order/entity/order.entity';
 import { UserLecture } from 'src/user-lecture/entity/user-lecture.entity';
+import { Exclude } from 'class-transformer';
 
 @Entity()
 export class User {
@@ -47,6 +48,7 @@ export class User {
   })
   userName: string;
 
+  @Exclude()
   @Column()
   password: string;
 
@@ -56,21 +58,26 @@ export class User {
   @Column()
   phoneNumber: string;
 
+  @Exclude()
   @Column({ nullable: true })
   status: string;
 
   @Column({ unique: true, nullable: true })
   email: string;
 
+  @Exclude()
   @Column()
   active: boolean;
 
+  @Exclude()
   @Column({ nullable: true })
   otpCreatedDate: Date;
 
+  @Exclude()
   @Column({ nullable: true })
   otp: string;
 
+  @Exclude()
   @Column({ nullable: true })
   isConfirmedEmail: boolean;
 

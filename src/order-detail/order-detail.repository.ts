@@ -21,6 +21,10 @@ export class OrderDetailRepository {
     return this.orderDetailRepository.save(order);
   }
 
+  async removeOrderDetail(orderDetail: OrderDetail) {
+    return await this.orderDetailRepository.remove(orderDetail);
+  }
+
   // async createAndSaveCart(user: User) {
   //   const cart = await this.createCart(user);
   //   return this.saveCart(cart);

@@ -1,25 +1,20 @@
 import {
   BadRequestException,
   ConflictException,
-  Inject,
   Injectable,
   Logger,
-  Scope,
 } from '@nestjs/common';
 import { CartRepository } from './cart.repository';
 import { UserRepository } from 'src/user/user.repository';
 import { AddCartItemRequest } from './dto/request/add-cart-item.dto';
 import { CourseRepository } from 'src/course/course.repository';
-import { Request } from 'express';
-import { REQUEST } from '@nestjs/core';
 import { User } from 'src/user/entity/user.entity';
 import { CartItemRepository } from 'src/cart-item/cart-item.repository';
 import { CartItem } from 'src/cart-item/entity/cart-item.entity';
 import { Cart } from './entity/cart.entity';
 import { CourseService } from 'src/course/course.service';
-import { Course } from 'src/course/entity/course.entity';
 
-@Injectable({ scope: Scope.REQUEST })
+@Injectable()
 export class CartService {
   private logger = new Logger('CartService', { timestamp: true });
 
@@ -29,15 +24,15 @@ export class CartService {
     private courseRepository: CourseRepository,
     private courseService: CourseService,
     private cartItemRepository: CartItemRepository,
-    @Inject(REQUEST) private request: Request,
   ) {}
 
   async addCourseToCartItem(
     addCartItemRequest: AddCartItemRequest,
+    user: User,
   ): Promise<void> {
     const { courseId, promotionCourseId } = addCartItemRequest;
 
-    const customer = await this.getCustomerWithCart();
+    const customer = await this.getCustomerWithCart(user);
 
     const cart = await this.getOrCreateCart(customer);
 
@@ -62,12 +57,10 @@ export class CartService {
     });
 
     await this.cartItemRepository.saveCartItem(cartItem);
-
-    return;
   }
 
-  async getCart() {
-    const customer = await this.getCustomerWithCart();
+  async getCart(user: User) {
+    const customer = await this.getCustomerWithCart(user);
     const cart = await this.getOrCreateCart(customer);
     cart.cartItems = cart.cartItems ? cart.cartItems : [];
 
@@ -90,8 +83,8 @@ export class CartService {
     return cart;
   }
 
-  async deleteCartItem(cartItemId: string) {
-    const customer = await this.getCustomerWithCart();
+  async deleteCartItem(cartItemId: string, user: User) {
+    const customer = await this.getCustomerWithCart(user);
 
     const cartItem = await this.cartItemRepository.getCartItemById(
       cartItemId,
@@ -107,18 +100,18 @@ export class CartService {
     return;
   }
 
-  async deleteAllCartItems() {
-    const customer = await this.getCustomerWithCart();
+  async deleteAllCartItems(user: User) {
+    const customer = await this.getCustomerWithCart(user);
     await this.cartRepository.emptyCart(customer.cart);
   }
 
-  async getTotalPrice() {
-    const customer = await this.getCustomerWithCart();
+  async getTotalPrice(user: User) {
+    const customer = await this.getCustomerWithCart(user);
     return this.caculatePrice(customer.cart);
   }
 
-  async checkCartIsValid() {
-    const customer = await this.getCustomerWithCart();
+  async checkCartIsValid(user: User) {
+    const customer = await this.getCustomerWithCart(user);
     const messageErrors: string[] = [];
 
     customer.cart.cartItems = customer.cart.cartItems.filter((cartItem) => {
@@ -190,28 +183,25 @@ export class CartService {
       ? this.cartRepository.createAndSaveCart(customer)
       : customer.cart;
 
-  getCustomerWithCart = async () =>
-    this.userRepository.getUserByIdWithRelation(
-      (this.request['user'] as User).id,
-      {
-        cart: {
-          cartItems: {
-            course: {
-              courseFeedbacks: true,
-              chapterLectures: true,
-              level: true,
-              promotionCourses: {
-                promotion: {
-                  user: { role: true },
-                },
+  getCustomerWithCart = async (user: User) =>
+    this.userRepository.getUserByIdWithRelation(user.id, {
+      cart: {
+        cartItems: {
+          course: {
+            courseFeedbacks: true,
+            chapterLectures: true,
+            level: true,
+            promotionCourses: {
+              promotion: {
+                user: { role: true },
               },
-              user: true,
             },
-            promotionCourse: {
-              promotion: true,
-            },
+            user: true,
+          },
+          promotionCourse: {
+            promotion: true,
           },
         },
       },
-    );
+    });
 }

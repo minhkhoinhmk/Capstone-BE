@@ -3,6 +3,7 @@ import {
   Controller,
   Get,
   Param,
+  Patch,
   Post,
   Req,
   UseGuards,
@@ -20,6 +21,8 @@ import { HasRoles } from 'src/auth/roles.decorator';
 import { NameRole } from 'src/role/enum/name-role.enum';
 import { Course } from './entity/course.entity';
 import { FilterCourseByCustomerResponse } from './dto/reponse/filter-by-customer.dto';
+import { User } from 'src/user/entity/user.entity';
+import { Request } from 'express';
 
 @Controller('course')
 @ApiTags('Courses')
@@ -55,4 +58,27 @@ export class CourseController {
   ): Promise<FilterCourseByCustomerResponse[]> {
     return await this.courseService.getCoursesByUserId(request['user']['id']);
   }
+
+  @Get('/order/check-owned/:id')
+  @UseGuards(AuthGuard(), RolesGuard)
+  @HasRoles(NameRole.Customer)
+  async checkCourseIsOwnedByCourseId(
+    @Param('id') courseId: string,
+    @Req() request: Request,
+  ): Promise<{ status: boolean }> {
+    return await this.courseService.checkCourseIsOwnedByCourseId(
+      courseId,
+      request['user'] as User,
+    );
+  }
+
+  // @Patch(':id')
+  // @ApiOkResponse({
+  //   description: 'course successfully updated',
+  // })
+  // async updateCourse(
+  //   @Body() searchCourseRequest: SearchCourseRequest,
+  // ): Promise<PageDto<SearchCourseReponse>> {
+  //   return await this.courseService.searchAndFilter(searchCourseRequest);
+  // }
 }

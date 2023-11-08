@@ -10,4 +10,5 @@ export type CreateOrderBody = {
   orderStatus: OrderStatus;
   note: string;
   active: boolean;
+  insertedDate: Date;
 };
