@@ -7,6 +7,7 @@ import {
   PRIVATE_KEY,
   PROJECT_ID,
 } from 'src/common/firebase/firebase.constants';
+import { DynamodbService } from 'src/dynamodb/dynamodb.service';
 
 admin.initializeApp({
   credential: admin.credential.cert({
@@ -19,6 +20,8 @@ admin.initializeApp({
 @Injectable()
 export class NotificationService {
   private logger = new Logger('S3Service', { timestamp: true });
+
+  constructor(private readonly dynamoDBService: DynamodbService) {}
 
   async sendingNotification(
     notification: NotificationPayload,
@@ -35,6 +38,15 @@ export class NotificationService {
       .messaging()
       .send(payload)
       .then((res) => {
+        const createNotificationDto = {
+          title: notification.title,
+          body: notification.body,
+          data: notification.data,
+          userId: notification.userId,
+        };
+
+        this.dynamoDBService.saveNotification(createNotificationDto);
+
         this.logger.log(`method=sendingNotification, sent successfully`);
         return {
           success: true,

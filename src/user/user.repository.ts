@@ -38,6 +38,7 @@ export class UserRepository {
   async getUserByUserName(userName: string): Promise<User> {
     const user = await this.userRepository.findOne({
       where: { userName },
+      relations: { role: true },
     });
     return user;
   }
