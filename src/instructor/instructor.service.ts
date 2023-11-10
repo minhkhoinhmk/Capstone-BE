@@ -36,6 +36,7 @@ export class InstructorService {
   ): Promise<UploadStatus> {
     try {
       const user = await this.userRepository.getUserByEmail(email);
+
       const key = `${INSTRUCTOR_CERTIFICATION_PATH}${user.id}.${substringAfterDot}`;
 
       await this.s3Service.putObject(buffer, key, type);
@@ -52,6 +53,7 @@ export class InstructorService {
         data: {
           certificationUrl: key,
         },
+        userId: user.id,
       };
 
       this.notificationService.sendingNotification(payload);

@@ -12,4 +12,7 @@ export class NotificationPayload {
 
   @ApiProperty()
   data: any;
+
+  @ApiProperty()
+  userId: string;
 }
