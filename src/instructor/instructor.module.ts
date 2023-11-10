@@ -8,6 +8,7 @@ import { CategoryModule } from 'src/category/category.module';
 import { LevelModule } from 'src/level/level.module';
 import { CourseModule } from 'src/course/course.module';
 import { DeviceModule } from 'src/device/device.module';
+import { AuthModule } from 'src/auth/auth.module';
 
 @Module({
   providers: [InstructorService],
@@ -20,6 +21,7 @@ import { DeviceModule } from 'src/device/device.module';
     LevelModule,
     CourseModule,
     DeviceModule,
+    AuthModule,
   ],
 })
 export class InstructorModule {}

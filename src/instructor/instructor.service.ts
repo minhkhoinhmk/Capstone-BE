@@ -1,5 +1,8 @@
 import { Injectable, Logger, NotFoundException } from '@nestjs/common';
-import { INSTRUCTOR_CERTIFICATION_PATH } from 'src/common/s3/s3.constants';
+import {
+  COURSE_THUMBNAIL_PATH,
+  INSTRUCTOR_CERTIFICATION_PATH,
+} from 'src/common/s3/s3.constants';
 import { UploadStatus } from 'src/s3/dto/upload-status.dto';
 import { S3Service } from 'src/s3/s3.service';
 import { UserRepository } from 'src/user/user.repository';
@@ -77,6 +80,7 @@ export class InstructorService {
 
   async createCourse(
     createCourseRequest: CreateCourseRequest,
+    userId: string,
   ): Promise<Course> {
     try {
       const level = await this.levelRepository.getLevelById(
@@ -85,11 +89,13 @@ export class InstructorService {
       const category = await this.categoryRepository.getCategoryById(
         createCourseRequest.categoryId,
       );
+      const instructor = await this.userRepository.getUserById(userId);
 
       const course = new Course();
       (course.title = createCourseRequest.title),
         (course.level = level),
         (course.category = category);
+      course.user = instructor;
 
       this.logger.log(`method=createCourse, created course successfully`);
 
@@ -100,6 +106,28 @@ export class InstructorService {
       throw new NotFoundException(
         `Category with id ${createCourseRequest.categoryId} or level with id ${createCourseRequest.levelId} not found`,
       );
+    }
+  }
+
+  async uploadThumbnail(
+    buffer: Buffer,
+    type: string,
+    substringAfterDot: string,
+    courseId: string,
+  ): Promise<void> {
+    try {
+      const key = `${COURSE_THUMBNAIL_PATH}${courseId}.${substringAfterDot}`;
+
+      let course = await this.courseRepository.getCourseById(courseId);
+      course.thumbnailUrl = key;
+
+      await this.courseRepository.saveCourse(course);
+
+      await this.s3Service.putObject(buffer, key, type);
+
+      this.logger.log(`method=uploadThumbnail, uploaed thumbnail successfully`);
+    } catch (error) {
+      this.logger.log(`method=uploadThumbnail, error: ${error.message}`);
     }
   }
 }
