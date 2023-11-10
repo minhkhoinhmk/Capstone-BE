@@ -5,6 +5,7 @@ import {
   Query,
   Req,
   UploadedFile,
+  UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
 import { InstructorService } from './instructor.service';
@@ -13,6 +14,10 @@ import { UploadStatus } from 'src/s3/dto/upload-status.dto';
 import { ApiBody, ApiCreatedResponse, ApiTags } from '@nestjs/swagger';
 import { Course } from 'src/course/entity/course.entity';
 import { CreateCourseRequest } from 'src/course/dto/request/create-course-request.dto';
+import { AuthGuard } from '@nestjs/passport';
+import { RolesGuard } from 'src/auth/role.guard';
+import { HasRoles } from 'src/auth/roles.decorator';
+import { NameRole } from 'src/role/enum/name-role.enum';
 
 @Controller('instructor')
 @ApiTags('Intstructor')
@@ -40,6 +45,8 @@ export class InstructorController {
   }
 
   @Post('/course/create')
+  @UseGuards(AuthGuard(), RolesGuard)
+  @HasRoles(NameRole.Instructor)
   @ApiCreatedResponse({
     description: 'Create Course Successfully',
     type: Course,
@@ -48,8 +55,33 @@ export class InstructorController {
     type: CreateCourseRequest,
   })
   async createCourse(
+    @Req() request: any,
     @Body() createCourseRequest: CreateCourseRequest,
   ): Promise<Course> {
-    return await this.instructorService.createCourse(createCourseRequest);
+    return await this.instructorService.createCourse(
+      createCourseRequest,
+      request['user']['id'],
+    );
+  }
+
+  @Post('/course/thumbnail/upload')
+  @UseInterceptors(FileInterceptor('file'))
+  @UseGuards(AuthGuard(), RolesGuard)
+  @HasRoles(NameRole.Instructor)
+  async uploadThumbnail(
+    @UploadedFile() file: Express.Multer.File,
+    @Query('courseId') courseId: string,
+  ) {
+    const parts = file.originalname.split('.');
+
+    if (parts.length > 1) {
+      const substringAfterDot = parts[parts.length - 1];
+      return await this.instructorService.uploadThumbnail(
+        file.buffer,
+        file.mimetype,
+        substringAfterDot,
+        courseId,
+      );
+    }
   }
 }
