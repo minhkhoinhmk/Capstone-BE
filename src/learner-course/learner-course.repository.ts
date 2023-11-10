@@ -34,6 +34,7 @@ export class LearnerCourseRepository {
   ): Promise<LearnerCourse> {
     return await this.learnerCourseRepository.findOne({
       where: { course: course, learner: learner },
+      relations: { course: true, learner: true },
     });
   }
 
@@ -48,7 +49,7 @@ export class LearnerCourseRepository {
     if (search) {
       entities = await this.learnerCourseRepository.find({
         where: {
-          learner: { id: learnerId },
+          learner: { id: learnerId, active: true },
           course: { title: ILike(`%${search}%`) },
         },
         relations: { learner: true, course: true },
@@ -61,7 +62,7 @@ export class LearnerCourseRepository {
       });
     } else {
       entities = await this.learnerCourseRepository.find({
-        where: { learner: { id: learnerId } },
+        where: { learner: { id: learnerId }, active: true },
         relations: { learner: true, course: true },
         skip: (pageOptionsDto.page - 1) * pageOptionsDto.take,
         take: pageOptionsDto.take,

@@ -1,13 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
-import {
-  IsEnum,
-  IsNotEmpty,
-  IsNumber,
-  IsOptional,
-  IsString,
-  IsUUID,
-} from 'class-validator';
-import { NameOrderStatus } from 'src/order-status/enum/name-order-status.enum';
+import { IsEnum, IsNotEmpty, IsOptional, IsUUID } from 'class-validator';
+import { NameOrderStatus } from 'src/order/enum/name-order-status.enum';
 
 export class UpdateTransactionRequest {
   @IsUUID()
