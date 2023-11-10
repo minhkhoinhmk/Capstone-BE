@@ -34,9 +34,7 @@ import { S3Module } from './s3/s3.module';
 import { PaymentModule } from './payment/payment.module';
 import { Order } from './order/entity/order.entity';
 import { OrderDetail } from './order-detail/entity/order-detail.entity';
-import { OrderStatus } from './order-status/entity/order-status.entity';
 import { PaymentMethod } from './payment-method/entity/payment-method.entity';
-import { OrderStatusModule } from './order-status/order-status.module';
 import { PaymentMethodModule } from './payment-method/payment-method.module';
 import { OrderModule } from './order/order.module';
 import { TransactionModule } from './transaction/transaction.module';
@@ -86,7 +84,6 @@ import { DeviceModule } from './device/device.module';
             CartItem,
             Order,
             OrderDetail,
-            OrderStatus,
             PaymentMethod,
           ],
         };
@@ -134,7 +131,6 @@ import { DeviceModule } from './device/device.module';
     VideoModule,
     S3Module,
     PaymentModule,
-    OrderStatusModule,
     PaymentMethodModule,
     OrderModule,
     TransactionModule,

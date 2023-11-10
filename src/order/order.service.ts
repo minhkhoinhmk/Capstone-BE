@@ -8,14 +8,12 @@ import { CartService } from 'src/cart/cart.service';
 import { NamePaymentMethod } from 'src/payment-method/enum/name-payment-method.enum';
 import { Order } from './entity/order.entity';
 import { OrderRepository } from './order.repository';
-import { OrderStatusRepository } from 'src/order-status/order-status.repository';
-import { NameOrderStatus } from 'src/order-status/enum/name-order-status.enum';
 import { PaymentMethodRepository } from 'src/payment-method/payment-method.repository';
 import { OrderDetailRepository } from 'src/order-detail/order-detail.repository';
 import { UpdateTransactionRequest } from './dto/request/update-order.request.dto';
 import { User } from 'src/user/entity/user.entity';
 import { Cron, CronExpression } from '@nestjs/schedule';
-import { DateTime, Interval } from 'luxon';
+import { NameOrderStatus } from './enum/name-order-status.enum';
 
 @Injectable()
 export class OrderService {
@@ -31,15 +29,12 @@ export class OrderService {
     private courseService: CourseService,
     private cartItemRepository: CartItemRepository,
     private paymentMethodRepository: PaymentMethodRepository,
-    private orderStatusRepository: OrderStatusRepository,
   ) {}
 
   async createOrder(user: User): Promise<Order> {
     const customer = await this.cartService.getCustomerWithCart(user);
     const caculatePrice = this.cartService.caculatePrice(customer.cart);
-    const orderStatus = await this.orderStatusRepository.getOrderStatusByName(
-      NameOrderStatus.Pending,
-    );
+    const orderStatus = NameOrderStatus.Pending;
     const paymentMethod =
       await this.paymentMethodRepository.getPaymentMethodByName(
         NamePaymentMethod.VNPAY,
@@ -94,9 +89,7 @@ export class OrderService {
     const order = await this.orderRepository.getOrderById(body.orderId);
 
     if (body.nameOrderStatus) {
-      order.orderStatus = await this.orderStatusRepository.getOrderStatusByName(
-        body.nameOrderStatus,
-      );
+      order.orderStatus = body.nameOrderStatus;
 
       if (body.nameOrderStatus === NameOrderStatus.Success) {
         order.orderDetails.forEach((orderDetail) => {
@@ -136,9 +129,6 @@ export class OrderService {
   }
 
   async getOrdersPending(): Promise<Order[]> {
-    const orderStatus = await this.orderStatusRepository.getOrderStatusByName(
-      NameOrderStatus.Pending,
-    );
-    return this.orderRepository.getOrdersByOrderStatus(orderStatus);
+    return this.orderRepository.getOrdersByOrderStatus(NameOrderStatus.Pending);
   }
 }

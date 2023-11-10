@@ -25,6 +25,7 @@ import { FilterCourseByCustomerResponse } from 'src/course/dto/reponse/filter-by
 import { ApiPaginatedResponse } from 'src/common/decorator/api-pagination-response';
 import { PageOptionsDto } from 'src/common/pagination/dto/pageOptionsDto';
 import { PageDto } from 'src/common/pagination/dto/pageDto';
+import { FilterCourseByLearnerResponse } from 'src/course/dto/reponse/filter-by-learner.dto';
 
 @Controller('learner')
 @ApiTags('Learner')
@@ -64,7 +65,7 @@ export class LearnerController {
     return this.learnerService.getLearnerByUserId(request['user']['id']);
   }
 
-  @ApiPaginatedResponse(FilterCourseByCustomerResponse)
+  @ApiPaginatedResponse(FilterCourseByLearnerResponse)
   @UseGuards(AuthGuard(), RolesGuard)
   @HasRoles(NameRole.Learner)
   @Post('/course/user')
@@ -72,7 +73,7 @@ export class LearnerController {
     @Query('search') search: string,
     @Req() request: Request,
     @Body() pageOption: PageOptionsDto,
-  ): Promise<PageDto<FilterCourseByCustomerResponse>> {
+  ): Promise<PageDto<FilterCourseByLearnerResponse>> {
     return this.learnerService.getCoursesForLearner(
       search,
       request['user']['id'],

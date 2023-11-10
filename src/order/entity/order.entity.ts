@@ -14,8 +14,8 @@ import { ApiProperty } from '@nestjs/swagger';
 import { Exclude } from 'class-transformer';
 import { PaymentMethod } from 'src/payment-method/entity/payment-method.entity';
 import { Transaction } from 'src/transaction/entity/transaction.entity';
-import { OrderStatus } from 'src/order-status/entity/order-status.entity';
 import { OrderDetail } from 'src/order-detail/entity/order-detail.entity';
+import { NameOrderStatus } from '../enum/name-order-status.enum';
 
 @Entity()
 export class Order {
@@ -61,9 +61,12 @@ export class Order {
   @JoinColumn({ name: 'paymentMethodId' })
   paymentMethod: PaymentMethod;
 
-  @ManyToOne(() => OrderStatus, (orderStatus) => orderStatus.orders)
-  @JoinColumn({ name: 'orderStatusId' })
-  orderStatus: OrderStatus;
+  @ApiProperty({
+    enum: NameOrderStatus,
+    description: 'Order status',
+  })
+  @Column()
+  orderStatus: NameOrderStatus;
 
   @OneToMany(() => OrderDetail, (orderDetail) => orderDetail.order)
   orderDetails: OrderDetail[];

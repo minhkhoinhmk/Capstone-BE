@@ -19,6 +19,7 @@ import { PageDto } from 'src/common/pagination/dto/pageDto';
 import { PageMetaDto } from 'src/common/pagination/dto/pageMetaDto';
 import { UserLectureRepository } from 'src/user-lecture/user-lecture.repository';
 import { response } from 'express';
+import { FilterCourseByLearnerResponse } from 'src/course/dto/reponse/filter-by-learner.dto';
 
 @Injectable()
 export class LearnerService {
@@ -95,14 +96,14 @@ export class LearnerService {
     search: string,
     userId: string,
     pageOption: PageOptionsDto,
-  ): Promise<PageDto<FilterCourseByCustomerResponse>> {
+  ): Promise<PageDto<FilterCourseByLearnerResponse>> {
     const { count, entites } =
       await this.learnerCourseRepository.getCourseByLearnerId(
         search,
         userId,
         pageOption,
       );
-    const responses: FilterCourseByCustomerResponse[] = [];
+    const responses: FilterCourseByLearnerResponse[] = [];
     let completedCount = 0;
 
     for (const leanerCourse of entites) {

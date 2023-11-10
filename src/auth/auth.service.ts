@@ -57,7 +57,11 @@ export class AuthService {
 
     // Check user isConfirmedEmail and learner is not check that
     if (user && (await bcrypt.compare(password, user.password))) {
+<<<<<<< HEAD
       if (!user.active && !user.isConfirmedEmail)
+=======
+      if (!user.active || (user.role?.name && !user.isConfirmedEmail))
+>>>>>>> 984faae (Fix(US00038): Fix orderStatus into field)
         throw new BadRequestException(`This account is not activated`);
 
       const tokensAndCount = await this.jwtStoreRepository.getTokenAndCount(
