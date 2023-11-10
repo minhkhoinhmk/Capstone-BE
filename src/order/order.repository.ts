@@ -3,12 +3,10 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Order } from './entity/order.entity';
 import { User } from 'src/user/entity/user.entity';
-import { PaymentMethod } from 'src/payment-method/entity/payment-method.entity';
 import { CreateOrderBody } from './types/create-order-body';
-import { NameOrderStatus } from 'src/order-status/enum/name-order-status.enum';
-import { OrderStatus } from 'src/order-status/entity/order-status.entity';
 import { OrderDetailRepository } from 'src/order-detail/order-detail.repository';
 import { TransactionRepository } from 'src/transaction/transaction.repository';
+import { NameOrderStatus } from './enum/name-order-status.enum';
 
 @Injectable()
 export class OrderRepository {
@@ -35,7 +33,6 @@ export class OrderRepository {
       relations: {
         user: true,
         paymentMethod: true,
-        orderStatus: true,
         orderDetails: { course: true },
       },
     });
@@ -47,7 +44,6 @@ export class OrderRepository {
       relations: {
         user: true,
         paymentMethod: true,
-        orderStatus: true,
         orderDetails: { course: true },
       },
     });
@@ -58,16 +54,16 @@ export class OrderRepository {
       where: {
         user: { id: userId },
         active: true,
-        orderStatus: { statusName: NameOrderStatus.Success },
+        orderStatus: NameOrderStatus.Success,
       },
       relations: { orderDetails: { course: true } },
     });
   }
 
-  async getOrdersByOrderStatus(orderStatus: OrderStatus): Promise<Order[]> {
+  async getOrdersByOrderStatus(orderStatus: NameOrderStatus): Promise<Order[]> {
     const orders = await this.orderRepository.find({
       where: {
-        orderStatus: { statusName: orderStatus.statusName },
+        orderStatus: orderStatus,
       },
       relations: {
         orderDetails: true,
