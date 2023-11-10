@@ -46,6 +46,7 @@ import { ImageModule } from './image/image.module';
 import { InstructorModule } from './instructor/instructor.module';
 import { NotificationModule } from './notification/notification.module';
 import { DynamodbModule } from './dynamodb/dynamodb.module';
+import { DeviceModule } from './device/device.module';
 
 @Global()
 @Module({
@@ -143,6 +144,7 @@ import { DynamodbModule } from './dynamodb/dynamodb.module';
     InstructorModule,
     NotificationModule,
     DynamodbModule,
+    DeviceModule,
   ],
 })
 export class AppModule {}

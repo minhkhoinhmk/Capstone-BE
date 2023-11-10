@@ -1,19 +1,17 @@
 import { Injectable, Logger, NotFoundException } from '@nestjs/common';
-import {
-  COURSE_PATH,
-  INSTRUCTOR_CERTIFICATION_PATH,
-} from 'src/common/s3/s3.constants';
+import { INSTRUCTOR_CERTIFICATION_PATH } from 'src/common/s3/s3.constants';
 import { UploadStatus } from 'src/s3/dto/upload-status.dto';
 import { S3Service } from 'src/s3/s3.service';
 import { UserRepository } from 'src/user/user.repository';
 import { InstructorStatus } from './enum/instructor-status.enum';
 import { NotificationService } from 'src/notification/notification.service';
-import { NotificationPayload } from 'src/notification/dto/request/notification-payload.dto';
 import { CategoryRepository } from 'src/category/category.repository';
 import { LevelRepository } from 'src/level/level.repository';
 import { CreateCourseRequest } from 'src/course/dto/request/create-course-request.dto';
 import { Course } from 'src/course/entity/course.entity';
 import { CourseRepository } from 'src/course/course.repository';
+import { DeviceRepository } from 'src/device/device.repository';
+import { NameRole } from 'src/role/enum/name-role.enum';
 
 @Injectable()
 export class InstructorService {
@@ -26,6 +24,7 @@ export class InstructorService {
     private readonly categoryRepository: CategoryRepository,
     private readonly levelRepository: LevelRepository,
     private readonly courseRepository: CourseRepository,
+    private readonly deviceRepository: DeviceRepository,
   ) {}
 
   async uploadCertification(
@@ -45,18 +44,24 @@ export class InstructorService {
       user.status = InstructorStatus.Pending;
       await this.userRepository.save(user);
 
-      const payload = {
-        token:
-          'fMawqyJNHXeUNXEDF_M90C:APA91bFT32pRONbXyfIS698O6EeFs3OLXmqMFkPeVYWzlTcJPIDNObb4vRT7lll1nQ5X8bOttXpgutEYUAgeI9C8Lkir2jG8Nzn_TuDwpq0kkAKc9ihzHa0wSDIlsgKUCLm685GlQSeQ',
-        title: 'Cập nhật bằng cấp',
-        body: 'Một giáo viên vừa cập nhật bằng cấp. Hãy xét duyệtt!',
-        data: {
-          certificationUrl: key,
-        },
-        userId: user.id,
-      };
+      const tokens = await this.deviceRepository.getDeviceByRole(
+        NameRole.Admin,
+      );
 
-      this.notificationService.sendingNotification(payload);
+      tokens.forEach((token) => {
+        console.log(token);
+        const payload = {
+          token: token.deviceTokenId,
+          title: 'Cập nhật bằng cấp',
+          body: 'Một giáo viên vừa cập nhật bằng cấp. Hãy xét duyệtt!',
+          data: {
+            certificationUrl: key,
+          },
+          userId: token.user.id,
+        };
+
+        this.notificationService.sendingNotification(payload);
+      });
 
       this.logger.log(
         `method=uploadCertification, uploadCertification succeed`,

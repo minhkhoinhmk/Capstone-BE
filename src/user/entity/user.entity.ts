@@ -20,6 +20,7 @@ import { Cart } from 'src/cart/entity/cart.entity';
 import { Order } from 'src/order/entity/order.entity';
 import { UserLecture } from 'src/user-lecture/entity/user-lecture.entity';
 import { Exclude } from 'class-transformer';
+import { Device } from 'src/device/entity/device.entity';
 
 @Entity()
 export class User {
@@ -111,4 +112,7 @@ export class User {
 
   @OneToMany(() => UserLecture, (userLecture) => userLecture.user)
   userLectures: UserLecture[];
+
+  @OneToMany(() => Device, (device) => device.user)
+  devices: Device[];
 }

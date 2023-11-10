@@ -21,7 +21,6 @@ import * as validator from 'validator';
 import { JwtStorerRepository } from 'src/user/jwt-store.repository';
 import { UserRepository } from 'src/user/user.repository';
 import { LearnerRepository } from 'src/learner/learner.repository';
-import { User } from 'aws-sdk/clients/budgets';
 
 @Injectable()
 export class AuthService {
@@ -58,7 +57,7 @@ export class AuthService {
 
     // Check user isConfirmedEmail and learner is not check that
     if (user && (await bcrypt.compare(password, user.password))) {
-      if (!user.active || !user.isConfirmedEmail)
+      if (!user.active && !user.isConfirmedEmail)
         throw new BadRequestException(`This account is not activated`);
 
       const tokensAndCount = await this.jwtStoreRepository.getTokenAndCount(

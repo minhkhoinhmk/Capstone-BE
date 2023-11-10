@@ -7,6 +7,7 @@ import { NotificationModule } from 'src/notification/notification.module';
 import { CategoryModule } from 'src/category/category.module';
 import { LevelModule } from 'src/level/level.module';
 import { CourseModule } from 'src/course/course.module';
+import { DeviceModule } from 'src/device/device.module';
 
 @Module({
   providers: [InstructorService],
@@ -18,6 +19,7 @@ import { CourseModule } from 'src/course/course.module';
     CategoryModule,
     LevelModule,
     CourseModule,
+    DeviceModule,
   ],
 })
 export class InstructorModule {}

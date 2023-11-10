@@ -1,4 +1,5 @@
 import { CourseFeedback } from 'src/course-feedback/entity/course-feedbacl.entity';
+import { Device } from 'src/device/entity/device.entity';
 import { LearnerCourse } from 'src/learner-course/entity/learner-course.entity';
 import { Role } from 'src/role/entity/role.entity';
 import { UserLecture } from 'src/user-lecture/entity/user-lecture.entity';
@@ -58,6 +59,9 @@ export class Learner {
 
   @OneToMany(() => UserLecture, (userLecture) => userLecture.learner)
   userLectures: UserLecture[];
+
+  @OneToMany(() => Device, (device) => device.learner)
+  devices: Device[];
 
   @ManyToOne(() => User, (user) => user.learners)
   @JoinColumn({ name: 'userId' })
