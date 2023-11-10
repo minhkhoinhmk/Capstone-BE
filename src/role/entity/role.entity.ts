@@ -15,7 +15,7 @@ import { Learner } from 'src/learner/entity/learner.entity';
 
 @Entity()
 export class Role {
-  @ApiProperty({ type: UUID, description: 'UUIDe of the role' })
+  @ApiProperty({ type: UUID, description: 'UUID of the role' })
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
