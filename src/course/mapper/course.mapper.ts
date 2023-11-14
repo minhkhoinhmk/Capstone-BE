@@ -2,6 +2,7 @@ import { Mapper, Mappings } from 'ts-mapstruct';
 import { Course } from '../entity/course.entity';
 import { FilterCourseByCustomerResponse } from '../dto/reponse/filter-by-customer.dto';
 import { FilterCourseByLearnerResponse } from '../dto/reponse/filter-by-learner.dto';
+import { FilterCourseByInstructorResponse } from '../dto/reponse/filter-by-instructor.dto';
 
 @Mapper()
 export class CourseMapper {
@@ -18,5 +19,12 @@ export class CourseMapper {
     percent: number,
   ): FilterCourseByLearnerResponse {
     return new FilterCourseByLearnerResponse();
+  }
+
+  @Mappings()
+  filterCourseByInstructorResponseFromCourse(
+    course: Course,
+  ): FilterCourseByInstructorResponse {
+    return new FilterCourseByInstructorResponse();
   }
 }
