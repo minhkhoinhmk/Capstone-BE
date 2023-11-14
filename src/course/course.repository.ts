@@ -109,4 +109,32 @@ export class CourseRepository {
   async saveCourse(course: Course): Promise<Course> {
     return this.courseRepository.save(course);
   }
+
+  async getCoursesByInstructorId(
+    instructorId: string,
+    pageOptionsDto: PageOptionsDto,
+  ): Promise<{ count: number; entities: Course[] }> {
+    const entities = await this.courseRepository.find({
+      where: {
+        user: {
+          id: instructorId,
+        },
+      },
+      relations: {
+        user: true,
+      },
+      skip: (pageOptionsDto.page - 1) * pageOptionsDto.take,
+      take: pageOptionsDto.take,
+    });
+
+    const count = await this.courseRepository.count({
+      where: {
+        user: {
+          id: instructorId,
+        },
+      },
+    });
+
+    return { count: count, entities: entities };
+  }
 }

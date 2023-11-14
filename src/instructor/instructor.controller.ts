@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Param,
   Post,
   Query,
   Req,
@@ -18,6 +19,9 @@ import { AuthGuard } from '@nestjs/passport';
 import { RolesGuard } from 'src/auth/role.guard';
 import { HasRoles } from 'src/auth/roles.decorator';
 import { NameRole } from 'src/role/enum/name-role.enum';
+import { PageOptionsDto } from 'src/common/pagination/dto/pageOptionsDto';
+import { PageDto } from 'src/common/pagination/dto/pageDto';
+import { FilterCourseByInstructorResponse } from 'src/course/dto/reponse/filter-by-instructor.dto';
 
 @Controller('instructor')
 @ApiTags('Intstructor')
@@ -83,5 +87,18 @@ export class InstructorController {
         courseId,
       );
     }
+  }
+
+  @UseGuards(AuthGuard(), RolesGuard)
+  @HasRoles(NameRole.Instructor)
+  @Post('/course/own')
+  getRefundsByCsutomerId(
+    @Body() pageOption: PageOptionsDto,
+    @Req() request: Request,
+  ): Promise<PageDto<FilterCourseByInstructorResponse>> {
+    return this.instructorService.getCoursesByInstructorId(
+      request['user']['id'],
+      pageOption,
+    );
   }
 }

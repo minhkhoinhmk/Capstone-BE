@@ -15,6 +15,11 @@ import { Course } from 'src/course/entity/course.entity';
 import { CourseRepository } from 'src/course/course.repository';
 import { DeviceRepository } from 'src/device/device.repository';
 import { NameRole } from 'src/role/enum/name-role.enum';
+import { PageOptionsDto } from 'src/common/pagination/dto/pageOptionsDto';
+import { PageDto } from 'src/common/pagination/dto/pageDto';
+import { FilterCourseByInstructorResponse } from 'src/course/dto/reponse/filter-by-instructor.dto';
+import { CourseMapper } from 'src/course/mapper/course.mapper';
+import { PageMetaDto } from 'src/common/pagination/dto/pageMetaDto';
 
 @Injectable()
 export class InstructorService {
@@ -28,6 +33,7 @@ export class InstructorService {
     private readonly levelRepository: LevelRepository,
     private readonly courseRepository: CourseRepository,
     private readonly deviceRepository: DeviceRepository,
+    private readonly courseMapper: CourseMapper,
   ) {}
 
   async uploadCertification(
@@ -129,5 +135,32 @@ export class InstructorService {
     } catch (error) {
       this.logger.log(`method=uploadThumbnail, error: ${error.message}`);
     }
+  }
+
+  async getCoursesByInstructorId(
+    id: string,
+    pageOption: PageOptionsDto,
+  ): Promise<PageDto<FilterCourseByInstructorResponse>> {
+    const { count, entities } =
+      await this.courseRepository.getCoursesByInstructorId(id, pageOption);
+
+    let responses: FilterCourseByInstructorResponse[] = [];
+
+    for (const course of entities) {
+      responses.push(
+        this.courseMapper.filterCourseByInstructorResponseFromCourse(course),
+      );
+    }
+
+    const itemCount = count;
+
+    const pageMetaDto = new PageMetaDto({
+      itemCount,
+      pageOptionsDto: pageOption,
+    });
+
+    this.logger.log(`method=getCoursesByInstructorId, totalItems=${count}`);
+
+    return new PageDto(responses, pageMetaDto);
   }
 }
