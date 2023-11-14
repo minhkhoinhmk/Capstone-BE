@@ -25,6 +25,16 @@ export class OrderDetailRepository {
     return await this.orderDetailRepository.remove(orderDetail);
   }
 
+  async getOrderDetailById(id: string) {
+    return this.orderDetailRepository.findOne({
+      where: { id: id },
+      relations: {
+        order: { user: true },
+        course: true,
+      },
+    });
+  }
+
   // async createAndSaveCart(user: User) {
   //   const cart = await this.createCart(user);
   //   return this.saveCart(cart);

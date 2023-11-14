@@ -43,6 +43,20 @@ export class UserLectureRepository {
     return userLecture;
   }
 
+  async checkChapterLectureIsCompletedForRefund(
+    chapterLectureId: string,
+    userId: string,
+  ): Promise<UserLecture> {
+    const userLecture = await this.userLectureRepository.findOne({
+      where: {
+        chapterLecture: { id: chapterLectureId },
+        learner: { user: { id: userId } },
+      },
+    });
+
+    return userLecture;
+  }
+
   async createCompletedUserLecture(
     learner: Learner,
     user: User,

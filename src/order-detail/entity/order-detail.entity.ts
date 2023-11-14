@@ -3,13 +3,14 @@ import {
   Entity,
   JoinColumn,
   ManyToOne,
+  OneToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { Course } from 'src/course/entity/course.entity';
-import { Combo } from 'src/combo/entity/combo.entity';
 import { PromotionCourse } from 'src/promotion-course/entity/promotion-course.entity';
 import { Order } from 'src/order/entity/order.entity';
 import { ApiProperty } from '@nestjs/swagger';
+import { Refund } from 'src/refund/entity/refund.entity';
 
 @Entity()
 export class OrderDetail {
@@ -65,4 +66,7 @@ export class OrderDetail {
   )
   @JoinColumn({ name: 'promotionCourseId' })
   promotionCourse: PromotionCourse | null;
+
+  @OneToOne(() => Refund, (refund) => refund.orderDetail)
+  refund: Refund;
 }
