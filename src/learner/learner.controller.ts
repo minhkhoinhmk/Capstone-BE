@@ -21,7 +21,6 @@ import { HasRoles } from 'src/auth/roles.decorator';
 import { NameRole } from 'src/role/enum/name-role.enum';
 import { Request } from 'express';
 import { FilterLearnerByUserResponse } from './dto/response/filter-by-user.dto';
-import { FilterCourseByCustomerResponse } from 'src/course/dto/reponse/filter-by-customer.dto';
 import { ApiPaginatedResponse } from 'src/common/decorator/api-pagination-response';
 import { PageOptionsDto } from 'src/common/pagination/dto/pageOptionsDto';
 import { PageDto } from 'src/common/pagination/dto/pageDto';

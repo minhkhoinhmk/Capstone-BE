@@ -13,12 +13,10 @@ import { FilterLearnerByUserResponse } from './dto/response/filter-by-user.dto';
 import { LearnerCourseRepository } from 'src/learner-course/learner-course.repository';
 import { CourseMapper } from 'src/course/mapper/course.mapper';
 import { CourseRepository } from 'src/course/course.repository';
-import { FilterCourseByCustomerResponse } from 'src/course/dto/reponse/filter-by-customer.dto';
 import { PageOptionsDto } from 'src/common/pagination/dto/pageOptionsDto';
 import { PageDto } from 'src/common/pagination/dto/pageDto';
 import { PageMetaDto } from 'src/common/pagination/dto/pageMetaDto';
 import { UserLectureRepository } from 'src/user-lecture/user-lecture.repository';
-import { response } from 'express';
 import { FilterCourseByLearnerResponse } from 'src/course/dto/reponse/filter-by-learner.dto';
 
 @Injectable()
