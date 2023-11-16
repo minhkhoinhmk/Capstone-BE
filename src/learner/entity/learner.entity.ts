@@ -1,4 +1,5 @@
 import { CourseFeedback } from 'src/course-feedback/entity/course-feedbacl.entity';
+import { CourseReport } from 'src/course-report/entity/course-report.entity';
 import { Device } from 'src/device/entity/device.entity';
 import { LearnerCourse } from 'src/learner-course/entity/learner-course.entity';
 import { Role } from 'src/role/entity/role.entity';
@@ -62,6 +63,9 @@ export class Learner {
 
   @OneToMany(() => Device, (device) => device.learner)
   devices: Device[];
+
+  @OneToMany(() => CourseReport, (courseReport) => courseReport.learner)
+  courseReports: CourseReport[];
 
   @ManyToOne(() => User, (user) => user.learners)
   @JoinColumn({ name: 'userId' })

@@ -46,6 +46,7 @@ import { NotificationModule } from './notification/notification.module';
 import { DynamodbModule } from './dynamodb/dynamodb.module';
 import { DeviceModule } from './device/device.module';
 import { RefundModule } from './refund/refund.module';
+import { CourseReportModule } from './course-report/course-report.module';
 
 @Global()
 @Module({
@@ -143,6 +144,7 @@ import { RefundModule } from './refund/refund.module';
     DynamodbModule,
     DeviceModule,
     RefundModule,
+    CourseReportModule,
   ],
 })
 export class AppModule {}
