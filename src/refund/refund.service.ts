@@ -148,9 +148,11 @@ export class RefundService {
 
   async getRefunds(
     pageOption: PageOptionsDto,
+    isApproved: boolean,
   ): Promise<PageDto<RefundResponse>> {
     const { count, entities } = await this.refundRepository.getRefunds(
       pageOption,
+      isApproved,
     );
 
     const responses: RefundResponse[] = [];
@@ -207,5 +209,13 @@ export class RefundService {
     this.logger.log(`method=getRefundByCustomerId, totalItems=${count}`);
 
     return new PageDto(responses, pageMetaDto);
+  }
+
+  async approveRefund(id: string): Promise<void> {
+    const refund = await this.refundRepository.getRefundById(id);
+
+    refund.isApproved = true;
+
+    this.refundRepository.saveRefund(refund);
   }
 }

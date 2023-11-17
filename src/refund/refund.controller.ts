@@ -56,12 +56,13 @@ export class RefundController {
 
   @Post()
   @UseGuards(AuthGuard(), RolesGuard)
-  @HasRoles(NameRole.Customer, NameRole.Admin)
+  @HasRoles(NameRole.Staff)
   @ApiPaginatedResponse(RefundResponse)
   getRefunds(
     @Body() pageOption: PageOptionsDto,
+    @Query('isApproved') isApproved: boolean,
   ): Promise<PageDto<RefundResponse>> {
-    return this.refundService.getRefunds(pageOption);
+    return this.refundService.getRefunds(pageOption, isApproved);
   }
 
   @ApiOkResponse({
@@ -85,5 +86,12 @@ export class RefundController {
     @Param('id') id: string,
   ): Promise<PageDto<RefundResponse>> {
     return this.refundService.getRefundByCustomerId(id, pageOption);
+  }
+
+  @UseGuards(AuthGuard(), RolesGuard)
+  @HasRoles(NameRole.Staff)
+  @Get('/approve/:id')
+  approveRefund(@Param('id') id: string): Promise<void> {
+    return this.refundService.approveRefund(id);
   }
 }
