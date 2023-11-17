@@ -1,4 +1,4 @@
-import { Controller, Get, Param } from '@nestjs/common';
+import { Controller, Get, Param, Query } from '@nestjs/common';
 import { Category } from './entity/category.entity';
 import { CategoryService } from './category.service';
 import { CategoryDto } from './dto/response/category.dto';
@@ -10,8 +10,8 @@ export class CategoryController {
   constructor(private categoryService: CategoryService) {}
 
   @Get()
-  findAll(): Promise<CategoryDto[]> {
-    return this.categoryService.getAllcategories();
+  findAll(@Query('active') active: string): Promise<CategoryDto[]> {
+    return this.categoryService.getAllcategories(active);
   }
 
   @Get(':id')

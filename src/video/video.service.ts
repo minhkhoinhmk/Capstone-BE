@@ -11,6 +11,9 @@ import { ConfigService } from '@nestjs/config';
 import { S3Service } from 'src/s3/s3.service';
 import { v4 as uuidv4 } from 'uuid';
 import { COURSE_PATH } from 'src/common/s3/s3.constants';
+import getVideoDurationInSeconds from 'get-video-duration';
+import { createReadStream } from 'fs';
+import { Readable } from 'stream';
 
 @Injectable()
 export class VideoService {
@@ -104,5 +107,14 @@ export class VideoService {
       `${COURSE_PATH}${uuid}.${substringAfterDot}`,
       type,
     );
+  }
+
+  async getVideoDuration(file: Express.Multer.File): Promise<number> {
+    const stream = new Readable();
+    stream.push(file.buffer);
+    stream.push(null); // End the stream
+
+    const duration = await getVideoDurationInSeconds(stream);
+    return duration;
   }
 }

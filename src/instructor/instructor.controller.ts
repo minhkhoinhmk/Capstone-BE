@@ -22,6 +22,7 @@ import { NameRole } from 'src/role/enum/name-role.enum';
 import { PageOptionsDto } from 'src/common/pagination/dto/pageOptionsDto';
 import { PageDto } from 'src/common/pagination/dto/pageDto';
 import { FilterCourseByInstructorResponse } from 'src/course/dto/reponse/filter-by-instructor.dto';
+import { Request } from 'express';
 
 @Controller('instructor')
 @ApiTags('Intstructor')
@@ -30,7 +31,7 @@ export class InstructorController {
 
   @Post('/certifications/upload')
   @UseInterceptors(FileInterceptor('file'))
-  async addAvatar(
+  async uploadCertificate(
     @Req() request: any,
     @UploadedFile() file: Express.Multer.File,
     @Query('email') email: string,
@@ -92,7 +93,7 @@ export class InstructorController {
   @UseGuards(AuthGuard(), RolesGuard)
   @HasRoles(NameRole.Instructor)
   @Post('/course/own')
-  getRefundsByCsutomerId(
+  getCoursesByInstructor(
     @Body() pageOption: PageOptionsDto,
     @Req() request: Request,
   ): Promise<PageDto<FilterCourseByInstructorResponse>> {

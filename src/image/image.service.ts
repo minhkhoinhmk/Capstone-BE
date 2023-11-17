@@ -13,7 +13,7 @@ export class ImageService {
 
   async getImage(path: string) {
     try {
-      var options = {
+      const options = {
         Bucket: this.configService.get('AWS_S3_PUBLIC_BUCKET_NAME'),
         Key: path,
       };

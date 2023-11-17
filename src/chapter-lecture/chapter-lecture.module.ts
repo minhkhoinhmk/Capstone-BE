@@ -9,6 +9,10 @@ import { ChapterLectureMapper } from './mapper/chapter-lecture.mapper';
 import { AuthModule } from 'src/auth/auth.module';
 import { LearnerModule } from 'src/learner/learner.module';
 import { UserModule } from 'src/user/user.module';
+import { CourseModule } from 'src/course/course.module';
+import { S3Module } from 'src/s3/s3.module';
+import { ConfigModule } from '@nestjs/config';
+import { VideoModule } from 'src/video/video.module';
 
 @Module({
   imports: [
@@ -17,6 +21,10 @@ import { UserModule } from 'src/user/user.module';
     forwardRef(() => AuthModule),
     forwardRef(() => LearnerModule),
     UserModule,
+    CourseModule,
+    S3Module,
+    ConfigModule,
+    VideoModule,
   ],
   providers: [
     ChapterLectureService,

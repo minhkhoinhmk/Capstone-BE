@@ -20,6 +20,7 @@ import { PageDto } from 'src/common/pagination/dto/pageDto';
 import { FilterCourseByInstructorResponse } from 'src/course/dto/reponse/filter-by-instructor.dto';
 import { CourseMapper } from 'src/course/mapper/course.mapper';
 import { PageMetaDto } from 'src/common/pagination/dto/pageMetaDto';
+import { CourseStatus } from 'src/course/type/enum/CourseStatus';
 
 @Injectable()
 export class InstructorService {
@@ -98,10 +99,12 @@ export class InstructorService {
       const instructor = await this.userRepository.getUserById(userId);
 
       const course = new Course();
-      (course.title = createCourseRequest.title),
-        (course.level = level),
-        (course.category = category);
+      course.title = createCourseRequest.title;
+      course.level = level;
+      course.category = category;
       course.user = instructor;
+      course.active = false;
+      course.status = CourseStatus.PENDING;
 
       this.logger.log(`method=createCourse, created course successfully`);
 
@@ -124,14 +127,16 @@ export class InstructorService {
     try {
       const key = `${COURSE_THUMBNAIL_PATH}${courseId}.${substringAfterDot}`;
 
-      let course = await this.courseRepository.getCourseById(courseId);
+      const course = await this.courseRepository.getCourseById(courseId);
       course.thumbnailUrl = key;
 
       await this.courseRepository.saveCourse(course);
 
       await this.s3Service.putObject(buffer, key, type);
 
-      this.logger.log(`method=uploadThumbnail, uploaed thumbnail successfully`);
+      this.logger.log(
+        `method=uploadThumbnail, uploaded thumbnail successfully`,
+      );
     } catch (error) {
       this.logger.log(`method=uploadThumbnail, error: ${error.message}`);
     }
@@ -144,7 +149,7 @@ export class InstructorService {
     const { count, entities } =
       await this.courseRepository.getCoursesByInstructorId(id, pageOption);
 
-    let responses: FilterCourseByInstructorResponse[] = [];
+    const responses: FilterCourseByInstructorResponse[] = [];
 
     for (const course of entities) {
       responses.push(

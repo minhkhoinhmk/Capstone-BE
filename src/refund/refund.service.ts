@@ -153,7 +153,7 @@ export class RefundService {
       pageOption,
     );
 
-    let responses: RefundResponse[] = [];
+    const responses: RefundResponse[] = [];
 
     for (const refund of entities) {
       responses.push(this.refundMapper.filterRefundResponseFromRefund(refund));
@@ -191,7 +191,7 @@ export class RefundService {
     const { count, entities } =
       await this.refundRepository.getRefundByCustomerId(id, pageOption);
 
-    let responses: RefundResponse[] = [];
+    const responses: RefundResponse[] = [];
 
     for (const refund of entities) {
       responses.push(this.refundMapper.filterRefundResponseFromRefund(refund));

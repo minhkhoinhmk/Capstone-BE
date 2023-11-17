@@ -22,6 +22,7 @@ import { UserLecture } from 'src/user-lecture/entity/user-lecture.entity';
 import { Exclude } from 'class-transformer';
 import { Device } from 'src/device/entity/device.entity';
 import { CourseReport } from 'src/course-report/entity/course-report.entity';
+import { QuestionTopic } from 'src/question-topic/entity/question-topic.entity';
 
 @Entity()
 export class User {
@@ -119,4 +120,7 @@ export class User {
 
   @OneToMany(() => Device, (device) => device.user)
   devices: Device[];
+
+  @OneToMany(() => QuestionTopic, (questionTopic) => questionTopic.user)
+  questionTopics: QuestionTopic[];
 }

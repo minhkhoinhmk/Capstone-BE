@@ -12,9 +12,9 @@ export class CategoryRepository {
     private categoryRepository: Repository<Category>,
   ) {}
 
-  async getAllCategories() {
+  async getAllCategories(active: boolean) {
     return this.categoryRepository.find({
-      where: { active: true },
+      where: { active },
       relations: { courses: true },
     });
   }

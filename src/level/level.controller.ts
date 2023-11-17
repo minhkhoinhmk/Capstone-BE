@@ -1,4 +1,4 @@
-import { Controller, Get, Param } from '@nestjs/common';
+import { Controller, Get, Param, Query } from '@nestjs/common';
 import Level from './entity/level.entity';
 import { LevelService } from './level.service';
 import { ApiTags } from '@nestjs/swagger';
@@ -9,8 +9,8 @@ export class LevelController {
   constructor(private levelService: LevelService) {}
 
   @Get()
-  findAll(): Promise<Level[]> {
-    return this.levelService.getAllLevels();
+  findAll(@Query('active') active: string): Promise<Level[]> {
+    return this.levelService.getAllLevels(active);
   }
 
   @Get(':id')

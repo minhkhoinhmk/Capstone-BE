@@ -6,9 +6,9 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { AuthModule } from 'src/auth/auth.module';
 
 @Module({
+  imports: [ConfigModule, AuthModule],
   providers: [DynamodbService, DynamodbRepository, ConfigService],
   controllers: [DynamodbController],
-  imports: [ConfigModule, AuthModule],
   exports: [DynamodbService],
 })
 export class DynamodbModule {}

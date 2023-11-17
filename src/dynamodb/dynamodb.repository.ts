@@ -57,7 +57,7 @@ export class DynamodbRepository {
   }
 
   async findByUserId(userId: string): Promise<Notification[]> {
-    let results: Notification[] = [];
+    const results: Notification[] = [];
 
     const command = new QueryCommand({
       TableName: this.tableName,

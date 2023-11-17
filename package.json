@@ -44,6 +44,7 @@
     "crypto": "^1.0.1",
     "deep-email-validator": "^0.1.21",
     "firebase-admin": "^11.11.0",
+    "get-video-duration": "^4.1.0",
     "hbs": "^4.2.0",
     "luxon": "^3.4.3",
     "nestjs-typeorm-paginate": "^4.0.4",

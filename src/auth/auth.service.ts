@@ -38,7 +38,7 @@ export class AuthService {
   async loginForGuest(guestLoginRequest: GuestLoginRequest): Promise<Token> {
     const { emailOrUsername, password } = guestLoginRequest;
 
-    const valid = await validator.default.isEmail(emailOrUsername);
+    const valid = validator.default.isEmail(emailOrUsername);
 
     let user;
     if (valid) {

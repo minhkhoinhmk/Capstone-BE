@@ -19,6 +19,7 @@ import {
   OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
+import { CourseStatus } from '../type/enum/CourseStatus';
 
 @Entity()
 export class Course {
@@ -48,7 +49,7 @@ export class Course {
 
   @Column({ nullable: true })
   @Expose()
-  status: string;
+  status: CourseStatus;
 
   @Column({ nullable: true })
   @Expose()

@@ -2,6 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ChapterLecture } from './entity/chapter-lecture.entity';
 import { Repository } from 'typeorm';
+import { Course } from 'src/course/entity/course.entity';
 
 @Injectable()
 export class ChapterLectureRepository {
@@ -30,5 +31,18 @@ export class ChapterLectureRepository {
     });
 
     return chapterLecture;
+  }
+
+  async saveChapterLecture(chapterLecture: ChapterLecture) {
+    return this.chapterLectureRepository.save(chapterLecture);
+  }
+
+  async getChapterLectureByIndex(index: number, course: Course) {
+    return this.chapterLectureRepository.findOne({
+      where: {
+        index,
+        course,
+      },
+    });
   }
 }

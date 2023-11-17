@@ -9,6 +9,7 @@ import { UserService } from './user.service';
 import { LearnerModule } from 'src/learner/learner.module';
 import { RoleModule } from 'src/role/role.module';
 import { AuthModule } from 'src/auth/auth.module';
+import { S3Module } from 'src/s3/s3.module';
 
 @Module({
   imports: [
@@ -16,6 +17,7 @@ import { AuthModule } from 'src/auth/auth.module';
     forwardRef(() => AuthModule),
     forwardRef(() => LearnerModule),
     RoleModule,
+    S3Module,
   ],
   providers: [UserRepository, JwtStorerRepository, UserService],
   controllers: [UserController],
