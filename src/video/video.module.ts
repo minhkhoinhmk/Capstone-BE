@@ -8,5 +8,6 @@ import { S3Module } from 'src/s3/s3.module';
   providers: [VideoService, ConfigService],
   controllers: [VideoController],
   imports: [ConfigModule, S3Module],
+  exports: [VideoService],
 })
 export class VideoModule {}

@@ -10,6 +10,7 @@ import { CourseReport } from './entity/course-report.entity';
 import { PageOptionsDto } from 'src/common/pagination/dto/pageOptionsDto';
 import { PageDto } from 'src/common/pagination/dto/pageDto';
 import { CourseReportResponse } from './dto/response/report-reponse.dto';
+import { Request } from 'express';
 
 @Controller('course-report')
 @ApiTags('Course Report')

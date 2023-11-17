@@ -3,7 +3,6 @@ import {
   Controller,
   Get,
   Param,
-  Patch,
   Post,
   Req,
   UseGuards,
@@ -19,7 +18,6 @@ import { AuthGuard } from '@nestjs/passport';
 import { RolesGuard } from 'src/auth/role.guard';
 import { HasRoles } from 'src/auth/roles.decorator';
 import { NameRole } from 'src/role/enum/name-role.enum';
-import { Course } from './entity/course.entity';
 import { FilterCourseByCustomerResponse } from './dto/reponse/filter-by-customer.dto';
 import { User } from 'src/user/entity/user.entity';
 import { Request } from 'express';

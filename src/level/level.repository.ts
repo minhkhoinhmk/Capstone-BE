@@ -12,8 +12,8 @@ export class LevelRepository {
     private levelRepository: Repository<Level>,
   ) {}
 
-  async getAllLevels() {
-    return this.levelRepository.find({});
+  async getAllLevels(active: boolean) {
+    return this.levelRepository.find({ where: { active } });
   }
 
   async getLevelById(id: string) {

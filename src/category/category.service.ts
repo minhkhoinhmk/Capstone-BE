@@ -9,9 +9,11 @@ export class CategoryService {
 
   constructor(private categoryRepository: CategoryRepository) {}
 
-  async getAllcategories(): Promise<CategoryDto[]> {
+  async getAllcategories(active: string): Promise<CategoryDto[]> {
     const categoriesDto: CategoryDto[] = [];
-    const categories = await this.categoryRepository.getAllCategories();
+    const categories = await this.categoryRepository.getAllCategories(
+      active === 'true' ? true : false,
+    );
     categories.forEach((category) => {
       const categoryDto = this.configCategoryDto(category);
       categoriesDto.push(categoryDto);

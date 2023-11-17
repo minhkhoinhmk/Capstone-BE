@@ -44,7 +44,7 @@ export class VideoController {
 
   @Post()
   @UseInterceptors(FileInterceptor('file'))
-  async addAvatar(
+  async uploadVideo(
     @Req() request: any,
     @UploadedFile() file: Express.Multer.File,
   ) {

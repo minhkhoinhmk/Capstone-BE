@@ -1,7 +1,7 @@
 import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import { Course } from './entity/course.entity';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { FindOptionsWhere, Repository } from 'typeorm';
 import { PageOptionsDto } from 'src/common/pagination/dto/pageOptionsDto';
 import SortField from './type/enum/SortField';
 import Level from 'src/level/entity/level.entity';
@@ -114,12 +114,14 @@ export class CourseRepository {
     instructorId: string,
     pageOptionsDto: PageOptionsDto,
   ): Promise<{ count: number; entities: Course[] }> {
-    const entities = await this.courseRepository.find({
-      where: {
-        user: {
-          id: instructorId,
-        },
+    const whereOptions: FindOptionsWhere<Course> = {
+      user: {
+        id: instructorId,
       },
+    };
+
+    const entities = await this.courseRepository.find({
+      where: whereOptions,
       relations: {
         user: true,
       },
@@ -128,11 +130,7 @@ export class CourseRepository {
     });
 
     const count = await this.courseRepository.count({
-      where: {
-        user: {
-          id: instructorId,
-        },
-      },
+      where: whereOptions,
     });
 
     return { count: count, entities: entities };

@@ -8,8 +8,8 @@ export class LevelService {
 
   constructor(private levelRepository: LevelRepository) {}
 
-  async getAllLevels(): Promise<Level[]> {
-    return this.levelRepository.getAllLevels();
+  async getAllLevels(active: string): Promise<Level[]> {
+    return this.levelRepository.getAllLevels(active === 'true' ? true : false);
   }
 
   async getLevelById(id: string): Promise<Level> {

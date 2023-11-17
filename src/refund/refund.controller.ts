@@ -54,10 +54,10 @@ export class RefundController {
     return this.refundService.createRefund(request, orderDetailId);
   }
 
-  @ApiPaginatedResponse(RefundResponse)
+  @Post()
   @UseGuards(AuthGuard(), RolesGuard)
   @HasRoles(NameRole.Customer, NameRole.Admin)
-  @Post()
+  @ApiPaginatedResponse(RefundResponse)
   getRefunds(
     @Body() pageOption: PageOptionsDto,
   ): Promise<PageDto<RefundResponse>> {

@@ -8,6 +8,10 @@ export class LearnerChapterResponse {
 
   @ApiProperty()
   @Expose()
+  index: number;
+
+  @ApiProperty()
+  @Expose()
   title: string;
 
   @ApiProperty()

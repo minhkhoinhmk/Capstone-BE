@@ -47,6 +47,8 @@ import { DynamodbModule } from './dynamodb/dynamodb.module';
 import { DeviceModule } from './device/device.module';
 import { RefundModule } from './refund/refund.module';
 import { CourseReportModule } from './course-report/course-report.module';
+import { QuestionTopicModule } from './question-topic/question-topic.module';
+import { QuestionTopic } from './question-topic/entity/question-topic.entity';
 
 @Global()
 @Module({
@@ -87,6 +89,7 @@ import { CourseReportModule } from './course-report/course-report.module';
             Order,
             OrderDetail,
             PaymentMethod,
+            QuestionTopic,
           ],
         };
       },
@@ -145,6 +148,7 @@ import { CourseReportModule } from './course-report/course-report.module';
     DeviceModule,
     RefundModule,
     CourseReportModule,
+    QuestionTopicModule,
   ],
 })
 export class AppModule {}

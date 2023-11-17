@@ -2,18 +2,10 @@ import {
   ConflictException,
   Injectable,
   Logger,
-  NotFoundException,
-  UnauthorizedException,
   BadRequestException,
 } from '@nestjs/common';
-import { JwtService } from '@nestjs/jwt';
-import { NameRole } from 'src/role/enum/name-role.enum';
-import { MailerService } from '@nestjs-modules/mailer';
-import { Cron, CronExpression } from '@nestjs/schedule';
 import { RoleRepository } from 'src/role/role.repository';
 import * as bcrypt from 'bcrypt';
-import * as validator from 'validator';
-import { JwtStorerRepository } from 'src/user/jwt-store.repository';
 import { UserRepository } from 'src/user/user.repository';
 import { LearnerRepository } from 'src/learner/learner.repository';
 import { UserUpdateRequest } from './dto/request/user-update.request.dto';
@@ -21,12 +13,15 @@ import { LearnerService } from 'src/learner/learner.service';
 import { User } from './entity/user.entity';
 import { UserChangePasswordRequest } from './dto/request/user-change-password.request.dto';
 import { hashPassword } from 'src/utils/hash-password.util';
+import { USER_AVATAR_PATH } from 'src/common/s3/s3.constants';
+import { S3Service } from 'src/s3/s3.service';
 
 @Injectable()
 export class UserService {
   private logger = new Logger('UserService', { timestamp: true });
 
   constructor(
+    private readonly s3Service: S3Service,
     private userRepository: UserRepository,
     // private mailsService: MailerService,
     // private jwtService: JwtService,
@@ -72,5 +67,28 @@ export class UserService {
 
   async getUserProfile(user: User) {
     return user;
+  }
+
+  async uploadAvatar(
+    buffer: Buffer,
+    type: string,
+    substringAfterDot: string,
+    user: User,
+  ): Promise<void> {
+    try {
+      const key = `${USER_AVATAR_PATH}${user.id}${substringAfterDot}`;
+
+      user.avatar = key;
+
+      await this.userRepository.save(user);
+
+      await this.s3Service.putObject(buffer, key, type);
+
+      this.logger.log(
+        `method=uploadAvatar, uploaded avatar user successfully uploaded`,
+      );
+    } catch (error) {
+      this.logger.log(`method=uploadThumbnail, error:${error.message}`);
+    }
   }
 }

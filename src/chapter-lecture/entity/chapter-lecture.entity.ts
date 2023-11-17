@@ -1,13 +1,17 @@
+import { ApiProperty } from '@nestjs/swagger';
 import { Expose } from 'class-transformer';
 import { Course } from 'src/course/entity/course.entity';
+import { QuestionTopic } from 'src/question-topic/entity/question-topic.entity';
 import { UserLecture } from 'src/user-lecture/entity/user-lecture.entity';
 import {
   Column,
+  CreateDateColumn,
   Entity,
   JoinColumn,
   ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn,
+  UpdateDateColumn,
 } from 'typeorm';
 
 @Entity()
@@ -15,6 +19,10 @@ export class ChapterLecture {
   @PrimaryGeneratedColumn('uuid')
   @Expose()
   id: string;
+
+  @Column({ nullable: true })
+  @Expose()
+  index: number;
 
   @Column()
   @Expose()
@@ -24,27 +32,27 @@ export class ChapterLecture {
   @Expose()
   description: string;
 
-  @Column()
-  @Expose()
+  @ApiProperty({ type: Date, description: 'Inserted date' })
+  @CreateDateColumn()
   insertedDate: Date;
 
-  @Column()
-  @Expose()
+  @ApiProperty({ type: Date, description: 'Updated date' })
+  @UpdateDateColumn()
   updatedDate: Date;
 
   @Column()
   @Expose()
   status: string;
 
-  @Column()
+  @Column({ nullable: true })
   @Expose()
   resource: string;
 
-  @Column()
+  @Column({ nullable: true })
   @Expose()
   video: string;
 
-  @Column()
+  @Column({ nullable: true })
   @Expose()
   totalContentLength: number;
 
@@ -62,4 +70,10 @@ export class ChapterLecture {
 
   @OneToMany(() => UserLecture, (userLecture) => userLecture.chapterLecture)
   userLectures: UserLecture[];
+
+  @OneToMany(
+    () => QuestionTopic,
+    (questionTopic) => questionTopic.chapterLecture,
+  )
+  questionTopics: QuestionTopic[];
 }
