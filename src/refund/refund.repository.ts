@@ -34,8 +34,10 @@ export class RefundRepository {
 
   async getRefunds(
     pageOptionsDto: PageOptionsDto,
+    isApproved: boolean,
   ): Promise<{ count: number; entities: Refund[] }> {
     const entities = await this.refundRepository.find({
+      where: { isApproved: isApproved },
       relations: {
         orderDetail: {
           course: true,
@@ -44,6 +46,7 @@ export class RefundRepository {
           },
         },
       },
+      order: { insertedDate: 'DESC' },
       skip: (pageOptionsDto.page - 1) * pageOptionsDto.take,
       take: pageOptionsDto.take,
     });
