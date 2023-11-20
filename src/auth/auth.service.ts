@@ -13,7 +13,7 @@ import { Token } from './dto/response/token.dto';
 import { NameRole } from 'src/role/enum/name-role.enum';
 import { CustomerRegisterResponse } from './dto/response/customer-register.response.dto';
 import { MailerService } from '@nestjs-modules/mailer';
-import { Cron, CronExpression } from '@nestjs/schedule';
+import { Cron } from '@nestjs/schedule';
 import { RoleRepository } from 'src/role/role.repository';
 import { GuestLoginRequest } from './dto/request/guest-login.request.dto';
 import * as bcrypt from 'bcrypt';

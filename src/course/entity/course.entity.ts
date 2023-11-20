@@ -71,6 +71,10 @@ export class Course {
   @Expose()
   active: boolean;
 
+  @Column({ nullable: true })
+  @Expose()
+  reason: string;
+
   @OneToMany(() => PromotionCourse, (promotionCourse) => promotionCourse.course)
   @Expose()
   promotionCourses: PromotionCourse[];

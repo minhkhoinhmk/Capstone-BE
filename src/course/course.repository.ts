@@ -4,12 +4,10 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { FindOptionsWhere, Repository } from 'typeorm';
 import { PageOptionsDto } from 'src/common/pagination/dto/pageOptionsDto';
 import SortField from './type/enum/SortField';
-import Level from 'src/level/entity/level.entity';
+import { CourseStatus } from './type/enum/CourseStatus';
 
 @Injectable()
 export class CourseRepository {
-  private logger = new Logger('CourseRepository', { timestamp: true });
-
   constructor(
     @InjectRepository(Course)
     private courseRepository: Repository<Course>,
@@ -74,6 +72,10 @@ export class CourseRepository {
       courseId: `${courseId}`,
     });
 
+    queryBuilder.andWhere('c.active = :active', {
+      active: true,
+    });
+
     queryBuilder.leftJoinAndSelect('c.promotionCourses', 'promotionCourses');
     queryBuilder.leftJoinAndSelect('promotionCourses.promotion', 'promotion');
     queryBuilder.leftJoinAndSelect('promotion.user', 'promotionUser');
@@ -102,7 +104,7 @@ export class CourseRepository {
   async getCourseById(id: string) {
     return this.courseRepository.findOne({
       where: { id },
-      relations: { cartItems: true, chapterLectures: true },
+      relations: { cartItems: true, chapterLectures: true, user: true },
     });
   }
 
@@ -131,6 +133,23 @@ export class CourseRepository {
 
     const count = await this.courseRepository.count({
       where: whereOptions,
+    });
+
+    return { count: count, entities: entities };
+  }
+
+  async getCourseForStaff(
+    pageOptionsDto: PageOptionsDto,
+    status: CourseStatus,
+  ): Promise<{ count: number; entities: Course[] }> {
+    const entities = await this.courseRepository.find({
+      where: { status: status },
+      skip: (pageOptionsDto.page - 1) * pageOptionsDto.take,
+      take: pageOptionsDto.take,
+    });
+
+    const count = await this.courseRepository.count({
+      where: { status: status },
     });
 
     return { count: count, entities: entities };

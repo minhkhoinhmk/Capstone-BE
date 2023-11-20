@@ -51,7 +51,9 @@ export class RefundRepository {
       take: pageOptionsDto.take,
     });
 
-    const count = await this.refundRepository.count();
+    const count = await this.refundRepository.count({
+      where: { isApproved: isApproved },
+    });
 
     return { count: count, entities: entities };
   }

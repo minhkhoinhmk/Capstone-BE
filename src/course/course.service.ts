@@ -1,4 +1,9 @@
-import { Injectable, Logger } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  Logger,
+  NotFoundException,
+} from '@nestjs/common';
 import { CourseRepository } from './course.repository';
 import { Course } from './entity/course.entity';
 import { SearchCourseReponse } from './dto/reponse/search-course-response.dto';
@@ -11,8 +16,12 @@ import { OrderRepository } from 'src/order/order.repository';
 import { FilterCourseByCustomerResponse } from './dto/reponse/filter-by-customer.dto';
 import { OrderDetail } from 'src/order-detail/entity/order-detail.entity';
 import { CourseMapper } from './mapper/course.mapper';
-import { Role } from 'src/role/entity/role.entity';
 import { User } from 'src/user/entity/user.entity';
+import { CourseStatus } from './type/enum/CourseStatus';
+import { FilterCourseByStaffResponse } from './dto/reponse/filter-by-staff.dt';
+import { PageOptionsDto } from 'src/common/pagination/dto/pageOptionsDto';
+import { SetStatusRequest } from './dto/request/set-status-request.dto';
+import { MailerService } from '@nestjs-modules/mailer';
 
 @Injectable()
 export class CourseService {
@@ -22,6 +31,7 @@ export class CourseService {
     private courseRepository: CourseRepository,
     private orderRepository: OrderRepository,
     private courserMapper: CourseMapper,
+    private mailsService: MailerService,
   ) {}
 
   async searchAndFilter(
@@ -57,44 +67,48 @@ export class CourseService {
   }
 
   async getDetail(courseId: string): Promise<CourseDetailResponse> {
-    const course = await this.courseRepository.getCourseDetailById(courseId);
+    try {
+      const course = await this.courseRepository.getCourseDetailById(courseId);
 
-    const totalLength = this.sumTotalLength(course)
-      ? this.sumTotalLength(course)
-      : 0;
-    const ratedStar = this.countRatedStar(course)
-      ? this.countRatedStar(course)
-      : 0;
-    const { sumDiscount, promotionCourseByStaffId } =
-      this.getDiscountOfStaff(course);
-    const discountPrice = course.price - course.price * (sumDiscount / 100);
+      const totalLength = this.sumTotalLength(course)
+        ? this.sumTotalLength(course)
+        : 0;
+      const ratedStar = this.countRatedStar(course)
+        ? this.countRatedStar(course)
+        : 0;
+      const { sumDiscount, promotionCourseByStaffId } =
+        this.getDiscountOfStaff(course);
+      const discountPrice = course.price - course.price * (sumDiscount / 100);
 
-    const response = {
-      id: course.id,
-      title: course.title,
-      description: course.description,
-      price: course.price,
-      discount: sumDiscount,
-      discountPrice: discountPrice,
-      promotionCourseByStaffId,
-      ratedStar: ratedStar,
-      authorId: course.user.id,
-      author: `${course.user.firstName} ${course.user.middleName} ${course.user.lastName}`,
-      categoryId: course.category.id,
-      category: course.category.name,
-      totalLength: totalLength,
-      shortDescription: course.shortDescription,
-      prepareMaterial: course.prepareMaterial,
-      status: course.status,
-      totalChapter: course.totalChapter,
-      publishedDate: course.publishedDate,
-      totalBought: course.totalBought,
-      thumbnailUrl: course.thumbnailUrl,
-      active: course.active,
-      level: course.level.name,
-    };
+      const response = {
+        id: course.id,
+        title: course.title,
+        description: course.description,
+        price: course.price,
+        discount: sumDiscount,
+        discountPrice: discountPrice,
+        promotionCourseByStaffId,
+        ratedStar: ratedStar,
+        authorId: course.user.id,
+        author: `${course.user.firstName} ${course.user.middleName} ${course.user.lastName}`,
+        categoryId: course.category.id,
+        category: course.category.name,
+        totalLength: totalLength,
+        shortDescription: course.shortDescription,
+        prepareMaterial: course.prepareMaterial,
+        status: course.status,
+        totalChapter: course.totalChapter,
+        publishedDate: course.publishedDate,
+        totalBought: course.totalBought,
+        thumbnailUrl: course.thumbnailUrl,
+        active: course.active,
+        level: course.level.name,
+      };
 
-    return response;
+      return response;
+    } catch (error) {
+      throw new NotFoundException(`Course with id: ${courseId} was banned`);
+    }
   }
 
   countRatedStar(course: Course): number {
@@ -224,5 +238,80 @@ export class CourseService {
       });
 
     return { status };
+  }
+
+  async getCoursesForStaff(
+    pageOption: PageOptionsDto,
+    status: CourseStatus,
+  ): Promise<PageDto<FilterCourseByStaffResponse>> {
+    const { count, entities } = await this.courseRepository.getCourseForStaff(
+      pageOption,
+      status,
+    );
+
+    const responses: FilterCourseByStaffResponse[] = [];
+
+    for (const course of entities) {
+      responses.push(
+        this.courserMapper.filterCourseByStaffResponseFromCourse(course),
+      );
+    }
+
+    const itemCount = count;
+
+    const pageMetaDto = new PageMetaDto({
+      itemCount,
+      pageOptionsDto: pageOption,
+    });
+
+    this.logger.log(`method=getCoursesForStaff, totalItems=${count}`);
+
+    return new PageDto(responses, pageMetaDto);
+  }
+
+  async setStatusForCourse(request: SetStatusRequest): Promise<void> {
+    const course = await this.courseRepository.getCourseById(request.courseId);
+
+    if (
+      request.status === CourseStatus.BANNED ||
+      request.status === CourseStatus.REJECTED
+    ) {
+      if (request.reason === null || request.reason === '') {
+        throw new BadRequestException('Reason can not be null');
+      }
+    }
+
+    course.status = request.status;
+    course.reason = request.reason;
+
+    if (request.status === CourseStatus.BANNED) {
+      course.active = false;
+      await this.mailsService.sendMail({
+        to: course.user.email,
+        subject: 'Xóa Khóa Học',
+        template: './ban',
+        context: {
+          COURSE_NAME: course.title,
+          REASON: request.reason,
+        },
+      });
+    } else if (request.status === CourseStatus.REJECTED) {
+      course.active = false;
+      await this.mailsService.sendMail({
+        to: course.user.email,
+        subject: 'Từ Chối Xét Duyệt Khóa Học',
+        template: './reject',
+        context: {
+          COURSE_NAME: course.title,
+          REASON: request.reason,
+        },
+      });
+    }
+
+    this.courseRepository.saveCourse(course);
+
+    this.logger.log(
+      `method=setStatusForCourse, set status course with id=${request.courseId} successfully`,
+    );
   }
 }

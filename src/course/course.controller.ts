@@ -4,6 +4,8 @@ import {
   Get,
   Param,
   Post,
+  Put,
+  Query,
   Req,
   UseGuards,
 } from '@nestjs/common';
@@ -21,6 +23,10 @@ import { NameRole } from 'src/role/enum/name-role.enum';
 import { FilterCourseByCustomerResponse } from './dto/reponse/filter-by-customer.dto';
 import { User } from 'src/user/entity/user.entity';
 import { Request } from 'express';
+import { PageOptionsDto } from 'src/common/pagination/dto/pageOptionsDto';
+import { FilterCourseByStaffResponse } from './dto/reponse/filter-by-staff.dt';
+import { CourseStatus } from './type/enum/CourseStatus';
+import { SetStatusRequest } from './dto/request/set-status-request.dto';
 
 @Controller('course')
 @ApiTags('Courses')
@@ -70,13 +76,20 @@ export class CourseController {
     );
   }
 
-  // @Patch(':id')
-  // @ApiOkResponse({
-  //   description: 'course successfully updated',
-  // })
-  // async updateCourse(
-  //   @Body() searchCourseRequest: SearchCourseRequest,
-  // ): Promise<PageDto<SearchCourseReponse>> {
-  //   return await this.courseService.searchAndFilter(searchCourseRequest);
-  // }
+  @Put('/status')
+  @UseGuards(AuthGuard(), RolesGuard)
+  @HasRoles(NameRole.Staff)
+  async banCourse(@Body() request: SetStatusRequest): Promise<void> {
+    return await this.courseService.setStatusForCourse(request);
+  }
+
+  @Get('/staff/list')
+  @UseGuards(AuthGuard(), RolesGuard)
+  @HasRoles(NameRole.Staff)
+  async getCoursesForStaff(
+    @Query('status') status: CourseStatus,
+    @Body() pageOption: PageOptionsDto,
+  ): Promise<PageDto<FilterCourseByStaffResponse>> {
+    return await this.courseService.getCoursesForStaff(pageOption, status);
+  }
 }
