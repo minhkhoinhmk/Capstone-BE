@@ -1,14 +1,9 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNotEmpty, IsString } from 'class-validator';
+import { IsArray, IsNotEmpty } from 'class-validator';
 
 export class ChangeIndexChapterLectureRequest {
-  @IsString()
+  @IsArray()
   @IsNotEmpty()
   @ApiProperty()
-  firstChapterLectureId: string;
-
-  @IsString()
-  @IsNotEmpty()
-  @ApiProperty()
-  secondChapterLectureId: string;
+  chapterLectureIds: string[];
 }

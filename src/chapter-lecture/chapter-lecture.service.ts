@@ -32,9 +32,13 @@ export class ChapterLectureService {
 
   async getChapterLectureByCourseId(
     courseId: string,
+    active: boolean,
   ): Promise<ChapterLecture[]> {
     const chapterLectures =
-      await this.chapterLectureRepository.getChapterLectureByCourseId(courseId);
+      await this.chapterLectureRepository.getChapterLectureByCourseId(
+        courseId,
+        active,
+      );
     return chapterLectures;
   }
 
@@ -43,7 +47,10 @@ export class ChapterLectureService {
     courseId: string,
   ): Promise<LearnerChapterResponse[]> {
     const chapterLectures =
-      await this.chapterLectureRepository.getChapterLectureByCourseId(courseId);
+      await this.chapterLectureRepository.getChapterLectureByCourseId(
+        courseId,
+        true,
+      );
 
     const learnerChapterResponse: LearnerChapterResponse[] = [];
 
@@ -174,36 +181,26 @@ export class ChapterLectureService {
     );
   }
 
-  async swapIndexChapterLectureByInstructor(
+  async changeIndexChapterLectureByInstructor(
     body: ChangeIndexChapterLectureRequest,
   ) {
-    const firstChapterLecture =
-      await this.chapterLectureRepository.getChapterLectureById(
-        body.firstChapterLectureId,
+    let listPromises = [];
+    body.chapterLectureIds.forEach((id) => {
+      listPromises.push(
+        this.chapterLectureRepository.getChapterLectureById(id),
       );
+    });
 
-    const secondChapterLecture =
-      await this.chapterLectureRepository.getChapterLectureById(
-        body.secondChapterLectureId,
+    const chapterLectures: ChapterLecture[] = await Promise.all(listPromises);
+
+    listPromises = [];
+    chapterLectures.forEach((chapterLecture, index) => {
+      chapterLecture.index = index + 1;
+      listPromises.push(
+        this.chapterLectureRepository.saveChapterLecture(chapterLecture),
       );
-
-    if (!firstChapterLecture || !secondChapterLecture) {
-      this.logger.error(
-        `method=changeIndexChapterLectureByInstructor, firstChapterLectureId=${body.firstChapterLectureId} or secondChapterLectureId=${body.secondChapterLectureId} is not found`,
-      );
-      throw new BadRequestException(
-        `firstChapterLectureId=${body.firstChapterLectureId} or secondChapterLectureId=${body.secondChapterLectureId} is not found`,
-      );
-    }
-
-    const firstIndex = firstChapterLecture.index;
-    firstChapterLecture.index = secondChapterLecture.index;
-    secondChapterLecture.index = firstIndex;
-
-    await this.chapterLectureRepository.saveChapterLecture(firstChapterLecture);
-    await this.chapterLectureRepository.saveChapterLecture(
-      secondChapterLecture,
-    );
+    });
+    await Promise.all(listPromises);
   }
 
   async uploadVideo(

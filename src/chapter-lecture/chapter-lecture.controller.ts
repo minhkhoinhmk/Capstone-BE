@@ -33,8 +33,14 @@ export class ChapterLectureController {
   constructor(private chapterLectureService: ChapterLectureService) {}
 
   @Get('courses/:id')
-  findAll(@Param('id') id: string): Promise<ChapterLecture[]> {
-    return this.chapterLectureService.getChapterLectureByCourseId(id);
+  findAll(
+    @Param('id') id: string,
+    @Query('active') active: string,
+  ): Promise<ChapterLecture[]> {
+    return this.chapterLectureService.getChapterLectureByCourseId(
+      id,
+      active === 'true' ? true : false,
+    );
   }
 
   @Get('/courses/learner/study')
@@ -90,7 +96,7 @@ export class ChapterLectureController {
   async changeIndexChapterLecture(
     @Body() body: ChangeIndexChapterLectureRequest,
   ): Promise<void> {
-    return await this.chapterLectureService.swapIndexChapterLectureByInstructor(
+    return await this.chapterLectureService.changeIndexChapterLectureByInstructor(
       body,
     );
   }
