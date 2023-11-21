@@ -103,7 +103,7 @@ export class User {
   courseFeedbacks: CourseFeedback[];
 
   @OneToMany(() => Order, (order) => order.user)
-  orders: Course[];
+  orders: Order[];
 
   @OneToMany(() => CourseReport, (courseReport) => courseReport.user)
   courseReports: CourseReport[];
@@ -123,4 +123,7 @@ export class User {
 
   @OneToMany(() => QuestionTopic, (questionTopic) => questionTopic.user)
   questionTopics: QuestionTopic[];
+
+  @OneToMany(() => Post, (post) => post.updatedBy)
+  updatedPosts: Post[];
 }

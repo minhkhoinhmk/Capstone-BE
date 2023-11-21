@@ -38,19 +38,21 @@ export class Post {
   @UpdateDateColumn({ type: 'timestamp', nullable: true })
   updatedDate: Date;
 
-  @ApiProperty({ type: String, description: 'Resources of the Post' })
-  @Column()
-  resources: string;
-
   @ApiProperty({ type: Boolean, description: 'Is active of the Post' })
   @Column()
   active: boolean;
 
   @ApiProperty({ type: String, description: 'Thumbnail URL of the Post' })
-  @Column()
+  @Column({ nullable: true })
   thumbnail: string;
 
   @ManyToOne(() => User, (user) => user.posts)
   @JoinColumn({ name: 'userId' })
   user: User;
+
+  @ManyToOne(() => User, (user) => user.updatedPosts, { nullable: true })
+  @JoinColumn({
+    name: 'updatedBy',
+  })
+  updatedBy: User;
 }

@@ -21,6 +21,8 @@ import { FilterCourseByInstructorResponse } from 'src/course/dto/reponse/filter-
 import { CourseMapper } from 'src/course/mapper/course.mapper';
 import { PageMetaDto } from 'src/common/pagination/dto/pageMetaDto';
 import { CourseStatus } from 'src/course/type/enum/CourseStatus';
+import { UpdateCourseRequest } from 'src/course/dto/request/update-course-request.dto';
+import { UpdatePriceCourseRequest } from 'src/course/dto/request/update-price-course-request.dto';
 
 @Injectable()
 export class InstructorService {
@@ -115,6 +117,58 @@ export class InstructorService {
       throw new NotFoundException(
         `Category with id ${createCourseRequest.categoryId} or level with id ${createCourseRequest.levelId} not found`,
       );
+    }
+  }
+
+  async updateCourse(
+    body: UpdateCourseRequest,
+    userId: string,
+  ): Promise<Course> {
+    try {
+      const { courseId, categoryId, levelId, ...otherUpdateFields } = body;
+
+      const level = await this.levelRepository.getLevelById(levelId);
+      const category = await this.categoryRepository.getCategoryById(
+        categoryId,
+      );
+      let course = await this.courseRepository.getCourseById(courseId);
+
+      if (!level || !category || !course) throw new Error();
+
+      if (level) course.level = level;
+      if (category) course.category = category;
+      course = { ...course, ...otherUpdateFields };
+
+      this.logger.log(`method=updateCourse, update course successfully`);
+
+      return await this.courseRepository.saveCourse(course);
+    } catch (error) {
+      this.logger.log(`method=updateCourse, failed to update course`);
+
+      throw new NotFoundException(
+        `Category with id ${body.categoryId} or level with id ${body.levelId} or course with id ${body.courseId} not found`,
+      );
+    }
+  }
+
+  async updatePriceCourse(
+    body: UpdatePriceCourseRequest,
+    userId: string,
+  ): Promise<Course> {
+    try {
+      const { courseId, price } = body;
+
+      const course = await this.courseRepository.getCourseById(courseId);
+      if (!course) throw new Error();
+      course.price = price;
+
+      this.logger.log(`method=updatePriceCourse, update course successfully`);
+
+      return await this.courseRepository.saveCourse(course);
+    } catch (error) {
+      this.logger.log(`method=updatePriceCourse, failed to update course`);
+
+      throw new NotFoundException(`course with id ${body.courseId} not found`);
     }
   }
 

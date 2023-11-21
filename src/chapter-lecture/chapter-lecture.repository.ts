@@ -15,9 +15,10 @@ export class ChapterLectureRepository {
 
   async getChapterLectureByCourseId(
     courseId: string,
+    active: boolean,
   ): Promise<ChapterLecture[]> {
     const chapterLectures = await this.chapterLectureRepository.find({
-      where: { course: { id: courseId } },
+      where: { course: { id: courseId }, active },
     });
 
     return chapterLectures;

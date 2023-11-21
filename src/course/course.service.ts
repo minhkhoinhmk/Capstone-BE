@@ -111,6 +111,10 @@ export class CourseService {
     }
   }
 
+  async getCourseById(courseId: string): Promise<Course> {
+    return await this.courseRepository.getCourseById(courseId);
+  }
+
   countRatedStar(course: Course): number {
     const allRatedStar = course.courseFeedbacks.reduce(
       (accumulator, currentValue) => {

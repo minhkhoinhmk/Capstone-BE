@@ -27,6 +27,7 @@ import { PageOptionsDto } from 'src/common/pagination/dto/pageOptionsDto';
 import { FilterCourseByStaffResponse } from './dto/reponse/filter-by-staff.dt';
 import { CourseStatus } from './type/enum/CourseStatus';
 import { SetStatusRequest } from './dto/request/set-status-request.dto';
+import { Course } from './entity/course.entity';
 
 @Controller('course')
 @ApiTags('Courses')
@@ -44,7 +45,15 @@ export class CourseController {
     return await this.courseService.searchAndFilter(searchCourseRequest);
   }
 
-  @Get(':id')
+  @Get('/:id')
+  @ApiOkResponse({
+    description: 'Get Course Successfully',
+  })
+  async getCourseById(@Param('id') id: string): Promise<Course> {
+    return await this.courseService.getCourseById(id);
+  }
+
+  @Get('/detail/:id')
   @ApiOkResponse({
     description: 'Get Detail Course Successfully',
   })

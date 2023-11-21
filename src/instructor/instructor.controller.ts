@@ -2,6 +2,7 @@ import {
   Body,
   Controller,
   Param,
+  Patch,
   Post,
   Query,
   Req,
@@ -23,6 +24,8 @@ import { PageOptionsDto } from 'src/common/pagination/dto/pageOptionsDto';
 import { PageDto } from 'src/common/pagination/dto/pageDto';
 import { FilterCourseByInstructorResponse } from 'src/course/dto/reponse/filter-by-instructor.dto';
 import { Request } from 'express';
+import { UpdateCourseRequest } from '../course/dto/request/update-course-request.dto';
+import { UpdatePriceCourseRequest } from 'src/course/dto/request/update-price-course-request.dto';
 
 @Controller('instructor')
 @ApiTags('Intstructor')
@@ -49,7 +52,7 @@ export class InstructorController {
     }
   }
 
-  @Post('/course/create')
+  @Post('/course')
   @UseGuards(AuthGuard(), RolesGuard)
   @HasRoles(NameRole.Instructor)
   @ApiCreatedResponse({
@@ -65,6 +68,46 @@ export class InstructorController {
   ): Promise<Course> {
     return await this.instructorService.createCourse(
       createCourseRequest,
+      request['user']['id'],
+    );
+  }
+
+  @Patch('/course')
+  @UseGuards(AuthGuard(), RolesGuard)
+  @HasRoles(NameRole.Instructor)
+  @ApiCreatedResponse({
+    description: 'Update Course Successfully',
+    type: Course,
+  })
+  @ApiBody({
+    type: UpdateCourseRequest,
+  })
+  async UpdateCourseRequest(
+    @Req() request: any,
+    @Body() body: UpdateCourseRequest,
+  ): Promise<Course> {
+    return await this.instructorService.updateCourse(
+      body,
+      request['user']['id'],
+    );
+  }
+
+  @Patch('/course/price')
+  @UseGuards(AuthGuard(), RolesGuard)
+  @HasRoles(NameRole.Instructor)
+  @ApiCreatedResponse({
+    description: 'Update Course price Successfully',
+    type: Course,
+  })
+  @ApiBody({
+    type: UpdatePriceCourseRequest,
+  })
+  async UpdatePriceCourse(
+    @Req() request: any,
+    @Body() body: UpdatePriceCourseRequest,
+  ): Promise<Course> {
+    return await this.instructorService.updatePriceCourse(
+      body,
       request['user']['id'],
     );
   }

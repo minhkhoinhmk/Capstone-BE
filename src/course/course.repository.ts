@@ -104,7 +104,13 @@ export class CourseRepository {
   async getCourseById(id: string) {
     return this.courseRepository.findOne({
       where: { id },
-      relations: { cartItems: true, chapterLectures: true, user: true },
+      relations: {
+        cartItems: true,
+        chapterLectures: true,
+        level: true,
+        category: true,
+        user: true,
+      },
     });
   }
 
