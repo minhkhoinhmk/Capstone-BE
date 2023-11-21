@@ -88,6 +88,7 @@ export class RefundController {
     return this.refundService.getRefundByCustomerId(id, pageOption);
   }
 
+  @ApiOkResponse({ description: 'Approve refund successfully' })
   @UseGuards(AuthGuard(), RolesGuard)
   @HasRoles(NameRole.Staff)
   @Get('/approve/:id')
