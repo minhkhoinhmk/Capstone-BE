@@ -2,12 +2,9 @@ import {
   Column,
   Entity,
   JoinColumn,
-  JoinTable,
-  ManyToMany,
   ManyToOne,
   OneToMany,
   OneToOne,
-  PrimaryColumn,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { Post } from 'src/post/entity/post.entity';
@@ -19,7 +16,7 @@ import { CourseFeedback } from 'src/course-feedback/entity/course-feedbacl.entit
 import { Cart } from 'src/cart/entity/cart.entity';
 import { Order } from 'src/order/entity/order.entity';
 import { UserLecture } from 'src/user-lecture/entity/user-lecture.entity';
-import { Exclude } from 'class-transformer';
+import { Exclude, Expose } from 'class-transformer';
 import { Device } from 'src/device/entity/device.entity';
 import { CourseReport } from 'src/course-report/entity/course-report.entity';
 import { QuestionTopic } from 'src/question-topic/entity/question-topic.entity';
@@ -27,21 +24,25 @@ import { QuestionTopic } from 'src/question-topic/entity/question-topic.entity';
 @Entity()
 export class User {
   @PrimaryGeneratedColumn('uuid')
+  @Expose()
   id: string;
 
   @Column({
     length: 100,
   })
+  @Expose()
   firstName: string;
 
   @Column({
     length: 100,
   })
+  @Expose()
   lastName: string;
 
   @Column({
     length: 100,
   })
+  @Expose()
   middleName: string;
 
   @Column({
@@ -49,27 +50,34 @@ export class User {
     unique: true,
     nullable: true,
   })
+  @Expose()
   userName: string;
 
   @Exclude()
   @Column()
+  @Expose()
   password: string;
 
   @Column({ nullable: true })
+  @Expose()
   avatar: string;
 
   @Column()
+  @Expose()
   phoneNumber: string;
 
   @Exclude()
   @Column({ nullable: true })
+  @Expose()
   status: string;
 
   @Column({ unique: true, nullable: true })
+  @Expose()
   email: string;
 
   @Exclude()
   @Column()
+  @Expose()
   active: boolean;
 
   @Exclude()
@@ -85,6 +93,19 @@ export class User {
   isConfirmedEmail: boolean;
 
   @Column({ nullable: true })
+  @Expose()
+  bank: string;
+
+  @Column({ nullable: true })
+  @Expose()
+  accountNumber: string;
+
+  @Column({ nullable: true })
+  @Expose()
+  reason: string;
+
+  @Column({ nullable: true })
+  @Expose()
   certificateUrl: string;
 
   @OneToMany(() => Post, (post) => post.user)

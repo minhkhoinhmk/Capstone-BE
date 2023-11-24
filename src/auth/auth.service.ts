@@ -13,7 +13,7 @@ import { Token } from './dto/response/token.dto';
 import { NameRole } from 'src/role/enum/name-role.enum';
 import { CustomerRegisterResponse } from './dto/response/customer-register.response.dto';
 import { MailerService } from '@nestjs-modules/mailer';
-import { Cron } from '@nestjs/schedule';
+import { Cron, CronExpression } from '@nestjs/schedule';
 import { RoleRepository } from 'src/role/role.repository';
 import { GuestLoginRequest } from './dto/request/guest-login.request.dto';
 import * as bcrypt from 'bcrypt';
@@ -166,14 +166,39 @@ export class AuthService {
   }
 
   @Cron('0 0 * * *')
-  async deleteNotConfirmedAccount() {
-    const customers = await this.userRepository.getUserNotConfirmed();
+  async deleteCustomerNotConfirmedAccount() {
+    const customers = await this.userRepository.getCustomerNotConfirmed();
 
     for (const customer of customers) {
       this.logger.log(
         `method=deleteNotConfirmedAccount, remove user with id ${customer.id}`,
       );
       await this.userRepository.remove(customer);
+    }
+  }
+
+  @Cron(CronExpression.EVERY_HOUR)
+  async deleteInstructorTerminatedSignUp() {
+    const instructors =
+      await this.userRepository.getInstructorTerminatedSignUp();
+
+    for (const instructor of instructors) {
+      this.logger.log(
+        `method=deleteInstructorTerminatedSignUp, remove user with id ${instructor.id}`,
+      );
+      await this.userRepository.remove(instructor);
+    }
+  }
+
+  @Cron('0 0 * * *')
+  async deleteInstructorRejected() {
+    const instructors = await this.userRepository.getInstructorRejected();
+
+    for (const instructor of instructors) {
+      this.logger.log(
+        `method=deleteInstructorRejected, remove user with id ${instructor.id}`,
+      );
+      await this.userRepository.remove(instructor);
     }
   }
 

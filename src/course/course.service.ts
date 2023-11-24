@@ -270,7 +270,8 @@ export class CourseService {
         subject: 'Xóa Khóa Học',
         template: './ban',
         context: {
-          COURSE_NAME: course.title,
+          SUBJECT: 'Khóa học',
+          NAME: course.title,
           REASON: request.reason,
         },
       });
@@ -281,7 +282,8 @@ export class CourseService {
         subject: 'Từ Chối Xét Duyệt Khóa Học',
         template: './reject',
         context: {
-          COURSE_NAME: course.title,
+          SUBJECT: 'Khóa học',
+          NAME: course.title,
           REASON: request.reason,
         },
       });

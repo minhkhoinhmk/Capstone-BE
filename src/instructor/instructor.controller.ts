@@ -1,9 +1,11 @@
 import {
   Body,
   Controller,
+  Get,
   Param,
   Patch,
   Post,
+  Put,
   Query,
   Req,
   UploadedFile,
@@ -26,6 +28,12 @@ import { FilterCourseByInstructorResponse } from 'src/course/dto/reponse/filter-
 import { Request } from 'express';
 import { UpdateCourseRequest } from '../course/dto/request/update-course-request.dto';
 import { UpdatePriceCourseRequest } from 'src/course/dto/request/update-price-course-request.dto';
+import { UpdateBankRequest } from './dto/request/update-bank-request.dto';
+import { ViewInstructorResponse } from './dto/response/view-instructor-response.dto';
+import { IsEnum } from 'class-validator';
+import { InstructorStatus } from './enum/instructor-status.enum';
+import { SetInstructorStatusRequest } from './dto/request/set-instructor-status-request.dto';
+import { UpdateInstructorProfileRequest } from './dto/request/update-profile-request.dto';
 
 @Controller('instructor')
 @ApiTags('Intstructor')
@@ -143,6 +151,61 @@ export class InstructorController {
     return this.instructorService.getCoursesByInstructorId(
       request['user']['id'],
       pageOption,
+    );
+  }
+
+  @Put('/bank/update')
+  updateBankForInstructor(
+    @Body() request: UpdateBankRequest,
+    @Query('email') email: string,
+  ): Promise<void> {
+    return this.instructorService.updateBankForInstructor(email, request);
+  }
+
+  @Get()
+  @UseGuards(AuthGuard(), RolesGuard)
+  @HasRoles(NameRole.Admin)
+  getInstructors(
+    @Query('status') status: InstructorStatus,
+  ): Promise<ViewInstructorResponse[]> {
+    return this.instructorService.getInstructors(status);
+  }
+
+  @Get('/:id')
+  @UseGuards(AuthGuard(), RolesGuard)
+  @HasRoles(NameRole.Admin)
+  getInstructorById(@Param('id') id: string): Promise<ViewInstructorResponse> {
+    return this.instructorService.getInstructorById(id);
+  }
+
+  @Get('/profile/view')
+  @UseGuards(AuthGuard(), RolesGuard)
+  @HasRoles(NameRole.Instructor)
+  getInstructorProfile(
+    @Req() request: Request,
+  ): Promise<ViewInstructorResponse> {
+    return this.instructorService.getInstructorById(request['user']['id']);
+  }
+
+  @Put('/status/set')
+  @UseGuards(AuthGuard(), RolesGuard)
+  @HasRoles(NameRole.Admin)
+  setInstructorStatus(
+    @Body() request: SetInstructorStatusRequest,
+  ): Promise<void> {
+    return this.instructorService.setInstructorSatus(request);
+  }
+
+  @Put('/profile/update')
+  @UseGuards(AuthGuard(), RolesGuard)
+  @HasRoles(NameRole.Instructor)
+  updateInstructorProfile(
+    @Req() req: Request,
+    @Body() request: UpdateInstructorProfileRequest,
+  ): Promise<void> {
+    return this.instructorService.updateInstructorProfile(
+      req['user']['id'],
+      request,
     );
   }
 }

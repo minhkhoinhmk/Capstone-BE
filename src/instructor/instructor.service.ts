@@ -1,4 +1,9 @@
-import { Injectable, Logger, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  Logger,
+  NotFoundException,
+} from '@nestjs/common';
 import {
   COURSE_THUMBNAIL_PATH,
   INSTRUCTOR_CERTIFICATION_PATH,
@@ -23,6 +28,12 @@ import { PageMetaDto } from 'src/common/pagination/dto/pageMetaDto';
 import { CourseStatus } from 'src/course/type/enum/CourseStatus';
 import { UpdateCourseRequest } from 'src/course/dto/request/update-course-request.dto';
 import { UpdatePriceCourseRequest } from 'src/course/dto/request/update-price-course-request.dto';
+import { UpdateBankRequest } from './dto/request/update-bank-request.dto';
+import { MailerService } from '@nestjs-modules/mailer';
+import { ViewInstructorResponse } from './dto/response/view-instructor-response.dto';
+import { InstructorMapper } from './mapper/instructor.mapper';
+import { SetInstructorStatusRequest } from './dto/request/set-instructor-status-request.dto';
+import { UpdateInstructorProfileRequest } from './dto/request/update-profile-request.dto';
 
 @Injectable()
 export class InstructorService {
@@ -37,6 +48,8 @@ export class InstructorService {
     private readonly courseRepository: CourseRepository,
     private readonly deviceRepository: DeviceRepository,
     private readonly courseMapper: CourseMapper,
+    private mailsService: MailerService,
+    private mapper: InstructorMapper,
   ) {}
 
   async uploadCertification(
@@ -61,7 +74,6 @@ export class InstructorService {
       );
 
       tokens.forEach((token) => {
-        console.log(token);
         const payload = {
           token: token.deviceTokenId,
           title: 'Cập nhật bằng cấp',
@@ -73,6 +85,15 @@ export class InstructorService {
         };
 
         this.notificationService.sendingNotification(payload);
+      });
+
+      await this.mailsService.sendMail({
+        to: user.email,
+        subject: 'Chờ xét duyệt',
+        template: './waitingApproval',
+        context: {
+          CONTENT: 'Thông tin đang chờ xét duyệt',
+        },
       });
 
       this.logger.log(
@@ -221,5 +242,119 @@ export class InstructorService {
     this.logger.log(`method=getCoursesByInstructorId, totalItems=${count}`);
 
     return new PageDto(responses, pageMetaDto);
+  }
+
+  async updateBankForInstructor(
+    email: string,
+    request: UpdateBankRequest,
+  ): Promise<void> {
+    const instructor = await this.userRepository.getUserByEmail(email);
+
+    if (!instructor) {
+      throw new NotFoundException(`Instructor with email=${email} not found`);
+    } else {
+      instructor.accountNumber = request.accountNumber;
+      instructor.bank = request.bank;
+
+      await this.userRepository.save(instructor);
+
+      this.logger.log(
+        `method=updateBankForInstructor, Updated bank successfully`,
+      );
+    }
+  }
+
+  async getInstructors(
+    status: InstructorStatus,
+  ): Promise<ViewInstructorResponse[]> {
+    let response: ViewInstructorResponse[] = [];
+
+    const instructors = await this.userRepository.getInstructors(status);
+
+    instructors.forEach((instructor) => {
+      response.push(
+        this.mapper.filterViewInstructorResponseFromInstructor(instructor),
+      );
+    });
+
+    this.logger.log(`method=getInstructors, total items = ${response.length}`);
+
+    return response;
+  }
+
+  async getInstructorById(id: string): Promise<ViewInstructorResponse> {
+    const instructor = await this.userRepository.getUserById(id);
+
+    if (!instructor) {
+      throw new NotFoundException(`User ${id} does not found`);
+    } else {
+      this.logger.log(
+        `method=getInstructorById, instructor with id ${id} found`,
+      );
+
+      return this.mapper.filterViewInstructorResponseFromInstructor(instructor);
+    }
+  }
+
+  async setInstructorSatus(request: SetInstructorStatusRequest): Promise<void> {
+    const instructor = await this.userRepository.getUserById(
+      request.instructorId,
+    );
+
+    if (request.status === InstructorStatus.Reject) {
+      if (request.reason === null || request.reason === '') {
+        throw new BadRequestException('Reason can not be null');
+      }
+    }
+
+    instructor.status = request.status;
+    instructor.reason = request.reason;
+
+    if (request.status === InstructorStatus.Reject) {
+      instructor.active = false;
+      await this.mailsService.sendMail({
+        to: instructor.email,
+        subject: 'Từ chối đăng ký giáo viên',
+        template: './reject',
+        context: {
+          SUBJECT: 'giáo viên',
+          NAME: `${instructor.lastName} ${instructor.middleName} ${instructor.firstName}`,
+          REASON: request.reason,
+        },
+      });
+    } else if (request.status === InstructorStatus.Approved) {
+      instructor.active = true;
+      await this.mailsService.sendMail({
+        to: instructor.email,
+        subject: 'Đồng ý xét duyệt',
+        template: './approve',
+        context: {
+          SUBJECT: 'đăng ký xét duyệt giáo viên',
+          CONTENT: 'Đã được chấp thuận',
+        },
+      });
+    }
+
+    this.userRepository.save(instructor);
+
+    this.logger.log(
+      `method=setInstructorSatus, set status instructor with id=${request.instructorId} successfully`,
+    );
+  }
+
+  async updateInstructorProfile(
+    instructorId: string,
+    request: UpdateInstructorProfileRequest,
+  ): Promise<void> {
+    const instructor = await this.userRepository.getUserById(instructorId);
+
+    instructor.firstName = request.firstName;
+    instructor.lastName = request.lastName;
+    instructor.middleName = request.middleName;
+    instructor.phoneNumber = request.phoneNumber;
+    instructor.bank = request.bank;
+    instructor.accountNumber = request.accountNumber;
+
+    await this.userRepository.save(instructor);
   }
 }

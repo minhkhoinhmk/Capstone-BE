@@ -10,9 +10,10 @@ import { CourseModule } from 'src/course/course.module';
 import { DeviceModule } from 'src/device/device.module';
 import { AuthModule } from 'src/auth/auth.module';
 import { CourseMapper } from 'src/course/mapper/course.mapper';
+import { InstructorMapper } from './mapper/instructor.mapper';
 
 @Module({
-  providers: [InstructorService],
+  providers: [InstructorService, InstructorMapper],
   controllers: [InstructorController],
   imports: [
     S3Module,

@@ -5,23 +5,14 @@ import {
   Get,
   Patch,
   Post,
-  Query,
   Req,
   UploadedFile,
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
-import {
-  ApiConflictResponse,
-  ApiCreatedResponse,
-  ApiNotFoundResponse,
-  ApiOkResponse,
-  ApiParam,
-  ApiTags,
-} from '@nestjs/swagger';
+import { ApiConflictResponse, ApiTags } from '@nestjs/swagger';
 import { UserService } from './user.service';
 import { UserUpdateRequest } from './dto/request/user-update.request.dto';
-import { UserUpdateResponse } from './dto/response/user-update.response.dto';
 import { Request } from 'express';
 import { User } from './entity/user.entity';
 import { HasRoles } from 'src/auth/roles.decorator';
@@ -56,7 +47,7 @@ export class UserController {
   @Post('/profile/change-password')
   @UseInterceptors(ClassSerializerInterceptor)
   @UseGuards(AuthGuard(), RolesGuard)
-  @HasRoles(NameRole.Customer)
+  @HasRoles(NameRole.Customer, NameRole.Instructor)
   changePassword(
     @Body() body: UserChangePasswordRequest,
     @Req() request: Request,
