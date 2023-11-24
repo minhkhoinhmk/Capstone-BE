@@ -1,11 +1,13 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from './entity/user.entity';
-import { FindOptionsRelations, Repository } from 'typeorm';
+import { FindOptionsRelations, IsNull, Repository } from 'typeorm';
 import { hashPassword } from 'src/utils/hash-password.util';
 import { Role } from 'src/role/entity/role.entity';
 import { UserRegisterRequest } from 'src/auth/dto/request/customer-register.request.dto';
 import { UserUpdateRequest } from './dto/request/user-update.request.dto';
+import { NameRole } from 'src/role/enum/name-role.enum';
+import { InstructorStatus } from 'src/instructor/enum/instructor-status.enum';
 
 @Injectable()
 export class UserRepository {
@@ -80,18 +82,40 @@ export class UserRepository {
     return user;
   }
 
-  async getUserNotConfirmed(): Promise<User[]> {
-    const queryBuilder = this.userRepository.createQueryBuilder('u');
-
-    queryBuilder.where('u.isConfirmedEmail = :isConfirmedEmail', {
-      isConfirmedEmail: false,
+  async getCustomerNotConfirmed(): Promise<User[]> {
+    const customers = await this.userRepository.find({
+      where: {
+        role: { name: NameRole.Customer },
+        isConfirmedEmail: false,
+        active: false,
+      },
     });
 
-    queryBuilder.andWhere('u.active = :active', { active: false });
-
-    const customers = await queryBuilder.getMany();
-
     return customers;
+  }
+
+  async getInstructorTerminatedSignUp(): Promise<User[]> {
+    const instructors = await this.userRepository.find({
+      where: {
+        role: { name: NameRole.Instructor },
+        active: false,
+        status: IsNull(),
+      },
+    });
+
+    return instructors;
+  }
+
+  async getInstructorRejected(): Promise<User[]> {
+    const instructors = await this.userRepository.find({
+      where: {
+        role: { name: NameRole.Instructor },
+        active: false,
+        status: InstructorStatus.Reject,
+      },
+    });
+
+    return instructors;
   }
 
   async remove(user: User): Promise<void> {
@@ -106,5 +130,17 @@ export class UserRepository {
     body && Object.assign(user, body);
     password && (user.password = password);
     return this.save(user);
+  }
+
+  async getInstructors(status: InstructorStatus): Promise<User[]> {
+    if (status.toString() === '') {
+      return await this.userRepository.find({
+        where: { role: { name: NameRole.Instructor } },
+      });
+    } else {
+      return await this.userRepository.find({
+        where: { role: { name: NameRole.Instructor }, status: status },
+      });
+    }
   }
 }
