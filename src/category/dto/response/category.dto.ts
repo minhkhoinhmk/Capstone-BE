@@ -12,4 +12,10 @@ export class CategoryDto {
 
   @ApiProperty({ type: Number, description: 'total number of courses' })
   totalCourses: number;
+
+  @ApiProperty({ type: Date, description: 'inserted date' })
+  insertedDate: Date;
+
+  @ApiProperty({ type: Date, description: 'updated date' })
+  updatedDate: Date;
 }

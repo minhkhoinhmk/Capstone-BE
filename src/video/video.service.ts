@@ -14,15 +14,17 @@ import { COURSE_PATH } from 'src/common/s3/s3.constants';
 import getVideoDurationInSeconds from 'get-video-duration';
 import { createReadStream } from 'fs';
 import { Readable } from 'stream';
+import { ChapterLectureRepository } from 'src/chapter-lecture/chapter-lecture.repository';
 
 @Injectable()
 export class VideoService {
   private logger = new Logger('VideoService', { timestamp: true });
-  private fileSize: number;
+  // private fileSize: number;
 
   constructor(
     private readonly configService: ConfigService,
     private readonly s3Service: S3Service,
+    private readonly chapterLectureRepository: ChapterLectureRepository,
   ) {}
 
   async getVideoStream(id: string) {
@@ -31,11 +33,14 @@ export class VideoService {
       Key: id,
     };
 
-    this.fileSize = (
-      await (await this.s3Service.headObject(options)).promise()
-    ).ContentLength;
+    const chapterLecture =
+      await this.chapterLectureRepository.getChapterLectureByVideo(id);
 
-    console.log(`this.fileSize: ${this.fileSize}`);
+    // this.fileSize = (
+    //   await (await this.s3Service.headObject(options)).promise()
+    // ).ContentLength;
+
+    console.log(`this.fileSize: ${chapterLecture.fileSize}`);
 
     const stream = (await this.s3Service.getObject(options)).createReadStream();
 
@@ -72,9 +77,12 @@ export class VideoService {
       Range: range,
     };
 
-    const { start, end } = this.parseRange(range, this.fileSize);
+    const chapterLecture =
+      await this.chapterLectureRepository.getChapterLectureByVideo(id);
 
-    console.log(this.fileSize);
+    const { start, end } = this.parseRange(range, chapterLecture.fileSize);
+
+    console.log(chapterLecture.fileSize);
 
     const stream = (await this.s3Service.getObject(options)).createReadStream();
 
@@ -83,7 +91,11 @@ export class VideoService {
       type: 'video/mp4',
     });
 
-    const contentRange = this.getContentRange(start, end, this.fileSize);
+    const contentRange = this.getContentRange(
+      start,
+      end,
+      chapterLecture.fileSize,
+    );
 
     this.logger.log(
       `method=getPartialVideoStream, stream partialy loaded, range=${range}`,

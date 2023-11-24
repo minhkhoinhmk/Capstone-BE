@@ -24,6 +24,14 @@ export class ChapterLectureRepository {
     return chapterLectures;
   }
 
+  async getChapterLectureByVideo(video: string): Promise<ChapterLecture> {
+    const chapterLecture = await this.chapterLectureRepository.findOne({
+      where: { video },
+    });
+
+    return chapterLecture;
+  }
+
   async getChapterLectureById(
     chapterLectureId: string,
   ): Promise<ChapterLecture> {

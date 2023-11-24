@@ -4,6 +4,7 @@ import {
   Delete,
   Get,
   Param,
+  Patch,
   Post,
   Put,
   Query,
@@ -31,8 +32,14 @@ export class CategoryController {
 
   @ApiOkResponse({ type: [CategoryDto], description: `List categories` })
   @Get()
-  findAll(@Query('active') active: string): Promise<CategoryDto[]> {
-    return this.categoryService.getAllcategories(active);
+  findAllByActive(@Query('active') active: string): Promise<CategoryDto[]> {
+    return this.categoryService.getAllcategoriesByActive(active);
+  }
+
+  @ApiOkResponse({ type: [CategoryDto], description: `List categories` })
+  @Get('/admin')
+  findAllByAdmin(): Promise<CategoryDto[]> {
+    return this.categoryService.getAllcategoriesByAdmin();
   }
 
   @Get(':id')
@@ -51,7 +58,7 @@ export class CategoryController {
     return this.categoryService.createCategory(category);
   }
 
-  @Put('/:id')
+  @Patch('/:id')
   @ApiOkResponse({ description: `Update category` })
   @ApiBody({ type: CreateCategotyRequest })
   @UseGuards(AuthGuard(), RolesGuard)

@@ -7,6 +7,7 @@ import { LearnerCourseRepository } from './learner-course.repository';
 import { LearnerModule } from 'src/learner/learner.module';
 import { CourseModule } from 'src/course/course.module';
 import { AuthModule } from 'src/auth/auth.module';
+import { UserLectureModule } from 'src/user-lecture/user-lecture.module';
 
 @Module({
   imports: [
@@ -14,6 +15,7 @@ import { AuthModule } from 'src/auth/auth.module';
     forwardRef(() => LearnerModule),
     CourseModule,
     forwardRef(() => AuthModule),
+    UserLectureModule,
   ],
   providers: [LearnerCourseService, LearnerCourseRepository],
   controllers: [LearnerCourseController],

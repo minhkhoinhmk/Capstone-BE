@@ -28,6 +28,7 @@ import { User } from 'src/user/entity/user.entity';
 export class LearnerCourseController {
   constructor(private learnerCourseService: LearnerCourseService) {}
 
+  @Post('/create')
   @ApiCreatedResponse({
     description: 'Created Learner Course Successfully',
   })
@@ -36,28 +37,31 @@ export class LearnerCourseController {
   })
   @UseGuards(AuthGuard(), RolesGuard)
   @HasRoles(NameRole.Customer)
-  @Post('/create')
   async createLearnerCourse(
     @Body() learnerCourseDto: CreateLearnerCourseRequest,
   ): Promise<void> {
     return this.learnerCourseService.createLearnerCourse(learnerCourseDto);
   }
 
+  @Patch('/update')
   @ApiCreatedResponse({
     description: 'Updated Learner Course Successfully',
   })
   @UseGuards(AuthGuard(), RolesGuard)
   @HasRoles(NameRole.Customer)
-  @Patch('/update')
   async updateLearnerCourse(
     @Body() body: UpdateLearnerCourseRequest,
+    @Req() request: Request,
   ): Promise<void> {
-    return this.learnerCourseService.updateLearnerCourse(body);
+    return this.learnerCourseService.updateLearnerCourse(
+      body,
+      request['user'] as User,
+    );
   }
 
+  @Get('/course/learning/learner/:courseId')
   @UseGuards(AuthGuard(), RolesGuard)
   @HasRoles(NameRole.Customer)
-  @Get('/course/learning/:courseId')
   async getLearnerIsLearningCourse(
     @Param('courseId') courseId: string,
     @Req() request: Request,
@@ -67,4 +71,17 @@ export class LearnerCourseController {
       request['user'] as User,
     );
   }
+
+  // @Get('/course/learning/customer/:courseId')
+  // @UseGuards(AuthGuard(), RolesGuard)
+  // @HasRoles(NameRole.Customer)
+  // async checkCustomerIsLearningCourse(
+  //   @Param('courseId') courseId: string,
+  //   @Req() request: Request,
+  // ) {
+  //   return this.learnerCourseService.checkCustomerIsLearningCourseByCourseId(
+  //     courseId,
+  //     request['user'] as User,
+  //   );
+  // }
 }

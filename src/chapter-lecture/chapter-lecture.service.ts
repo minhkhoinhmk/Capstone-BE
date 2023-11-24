@@ -233,11 +233,18 @@ export class ChapterLectureService {
 
       chapterLecture.totalContentLength = Math.floor(duration);
 
-      console.log(Math.floor(duration));
+      await this.s3Service.putObject(buffer, key, type);
+
+      const options = {
+        Bucket: 'nestjs-public-bucket-vennis',
+        Key: key,
+      };
+
+      chapterLecture.fileSize = (
+        await (await this.s3Service.headObject(options)).promise()
+      ).ContentLength;
 
       await this.chapterLectureRepository.saveChapterLecture(chapterLecture);
-
-      await this.s3Service.putObject(buffer, key, type);
 
       this.logger.log(`method=uploadVideo, uploaded video successfully`);
     } catch (error) {

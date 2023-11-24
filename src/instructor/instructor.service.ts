@@ -106,7 +106,7 @@ export class InstructorService {
       course.category = category;
       course.user = instructor;
       course.active = false;
-      course.status = CourseStatus.PENDING;
+      course.status = CourseStatus.CREATED;
 
       this.logger.log(`method=createCourse, created course successfully`);
 

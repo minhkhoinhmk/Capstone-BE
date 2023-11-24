@@ -87,7 +87,7 @@ export class PostController {
   @UsePipes(new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true }))
   @UseInterceptors(FileInterceptor('file'))
   @UseGuards(AuthGuard(), RolesGuard)
-  @HasRoles(NameRole.Instructor)
+  @HasRoles(NameRole.Staff)
   async uploadThumbnail(
     @UploadedFile() file: Express.Multer.File,
     @Query('postId') postId: string,

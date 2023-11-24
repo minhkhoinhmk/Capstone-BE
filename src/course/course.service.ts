@@ -244,33 +244,8 @@ export class CourseService {
     return { status };
   }
 
-  async getCoursesForStaff(
-    pageOption: PageOptionsDto,
-    status: CourseStatus,
-  ): Promise<PageDto<FilterCourseByStaffResponse>> {
-    const { count, entities } = await this.courseRepository.getCourseForStaff(
-      pageOption,
-      status,
-    );
-
-    const responses: FilterCourseByStaffResponse[] = [];
-
-    for (const course of entities) {
-      responses.push(
-        this.courserMapper.filterCourseByStaffResponseFromCourse(course),
-      );
-    }
-
-    const itemCount = count;
-
-    const pageMetaDto = new PageMetaDto({
-      itemCount,
-      pageOptionsDto: pageOption,
-    });
-
-    this.logger.log(`method=getCoursesForStaff, totalItems=${count}`);
-
-    return new PageDto(responses, pageMetaDto);
+  async getAllCoursesForStaff(): Promise<Course[]> {
+    return await this.courseRepository.getAllCourse();
   }
 
   async setStatusForCourse(request: SetStatusRequest): Promise<void> {

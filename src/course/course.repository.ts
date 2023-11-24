@@ -1,10 +1,9 @@
-import { BadRequestException, Injectable, Logger } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { Course } from './entity/course.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { FindOptionsWhere, Repository } from 'typeorm';
 import { PageOptionsDto } from 'src/common/pagination/dto/pageOptionsDto';
 import SortField from './type/enum/SortField';
-import { CourseStatus } from './type/enum/CourseStatus';
 
 @Injectable()
 export class CourseRepository {
@@ -144,20 +143,13 @@ export class CourseRepository {
     return { count: count, entities: entities };
   }
 
-  async getCourseForStaff(
-    pageOptionsDto: PageOptionsDto,
-    status: CourseStatus,
-  ): Promise<{ count: number; entities: Course[] }> {
-    const entities = await this.courseRepository.find({
-      where: { status: status },
-      skip: (pageOptionsDto.page - 1) * pageOptionsDto.take,
-      take: pageOptionsDto.take,
+  async getAllCourse() {
+    return this.courseRepository.find({
+      relations: {
+        level: true,
+        category: true,
+        user: true,
+      },
     });
-
-    const count = await this.courseRepository.count({
-      where: { status: status },
-    });
-
-    return { count: count, entities: entities };
   }
 }

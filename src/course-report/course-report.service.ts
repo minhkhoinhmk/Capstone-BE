@@ -44,15 +44,13 @@ export class CourseReportService {
     return await this.courseReportRepository.saveCourseReport(report);
   }
 
-  async getCourseReports(
-    pageOption: PageOptionsDto,
-  ): Promise<PageDto<CourseReportResponse>> {
-    const { count, entities } =
-      await this.courseReportRepository.getCourseReports(pageOption);
+  async getCourseReports(): Promise<CourseReportResponse[]> {
+    const courseReports: CourseReport[] =
+      await this.courseReportRepository.getCourseReports();
 
-    let responses: CourseReportResponse[] = [];
+    const responses: CourseReportResponse[] = [];
 
-    for (const report of entities) {
+    for (const report of courseReports) {
       if (report.user) {
         responses.push(
           this.courseReportMapper.filterCourseReportResponseFromCourseReportWithUser(
@@ -68,15 +66,8 @@ export class CourseReportService {
       }
     }
 
-    const itemCount = count;
+    this.logger.log(`method=getCourseReports, totalItems=${responses.length}`);
 
-    const pageMetaDto = new PageMetaDto({
-      itemCount,
-      pageOptionsDto: pageOption,
-    });
-
-    this.logger.log(`method=getCourseReports, totalItems=${count}`);
-
-    return new PageDto(responses, pageMetaDto);
+    return responses;
   }
 }

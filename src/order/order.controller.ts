@@ -2,6 +2,7 @@ import {
   Body,
   Controller,
   Get,
+  Param,
   Patch,
   Post,
   Req,
@@ -23,27 +24,37 @@ import { User } from 'src/user/entity/user.entity';
 export class OrderController {
   constructor(private orderService: OrderService) {}
 
+  @Post('/create')
+  @UseGuards(AuthGuard(), RolesGuard)
+  @HasRoles(NameRole.Customer)
   @ApiCreatedResponse({
     description: 'Created order successfully',
   })
-  @UseGuards(AuthGuard(), RolesGuard)
-  @HasRoles(NameRole.Customer)
-  @Post('/create')
   createOrder(@Req() request: Request): Promise<Order> {
     return this.orderService.createOrder(request['user'] as User);
   }
 
+  @Patch('/update')
   @UseGuards(AuthGuard(), RolesGuard)
   @HasRoles(NameRole.Customer)
-  @Patch('/update')
   updateOrder(@Body() body: UpdateTransactionRequest): Promise<Order> {
     return this.orderService.updateOrder(body);
   }
 
+  @Get('/user')
   @UseGuards(AuthGuard(), RolesGuard)
   @HasRoles(NameRole.Customer)
-  @Get('/user')
   findOrdersByUser(@Req() request: Request): Promise<Order[]> {
     return this.orderService.findOrdersByUser(request['user'] as User);
+  }
+
+  @Get('/user/:id')
+  @UseGuards(AuthGuard(), RolesGuard)
+  @HasRoles(NameRole.Customer)
+  findOrderByOrderId(
+    @Param('id') id: string,
+    @Req() request: Request,
+  ): Promise<Order> {
+    return this.orderService.findOrderByOrderId(id, request['user'] as User);
   }
 }

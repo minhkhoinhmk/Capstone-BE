@@ -64,6 +64,10 @@ export class ChapterLecture {
   @Expose()
   active: boolean;
 
+  @Column({ nullable: true })
+  @Expose()
+  fileSize: number;
+
   @ManyToOne(() => Course, (course) => course.chapterLectures)
   @JoinColumn({ name: 'courseId' })
   course: Course;

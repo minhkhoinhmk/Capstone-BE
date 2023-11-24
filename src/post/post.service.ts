@@ -12,6 +12,7 @@ import { CreatePostRequest } from './dto/request/create-post-request.dto';
 import { Post } from './entity/post.entity';
 import { POST_THUBMNAIL_PATH } from 'src/common/s3/s3.constants';
 import { S3Service } from 'src/s3/s3.service';
+import { isUndefined } from 'util';
 
 @Injectable()
 export class PostService {
@@ -47,7 +48,8 @@ export class PostService {
     post.updatedBy = user;
     if (title) post.title = title;
     if (description) post.description = description;
-    if (active) post.active = active;
+    console.log(active);
+    if (!isUndefined(active)) post.active = active;
     if (resources) {
       try {
         await this.postDynamodbRepository.updatePostBody(postId, resources);

@@ -32,6 +32,7 @@ import { Request } from 'express';
 export class TransactionController {
   constructor(private transactionService: TransactionService) {}
 
+  @Post('/create')
   @UseGuards(AuthGuard(), RolesGuard)
   @HasRoles(NameRole.Customer)
   @ApiCreatedResponse({
@@ -41,7 +42,6 @@ export class TransactionController {
   @ApiBody({
     type: CreateTransactionRequest,
   })
-  @Post('/create')
   async createTransaction(
     @Body() createTransactionRequest: CreateTransactionRequest,
   ): Promise<CreateTrsanctionResponse> {

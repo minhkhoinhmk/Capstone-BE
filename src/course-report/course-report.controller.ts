@@ -1,4 +1,12 @@
-import { Body, Controller, Post, Query, Req, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Post,
+  Query,
+  Req,
+  UseGuards,
+} from '@nestjs/common';
 import { CourseReportService } from './course-report.service';
 import { ApiBody, ApiCreatedResponse, ApiTags } from '@nestjs/swagger';
 import { CreateCourseReportRequest } from './dto/request/create-report.dto';
@@ -25,8 +33,8 @@ export class CourseReportController {
   })
   @UseGuards(AuthGuard(), RolesGuard)
   @HasRoles(NameRole.Customer, NameRole.Learner)
-  @Post('/create')
-  createRefund(
+  @Post()
+  createCourseReport(
     @Query('courseId') courseId: string,
     @Body() createCourseReportRequest: CreateCourseReportRequest,
     @Req() request: Request,
@@ -40,10 +48,8 @@ export class CourseReportController {
 
   @UseGuards(AuthGuard(), RolesGuard)
   @HasRoles(NameRole.Staff)
-  @Post('')
-  getRefundsByCsutomerId(
-    @Body() pageOption: PageOptionsDto,
-  ): Promise<PageDto<CourseReportResponse>> {
-    return this.courseReportService.getCourseReports(pageOption);
+  @Get()
+  getCourseReports(): Promise<CourseReportResponse[]> {
+    return this.courseReportService.getCourseReports();
   }
 }

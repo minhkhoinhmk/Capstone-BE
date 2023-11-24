@@ -33,7 +33,7 @@ export class LearnerCourseRepository {
     learner: Learner,
   ): Promise<LearnerCourse> {
     return await this.learnerCourseRepository.findOne({
-      where: { course: course, learner: learner },
+      where: { course: { id: course.id }, learner: { id: learner.id } },
       relations: { course: true, learner: true },
     });
   }
@@ -74,5 +74,9 @@ export class LearnerCourseRepository {
     }
 
     return { count: count, entites: entities };
+  }
+
+  async removeLearnerCourse(learnerCourse: LearnerCourse) {
+    return this.learnerCourseRepository.remove(learnerCourse);
   }
 }

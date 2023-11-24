@@ -31,15 +31,15 @@ import { FilterCourseByLearnerResponse } from 'src/course/dto/reponse/filter-by-
 export class LearnerController {
   constructor(private learnerService: LearnerService) {}
 
+  @Post('/create')
+  @UseGuards(AuthGuard(), RolesGuard)
+  @HasRoles(NameRole.Customer)
   @ApiCreatedResponse({
     description: 'Created Learner Successfully',
   })
   @ApiConflictResponse({
     description: 'User name was already exists',
   })
-  @UseGuards(AuthGuard(), RolesGuard)
-  @HasRoles(NameRole.Customer)
-  @Post('/create')
   signup(
     @Body() createLearnerRequest: CreateLearnerRequest,
     @Req() request: Request,
@@ -50,24 +50,24 @@ export class LearnerController {
     );
   }
 
+  @Get('/user')
+  @UseGuards(AuthGuard(), RolesGuard)
+  @HasRoles(NameRole.Customer)
   @ApiOkResponse({
     description: 'Get Learner Successfully',
     type: FilterLearnerByUserResponse,
     isArray: true,
   })
-  @UseGuards(AuthGuard(), RolesGuard)
-  @HasRoles(NameRole.Customer)
-  @Get('/user')
   getLearnersByUserId(
     @Req() request: Request,
   ): Promise<FilterLearnerByUserResponse[]> {
     return this.learnerService.getLearnerByUserId(request['user']['id']);
   }
 
-  @ApiPaginatedResponse(FilterCourseByLearnerResponse)
+  @Post('/course/user')
   @UseGuards(AuthGuard(), RolesGuard)
   @HasRoles(NameRole.Learner)
-  @Post('/course/user')
+  @ApiPaginatedResponse(FilterCourseByLearnerResponse)
   getCourseForLearnersByUserId(
     @Query('search') search: string,
     @Req() request: Request,
