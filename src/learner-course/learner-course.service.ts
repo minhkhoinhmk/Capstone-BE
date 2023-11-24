@@ -3,6 +3,7 @@ import {
   ConflictException,
   Injectable,
   Logger,
+  NotAcceptableException,
 } from '@nestjs/common';
 import { CourseRepository } from 'src/course/course.repository';
 import { LearnerRepository } from 'src/learner/learner.repository';
@@ -13,6 +14,8 @@ import { Course } from 'src/course/entity/course.entity';
 import { LearnerCourse } from './entity/learner-course.entity';
 import { UpdateLearnerCourseRequest } from './dto/request/update-learner-course.dto';
 import { User } from 'src/user/entity/user.entity';
+import { UserLectureRepository } from 'src/user-lecture/user-lecture.repository';
+import { ChapterLectureRepository } from 'src/chapter-lecture/chapter-lecture.repository';
 
 @Injectable()
 export class LearnerCourseService {
@@ -22,6 +25,8 @@ export class LearnerCourseService {
     private courseRepository: CourseRepository,
     private learnerRepository: LearnerRepository,
     private learnerCourseRepository: LearnerCourseRepository,
+    // private chapterLectureRepository: ChapterLectureRepository,
+    private userLectureRepository: UserLectureRepository,
   ) {}
 
   async createLearnerCourse(
@@ -59,7 +64,7 @@ export class LearnerCourseService {
     }
   }
 
-  async updateLearnerCourse(body: UpdateLearnerCourseRequest) {
+  async updateLearnerCourse(body: UpdateLearnerCourseRequest, user: User) {
     const { courseId, currentLearnerId, newLearnerId } = body;
 
     const course: Course = await this.courseRepository.getCourseById(courseId);
@@ -71,28 +76,22 @@ export class LearnerCourseService {
       throw new BadRequestException(`courseId ${courseId} is not existed`);
     }
 
-    // None -> A (chưa tạo)
-    // None -> A (đã tạo)
+    // None -> A
     if (!currentLearnerId && newLearnerId) {
       const newLearner = await this.learnerRepository.getLeanerById(
         newLearnerId,
       );
-      const newLearnerCourse =
-        await this.learnerCourseRepository.getLearnerCourseByCourseAndLearner(
-          course,
-          newLearner,
-        );
 
-      if (!newLearnerCourse)
-        await this.learnerCourseRepository.saveLearnerCourse(
-          await this.learnerCourseRepository.createLearnerCourse(
-            newLearner,
-            course,
-          ),
-        );
-      else await this.changeActiveLearnerCourse(newLearnerCourse, true);
+      await this.learnerCourseRepository.saveLearnerCourse(
+        await this.learnerCourseRepository.createLearnerCourse(
+          newLearner,
+          course,
+        ),
+      );
     }
-    //A(Đã tạo) -> None
+    // A -> None
+    // + A đã học: không assign
+    // + A chưa học: Được assign sang None, xóa learner_course trong db
     else if (currentLearnerId && !newLearnerId) {
       const currentLearner = await this.learnerRepository.getLeanerById(
         currentLearnerId,
@@ -102,10 +101,19 @@ export class LearnerCourseService {
           course,
           currentLearner,
         );
-      await this.changeActiveLearnerCourse(currentLearnerCourse, false);
+
+      if (await this.checkLearnerIsLearningCourse(course, currentLearner))
+        throw new NotAcceptableException(
+          `currentLearner with id=${currentLearnerId} is already learning course id=${courseId}`,
+        );
+      else
+        await this.learnerCourseRepository.removeLearnerCourse(
+          currentLearnerCourse,
+        );
     }
-    // A(Đã tạo) -> B(Đã tạo) và B(Đã tạo) -> A(Đã tạo)
-    // A(Đã tạo) -> B(Chưa tạo) và B(Đã tạo) -> A(Đã tạo)
+    // A -> B
+    // + A đã học: Không assign
+    // + A chưa học: Assign cho B, xóa A
     else if (currentLearnerId && newLearnerId) {
       const currentLearner = await this.learnerRepository.getLeanerById(
         currentLearnerId,
@@ -118,17 +126,15 @@ export class LearnerCourseService {
       const newLearner = await this.learnerRepository.getLeanerById(
         newLearnerId,
       );
-      const newLearnerCourse =
-        await this.learnerCourseRepository.getLearnerCourseByCourseAndLearner(
-          course,
-          newLearner,
-        );
 
-      if (newLearnerCourse) {
-        await this.changeActiveLearnerCourse(currentLearnerCourse, false);
-        await this.changeActiveLearnerCourse(newLearnerCourse, true);
+      if (await this.checkLearnerIsLearningCourse(course, currentLearner)) {
+        throw new NotAcceptableException(
+          `currentLearner with id=${currentLearnerId} is already learning course id=${courseId}`,
+        );
       } else {
-        await this.changeActiveLearnerCourse(currentLearnerCourse, false);
+        await this.learnerCourseRepository.removeLearnerCourse(
+          currentLearnerCourse,
+        );
         await this.learnerCourseRepository.saveLearnerCourse(
           await this.learnerCourseRepository.createLearnerCourse(
             newLearner,
@@ -139,37 +145,153 @@ export class LearnerCourseService {
     }
   }
 
-  async changeActiveLearnerCourse(
-    learnerCourse: LearnerCourse,
-    active: boolean,
-  ) {
-    learnerCourse.active = active;
-    this.learnerCourseRepository.saveLearnerCourse(learnerCourse);
+  async checkLearnerIsLearningCourse(course: Course, learner: Learner) {
+    let status = false;
+    for (let index = 0; index < course.chapterLectures.length; index++) {
+      const userLecture =
+        await this.userLectureRepository.checkChapterLectureIsCompletedForLearner(
+          course.chapterLectures[index].id,
+          learner.id,
+        );
+
+      if (userLecture) status = true;
+    }
+
+    return status;
   }
 
   async getLearnerIsLearningCourseByCourseId(courseId: string, user: User) {
+    let learnerId = '';
+    let isLearning = false;
     const learners: Learner[] = await this.learnerRepository.getLearnerByUserId(
       user.id,
     );
     const course: Course = await this.courseRepository.getCourseById(courseId);
-    let learnerId = '';
 
-    const listPromises = [];
-    learners.forEach((learner) => {
-      listPromises.push(
-        this.learnerCourseRepository.getLearnerCourseByCourseAndLearner(
+    for (let index = 0; index < learners.length; index++) {
+      const learnerCourse =
+        await this.learnerCourseRepository.getLearnerCourseByCourseAndLearner(
           course,
-          learner,
-        ),
-      );
-    });
+          learners[index],
+        );
+      if (learnerCourse) {
+        learnerId = learnerCourse.learner.id;
+        if (await this.checkLearnerIsLearningCourse(course, learners[index]))
+          isLearning = true;
+      }
+    }
 
-    const learnerCourses: LearnerCourse[] = await Promise.all(listPromises);
-
-    learnerCourses.forEach((learnerCourse) => {
-      if (learnerCourse?.active) learnerId = learnerCourse.learner.id;
-    });
-
-    return { learnerId };
+    return { learnerId, isLearning };
   }
 }
+
+// async updateLearnerCourse(body: UpdateLearnerCourseRequest, user: User) {
+//   const { courseId, currentLearnerId, newLearnerId } = body;
+
+//   const course: Course = await this.courseRepository.getCourseById(courseId);
+//   if (!course) {
+//     this.logger.log(
+//       `method=updateLearnerCourse, courseId ${courseId} is not existed`,
+//     );
+
+//     throw new BadRequestException(`courseId ${courseId} is not existed`);
+//   }
+
+//   // None -> A (chưa tạo)
+//   // None -> A (đã tạo)
+//   if (!currentLearnerId && newLearnerId) {
+//     const newLearner = await this.learnerRepository.getLeanerById(
+//       newLearnerId,
+//     );
+//     const newLearnerCourse =
+//       await this.learnerCourseRepository.getLearnerCourseByCourseAndLearner(
+//         course,
+//         newLearner,
+//       );
+
+//     if (!newLearnerCourse)
+//       await this.learnerCourseRepository.saveLearnerCourse(
+//         await this.learnerCourseRepository.createLearnerCourse(
+//           newLearner,
+//           course,
+//         ),
+//       );
+//     else await this.changeActiveLearnerCourse(newLearnerCourse, true);
+//   }
+//   //A(Đã tạo) -> None
+//   else if (currentLearnerId && !newLearnerId) {
+//     const currentLearner = await this.learnerRepository.getLeanerById(
+//       currentLearnerId,
+//     );
+//     const currentLearnerCourse =
+//       await this.learnerCourseRepository.getLearnerCourseByCourseAndLearner(
+//         course,
+//         currentLearner,
+//       );
+//     await this.changeActiveLearnerCourse(currentLearnerCourse, false);
+//   }
+//   // A(Đã tạo) -> B(Đã tạo) và B(Đã tạo) -> A(Đã tạo)
+//   // A(Đã tạo) -> B(Chưa tạo) và B(Đã tạo) -> A(Đã tạo)
+//   else if (currentLearnerId && newLearnerId) {
+//     const currentLearner = await this.learnerRepository.getLeanerById(
+//       currentLearnerId,
+//     );
+//     const currentLearnerCourse =
+//       await this.learnerCourseRepository.getLearnerCourseByCourseAndLearner(
+//         course,
+//         currentLearner,
+//       );
+//     const newLearner = await this.learnerRepository.getLeanerById(
+//       newLearnerId,
+//     );
+//     const newLearnerCourse =
+//       await this.learnerCourseRepository.getLearnerCourseByCourseAndLearner(
+//         course,
+//         newLearner,
+//       );
+
+//     if (newLearnerCourse) {
+//       await this.changeActiveLearnerCourse(currentLearnerCourse, false);
+//       await this.changeActiveLearnerCourse(newLearnerCourse, true);
+//     } else {
+//       await this.changeActiveLearnerCourse(currentLearnerCourse, false);
+//       await this.learnerCourseRepository.saveLearnerCourse(
+//         await this.learnerCourseRepository.createLearnerCourse(
+//           newLearner,
+//           course,
+//         ),
+//       );
+//     }
+//   }
+// }
+
+// async checkCustomerIsLearningCourseByCourseId(courseId: string, user: User) {
+//   const course: Course = await this.courseRepository.getCourseById(courseId);
+//   if (!course) {
+//     this.logger.log(
+//       `method=checkCustomerIsLearningCourseByCourseId, courseId ${courseId} is not existed`,
+//     );
+
+//     throw new BadRequestException(`courseId ${courseId} is not existed`);
+//   }
+
+//   let status = false;
+//   for (let index = 0; index < course.chapterLectures.length; index++) {
+//     const userLecture =
+//       await this.userLectureRepository.checkChapterLectureIsCompletedForCustomer(
+//         course.chapterLectures[index].id,
+//         user.id,
+//       );
+
+//     if (userLecture) status = true;
+//   }
+
+//   return { status };
+// }
+// async changeActiveLearnerCourse(
+//   learnerCourse: LearnerCourse,
+//   active: boolean,
+// ) {
+//   learnerCourse.active = active;
+//   this.learnerCourseRepository.saveLearnerCourse(learnerCourse);
+// }

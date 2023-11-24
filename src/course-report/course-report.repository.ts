@@ -34,21 +34,20 @@ export class CourseReportRepository {
     return this.courseReportRepository.save(courseReport);
   }
 
-  async getCourseReports(
-    pageOptionsDto: PageOptionsDto,
-  ): Promise<{ count: number; entities: CourseReport[] }> {
+  async getCourseReports() {
     const entities = await this.courseReportRepository.find({
       relations: {
         user: true,
         learner: true,
         course: true,
       },
-      skip: (pageOptionsDto.page - 1) * pageOptionsDto.take,
-      take: pageOptionsDto.take,
+      // skip: (pageOptionsDto.page - 1) * pageOptionsDto.take,
+      // take: pageOptionsDto.take,
     });
 
-    const count = await this.courseReportRepository.count();
+    // const count = await this.courseReportRepository.count();
 
-    return { count: count, entities: entities };
+    // return { count: count, entities: entities };
+    return entities;
   }
 }

@@ -13,9 +13,15 @@ export class CategoryRepository {
     private categoryRepository: Repository<Category>,
   ) {}
 
-  async getAllCategories(active: boolean): Promise<Category[]> {
+  async getAllCategoriesByActive(active: boolean): Promise<Category[]> {
     return this.categoryRepository.find({
       where: { active },
+      relations: { courses: true },
+    });
+  }
+
+  async getAllCategories(): Promise<Category[]> {
+    return this.categoryRepository.find({
       relations: { courses: true },
     });
   }

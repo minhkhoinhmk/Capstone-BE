@@ -34,6 +34,7 @@ export class OrderRepository {
         user: true,
         paymentMethod: true,
         orderDetails: { course: true },
+        transaction: true,
       },
     });
   }

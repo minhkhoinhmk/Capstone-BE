@@ -10,11 +10,21 @@ export class CategoryService {
 
   constructor(private categoryRepository: CategoryRepository) {}
 
-  async getAllcategories(active: string): Promise<CategoryDto[]> {
+  async getAllcategoriesByActive(active: string): Promise<CategoryDto[]> {
     const categoriesDto: CategoryDto[] = [];
-    const categories = await this.categoryRepository.getAllCategories(
+    const categories = await this.categoryRepository.getAllCategoriesByActive(
       active === 'true' ? true : false,
     );
+    categories.forEach((category) => {
+      const categoryDto = this.configCategoryDto(category);
+      categoriesDto.push(categoryDto);
+    });
+    return categoriesDto;
+  }
+
+  async getAllcategoriesByAdmin(): Promise<CategoryDto[]> {
+    const categoriesDto: CategoryDto[] = [];
+    const categories = await this.categoryRepository.getAllCategories();
     categories.forEach((category) => {
       const categoryDto = this.configCategoryDto(category);
       categoriesDto.push(categoryDto);
@@ -38,7 +48,7 @@ export class CategoryService {
     id: string,
     request: CreateCategotyRequest,
   ): Promise<void> {
-    let category = await this.categoryRepository.getCategoryById(id);
+    const category = await this.categoryRepository.getCategoryById(id);
 
     category.name = request.name;
 

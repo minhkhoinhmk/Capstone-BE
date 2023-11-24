@@ -1,5 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Expose } from 'class-transformer';
+import { Course } from 'src/course/entity/course.entity';
 
 export class CourseReportResponse {
   @ApiProperty({ type: 'string', description: 'Course report ID' })
@@ -33,4 +34,8 @@ export class CourseReportResponse {
   @ApiProperty({ type: 'string', description: 'Username or email' })
   @Expose()
   userNameOrEmail: string;
+
+  @ApiProperty({ type: Course, description: 'Course' })
+  @Expose()
+  course: Course;
 }

@@ -23,9 +23,6 @@ import { NameRole } from 'src/role/enum/name-role.enum';
 import { FilterCourseByCustomerResponse } from './dto/reponse/filter-by-customer.dto';
 import { User } from 'src/user/entity/user.entity';
 import { Request } from 'express';
-import { PageOptionsDto } from 'src/common/pagination/dto/pageOptionsDto';
-import { FilterCourseByStaffResponse } from './dto/reponse/filter-by-staff.dt';
-import { CourseStatus } from './type/enum/CourseStatus';
 import { SetStatusRequest } from './dto/request/set-status-request.dto';
 import { Course } from './entity/course.entity';
 
@@ -95,10 +92,7 @@ export class CourseController {
   @Get('/staff/list')
   @UseGuards(AuthGuard(), RolesGuard)
   @HasRoles(NameRole.Staff)
-  async getCoursesForStaff(
-    @Query('status') status: CourseStatus,
-    @Body() pageOption: PageOptionsDto,
-  ): Promise<PageDto<FilterCourseByStaffResponse>> {
-    return await this.courseService.getCoursesForStaff(pageOption, status);
+  async getCoursesForStaff(): Promise<Course[]> {
+    return await this.courseService.getAllCoursesForStaff();
   }
 }

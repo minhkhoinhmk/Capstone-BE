@@ -108,6 +108,11 @@ export class OrderService {
     return orders;
   }
 
+  async findOrderByOrderId(orderId: string, user: User) {
+    const order = await this.orderRepository.getOrderById(orderId);
+    return order;
+  }
+
   // @Cron('0 0 * * *')
   @Cron(CronExpression.EVERY_30_SECONDS)
   async deletePedingOrder() {
