@@ -70,7 +70,7 @@ export class UserController {
     NameRole.Customer,
     NameRole.Admin,
     NameRole.Instructor,
-    NameRole.Instructor,
+    NameRole.Staff,
   )
   async uploadAvatar(
     @UploadedFile() file: Express.Multer.File,

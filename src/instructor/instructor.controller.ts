@@ -30,7 +30,6 @@ import { UpdateCourseRequest } from '../course/dto/request/update-course-request
 import { UpdatePriceCourseRequest } from 'src/course/dto/request/update-price-course-request.dto';
 import { UpdateBankRequest } from './dto/request/update-bank-request.dto';
 import { ViewInstructorResponse } from './dto/response/view-instructor-response.dto';
-import { IsEnum } from 'class-validator';
 import { InstructorStatus } from './enum/instructor-status.enum';
 import { SetInstructorStatusRequest } from './dto/request/set-instructor-status-request.dto';
 import { UpdateInstructorProfileRequest } from './dto/request/update-profile-request.dto';
