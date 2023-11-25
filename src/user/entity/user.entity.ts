@@ -20,6 +20,7 @@ import { Exclude, Expose } from 'class-transformer';
 import { Device } from 'src/device/entity/device.entity';
 import { CourseReport } from 'src/course-report/entity/course-report.entity';
 import { QuestionTopic } from 'src/question-topic/entity/question-topic.entity';
+import { TransactionPayOff } from 'src/transaction-pay-off/entity/transaction-pay-off.entity';
 
 @Entity()
 export class User {
@@ -147,4 +148,10 @@ export class User {
 
   @OneToMany(() => Post, (post) => post.updatedBy)
   updatedPosts: Post[];
+
+  @OneToMany(
+    () => TransactionPayOff,
+    (transactionPayOff) => transactionPayOff.user,
+  )
+  transactionPayOffs: TransactionPayOff[];
 }

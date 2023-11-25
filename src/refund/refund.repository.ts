@@ -24,6 +24,7 @@ export class RefundRepository {
       refundPrice: refundPrice,
       refundReason: request.refundReason,
       isApproved: false,
+      accountName: request.accountName,
       orderDetail: orderDetail,
     });
   }

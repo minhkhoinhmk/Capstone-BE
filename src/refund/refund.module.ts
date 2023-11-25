@@ -24,5 +24,6 @@ import { RefundMapper } from './mapper/refund.mapper';
   ],
   providers: [RefundService, RefundRepository, RefundMapper],
   controllers: [RefundController],
+  exports: [RefundRepository],
 })
 export class RefundModule {}

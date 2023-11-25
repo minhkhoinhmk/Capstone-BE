@@ -49,6 +49,8 @@ import { RefundModule } from './refund/refund.module';
 import { CourseReportModule } from './course-report/course-report.module';
 import { QuestionTopicModule } from './question-topic/question-topic.module';
 import { QuestionTopic } from './question-topic/entity/question-topic.entity';
+import { TransactionOrderDetailModule } from './transaction-order-detail/transaction-order-detail.module';
+import { TransactionPayOffModule } from './transaction-pay-off/transaction-pay-off.module';
 
 @Global()
 @Module({
@@ -149,6 +151,8 @@ import { QuestionTopic } from './question-topic/entity/question-topic.entity';
     RefundModule,
     CourseReportModule,
     QuestionTopicModule,
+    TransactionOrderDetailModule,
+    TransactionPayOffModule,
   ],
 })
 export class AppModule {}

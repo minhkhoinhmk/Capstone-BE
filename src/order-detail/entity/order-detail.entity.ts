@@ -3,6 +3,7 @@ import {
   Entity,
   JoinColumn,
   ManyToOne,
+  OneToMany,
   OneToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
@@ -11,6 +12,7 @@ import { PromotionCourse } from 'src/promotion-course/entity/promotion-course.en
 import { Order } from 'src/order/entity/order.entity';
 import { ApiProperty } from '@nestjs/swagger';
 import { Refund } from 'src/refund/entity/refund.entity';
+import { TransactionOrderDetail } from 'src/transaction-order-detail/entity/transaction-order-detail.entity';
 
 @Entity()
 export class OrderDetail {
@@ -51,6 +53,10 @@ export class OrderDetail {
   @Column()
   active: boolean;
 
+  @ApiProperty({ type: Boolean, description: 'Is payed for instructor' })
+  @Column({ default: false })
+  isPaymentForInstructor: boolean;
+
   @ManyToOne(() => Order, (order) => order.orderDetails)
   @JoinColumn({ name: 'orderId' })
   order: Order;
@@ -69,4 +75,11 @@ export class OrderDetail {
 
   @OneToOne(() => Refund, (refund) => refund.orderDetail)
   refund: Refund;
+
+  @OneToMany(
+    () => TransactionOrderDetail,
+    (transactionOrderDetail) => transactionOrderDetail.orderDetail,
+    { nullable: true },
+  )
+  transactionOrderDetails: TransactionOrderDetail[];
 }

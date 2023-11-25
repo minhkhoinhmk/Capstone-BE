@@ -14,6 +14,10 @@ export class RefundResponse {
   @Expose()
   accountNumber: string;
 
+  @ApiProperty({ type: 'string', description: 'Account name of user' })
+  @Expose()
+  accountName: string;
+
   @ApiProperty({ type: 'number', description: 'Refund price' })
   @Expose()
   refundPrice: number;

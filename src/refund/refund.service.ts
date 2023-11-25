@@ -19,6 +19,7 @@ import { RefundResponse } from './dto/response/refund-response.dto';
 import { PageOptionsDto } from 'src/common/pagination/dto/pageOptionsDto';
 import { PageDto } from 'src/common/pagination/dto/pageDto';
 import { PageMetaDto } from 'src/common/pagination/dto/pageMetaDto';
+import { MailerService } from '@nestjs-modules/mailer';
 
 @Injectable()
 export class RefundService {
@@ -32,6 +33,7 @@ export class RefundService {
     private readonly noftificationService: NotificationService,
     private readonly deviceRepository: DeviceRepository,
     private readonly refundMapper: RefundMapper,
+    private mailsService: MailerService,
   ) {}
 
   async createRefund(
@@ -217,5 +219,15 @@ export class RefundService {
     refund.isApproved = true;
 
     this.refundRepository.saveRefund(refund);
+
+    await this.mailsService.sendMail({
+      to: refund.orderDetail.order.user.email,
+      subject: 'Đồng ý xét duyệt',
+      template: './approve',
+      context: {
+        SUBJECT: 'hoàn tiền khóa học',
+        CONTENT: 'Đã được chấp thuận',
+      },
+    });
   }
 }
