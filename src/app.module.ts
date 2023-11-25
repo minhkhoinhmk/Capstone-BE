@@ -49,6 +49,7 @@ import { RefundModule } from './refund/refund.module';
 import { CourseReportModule } from './course-report/course-report.module';
 import { QuestionTopicModule } from './question-topic/question-topic.module';
 import { QuestionTopic } from './question-topic/entity/question-topic.entity';
+import { StaffModule } from './staff/staff.module';
 
 @Global()
 @Module({
@@ -149,6 +150,7 @@ import { QuestionTopic } from './question-topic/entity/question-topic.entity';
     RefundModule,
     CourseReportModule,
     QuestionTopicModule,
+    StaffModule,
   ],
 })
 export class AppModule {}

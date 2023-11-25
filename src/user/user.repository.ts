@@ -8,6 +8,7 @@ import { UserRegisterRequest } from 'src/auth/dto/request/customer-register.requ
 import { UserUpdateRequest } from './dto/request/user-update.request.dto';
 import { NameRole } from 'src/role/enum/name-role.enum';
 import { InstructorStatus } from 'src/instructor/enum/instructor-status.enum';
+import { CreateStaffRequest } from 'src/staff/dto/request/create-staff-request.dto';
 
 @Injectable()
 export class UserRepository {
@@ -82,6 +83,28 @@ export class UserRepository {
     return user;
   }
 
+  async createStaff(
+    createStaffRequest: CreateStaffRequest,
+    role: Role,
+  ): Promise<User> {
+    const { firstName, lastName, middleName, password, phoneNumber, userName } =
+      createStaffRequest;
+
+    const staff = this.userRepository.create({
+      firstName: firstName,
+      lastName: lastName,
+      middleName: middleName,
+      password: await hashPassword(password),
+      phoneNumber: phoneNumber,
+      userName: userName,
+      active: true,
+      isConfirmedEmail: true,
+      role: role,
+    });
+
+    return staff;
+  }
+
   async getCustomerNotConfirmed(): Promise<User[]> {
     const customers = await this.userRepository.find({
       where: {
@@ -142,5 +165,11 @@ export class UserRepository {
         where: { role: { name: NameRole.Instructor }, status: status },
       });
     }
+  }
+
+  async getStaff(): Promise<User[]> {
+    return await this.userRepository.find({
+      where: { role: { name: NameRole.Staff } },
+    });
   }
 }
