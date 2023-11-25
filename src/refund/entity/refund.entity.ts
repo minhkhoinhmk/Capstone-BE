@@ -25,6 +25,10 @@ export class Refund {
 
   @Column()
   @Expose()
+  accountName: string;
+
+  @Column()
+  @Expose()
   refundPrice: number;
 
   @Column()
@@ -41,6 +45,10 @@ export class Refund {
   })
   @Expose()
   insertedDate: Date;
+
+  @Column({ default: false })
+  @Expose()
+  isStaffRefund: boolean;
 
   @OneToOne(() => OrderDetail, (orderDetail) => orderDetail.refund)
   @JoinColumn({ name: 'orderDetailId' })

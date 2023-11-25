@@ -40,7 +40,6 @@ export class CreatePaymentURLDto {
   })
   readonly language: string;
 
-  @IsUrl({ require_tld: false })
   @IsOptional()
   @ApiPropertyOptional({ name: 'Return URl', description: 'Đường dẫn trả về' })
   readonly returnUrl?: string;

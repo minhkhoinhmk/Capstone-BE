@@ -35,6 +35,27 @@ export class OrderDetailRepository {
     });
   }
 
+  async getOrderDetailByInstructor(id: string) {
+    return this.orderDetailRepository.find({
+      where: { course: { user: { id } }, isPaymentForInstructor: false },
+      relations: { course: { user: true }, order: { user: true } },
+    });
+  }
+
+  async getRefundInOrderDetailByInstructor(id: string) {
+    return this.orderDetailRepository.find({
+      where: {
+        course: { user: { id } },
+        refund: { isStaffRefund: false, isApproved: true },
+      },
+      relations: {
+        refund: true,
+        course: { user: true },
+        order: { user: true },
+      },
+    });
+  }
+
   // async createAndSaveCart(user: User) {
   //   const cart = await this.createCart(user);
   //   return this.saveCart(cart);

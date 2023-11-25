@@ -49,6 +49,8 @@ import { RefundModule } from './refund/refund.module';
 import { CourseReportModule } from './course-report/course-report.module';
 import { QuestionTopicModule } from './question-topic/question-topic.module';
 import { QuestionTopic } from './question-topic/entity/question-topic.entity';
+import { TransactionOrderDetailModule } from './transaction-order-detail/transaction-order-detail.module';
+import { TransactionPayOffModule } from './transaction-pay-off/transaction-pay-off.module';
 import { StaffModule } from './staff/staff.module';
 
 @Global()
@@ -150,6 +152,8 @@ import { StaffModule } from './staff/staff.module';
     RefundModule,
     CourseReportModule,
     QuestionTopicModule,
+    TransactionOrderDetailModule,
+    TransactionPayOffModule,
     StaffModule,
   ],
 })

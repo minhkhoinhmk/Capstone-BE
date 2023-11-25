@@ -12,6 +12,11 @@ export class CreateRefundRequest {
   @IsNotEmpty()
   accountNumber: string;
 
+  @ApiProperty({ type: 'string', description: "user's account name" })
+  @IsString()
+  @IsNotEmpty()
+  accountName: string;
+
   @ApiProperty({ type: 'string', description: "user's refund reason" })
   @IsString()
   @IsNotEmpty()
