@@ -172,4 +172,10 @@ export class UserRepository {
       where: { role: { name: NameRole.Staff } },
     });
   }
+
+  async getCustomers(): Promise<User[]> {
+    return await this.userRepository.find({
+      where: { role: { name: NameRole.Customer } },
+    });
+  }
 }

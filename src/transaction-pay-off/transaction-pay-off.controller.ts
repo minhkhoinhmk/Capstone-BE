@@ -6,8 +6,10 @@ import { HasRoles } from 'src/auth/roles.decorator';
 import { NameRole } from 'src/role/enum/name-role.enum';
 import { ViewTransactionPayOffResponse } from './dto/response/view-transaction-pay-off-response.dto';
 import { Request } from 'express';
+import { ApiTags } from '@nestjs/swagger';
 
 @Controller('transaction-pay-off')
+@ApiTags('Transaction-Pay-Off')
 export class TransactionPayOffController {
   constructor(
     private readonly transactionPayOffService: TransactionPayOffService,

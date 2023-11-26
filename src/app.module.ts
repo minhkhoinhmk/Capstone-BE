@@ -1,7 +1,5 @@
 import { Global, Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { Character } from './character/entity/character.entity';
-import { CharacterModule } from './character/character.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { configValidationSchema } from './config.schema';
 import { AuthModule } from './auth/auth.module';
@@ -83,7 +81,6 @@ import { QuestionAnswer } from './question-answer/entity/question-answer.entity'
           synchronize: true,
           timezone: 'Asia/Ho_Chi_Minh',
           entities: [
-            Character,
             User,
             Post,
             Role,
@@ -124,7 +121,6 @@ import { QuestionAnswer } from './question-answer/entity/question-answer.entity'
         },
       }),
     }),
-    CharacterModule,
     AuthModule,
     UserModule,
     RoleModule,
