@@ -21,6 +21,7 @@ import { Device } from 'src/device/entity/device.entity';
 import { CourseReport } from 'src/course-report/entity/course-report.entity';
 import { QuestionTopic } from 'src/question-topic/entity/question-topic.entity';
 import { TransactionPayOff } from 'src/transaction-pay-off/entity/transaction-pay-off.entity';
+import { QuestionAnswer } from 'src/question-answer/entity/question-answer.entity';
 
 @Entity()
 export class User {
@@ -103,6 +104,10 @@ export class User {
 
   @Column({ nullable: true })
   @Expose()
+  accountHolderName: string;
+
+  @Column({ nullable: true })
+  @Expose()
   reason: string;
 
   @Column({ nullable: true })
@@ -145,6 +150,9 @@ export class User {
 
   @OneToMany(() => QuestionTopic, (questionTopic) => questionTopic.user)
   questionTopics: QuestionTopic[];
+
+  @OneToMany(() => QuestionAnswer, (questionAnswer) => questionAnswer.user)
+  questionAnswers: QuestionAnswer[];
 
   @OneToMany(() => Post, (post) => post.updatedBy)
   updatedPosts: Post[];

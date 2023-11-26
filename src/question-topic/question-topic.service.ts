@@ -86,7 +86,10 @@ export class QuestionTopicService {
         );
 
       responses.push(
-        this.questionTopicMapper.filterQuestionTopicResponse(questionTopic),
+        this.questionTopicMapper.filterQuestionTopicResponse(
+          questionTopic,
+          questionTopic.questionAnswers.length,
+        ),
       );
     }
 
@@ -164,7 +167,10 @@ export class QuestionTopicService {
       }
     }
 
-    return this.questionTopicMapper.filterQuestionTopicResponse(questionTopic);
+    return this.questionTopicMapper.filterQuestionTopicResponse(
+      questionTopic,
+      questionTopic.questionAnswers.length,
+    );
   }
 
   // async getDetail(courseId: string): Promise<CourseDetailResponse> {

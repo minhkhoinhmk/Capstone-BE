@@ -4,9 +4,13 @@ import { QuestionTopic } from '../entity/question-topic.entity';
 
 @Mapper()
 export class QuestionTopicMapper {
-  @Mappings()
+  @Mappings({
+    target: 'totalLengthQuestionAnswers',
+    source: 'lengthQuestionAnswers',
+  })
   filterQuestionTopicResponse(
     questionTopic: QuestionTopic,
+    lengthQuestionAnswers: number,
   ): QuestionTopicResponse {
     return new QuestionTopicResponse();
   }

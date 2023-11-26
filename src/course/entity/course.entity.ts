@@ -18,6 +18,7 @@ import {
   ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn,
+  UpdateDateColumn,
 } from 'typeorm';
 import { CourseStatus } from '../type/enum/CourseStatus';
 
@@ -55,7 +56,7 @@ export class Course {
   @Expose()
   totalChapter: number;
 
-  @Column({ nullable: true })
+  @UpdateDateColumn({ type: 'timestamp' })
   @Expose()
   publishedDate: Date;
 

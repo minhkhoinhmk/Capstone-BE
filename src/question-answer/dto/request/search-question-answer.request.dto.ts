@@ -9,23 +9,12 @@ import {
 import { PageOptionsDto } from 'src/common/pagination/dto/pageOptionsDto';
 import SortField from 'src/question-topic/type/enum/SortField';
 
-export class SearchQuestionTopicRequest {
-  @IsString()
-  @IsNotEmpty()
-  @ApiProperty({ type: String, description: 'courseId' })
-  courseId: string;
-
+export class SearchQuestionAnswerRequest {
   @IsString()
   @IsNotEmpty()
   @IsOptional()
-  @ApiProperty({ type: String, description: 'chapterLectureId' })
-  chapterLectureId?: string;
-
-  @IsString()
-  @IsNotEmpty()
-  @IsOptional()
-  @ApiPropertyOptional({ type: String, description: 'search' })
-  search?: string;
+  @ApiProperty({ type: String, description: 'questionTopicId' })
+  questionTopicId?: string;
 
   @IsBoolean()
   active: boolean;

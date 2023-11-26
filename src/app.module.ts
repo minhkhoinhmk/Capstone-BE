@@ -50,6 +50,8 @@ import { QuestionTopic } from './question-topic/entity/question-topic.entity';
 import { TransactionOrderDetailModule } from './transaction-order-detail/transaction-order-detail.module';
 import { TransactionPayOffModule } from './transaction-pay-off/transaction-pay-off.module';
 import { StaffModule } from './staff/staff.module';
+import { QuestionAnswerModule } from './question-answer/question-answer.module';
+import { QuestionAnswer } from './question-answer/entity/question-answer.entity';
 
 @Global()
 @Module({
@@ -90,6 +92,7 @@ import { StaffModule } from './staff/staff.module';
             OrderDetail,
             PaymentMethod,
             QuestionTopic,
+            QuestionAnswer,
           ],
         };
       },
@@ -151,6 +154,7 @@ import { StaffModule } from './staff/staff.module';
     TransactionOrderDetailModule,
     TransactionPayOffModule,
     StaffModule,
+    QuestionAnswerModule,
   ],
 })
 export class AppModule {}

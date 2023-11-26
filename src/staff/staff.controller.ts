@@ -23,6 +23,7 @@ import { HasRoles } from 'src/auth/roles.decorator';
 import { NameRole } from 'src/role/enum/name-role.enum';
 import { ViewStaffrResponse } from './dto/response/view-staff-resonse.dto';
 import { UpdateStaffProfileRequest } from './dto/request/update-profile-request.dto';
+import { Request } from 'express';
 
 @Controller('staff')
 @ApiTags('Staff')

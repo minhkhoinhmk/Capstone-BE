@@ -1,5 +1,5 @@
 enum SortField {
-  RATING = 'rating',
+  INSERTED_DATE = 'insertedDate',
   UPDATED_DATE = 'updatedDate',
 }
 

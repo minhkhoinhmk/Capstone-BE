@@ -1,9 +1,10 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { Course } from './entity/course.entity';
 import { InjectRepository } from '@nestjs/typeorm';
-import { FindOptionsWhere, Repository } from 'typeorm';
+import { FindOptionsOrder, FindOptionsWhere, ILike, Repository } from 'typeorm';
 import { PageOptionsDto } from 'src/common/pagination/dto/pageOptionsDto';
 import SortField from './type/enum/SortField';
+import { GetCourseByInstructorRequest } from 'src/instructor/dto/request/get-course-by-instructor.request.dto';
 
 @Injectable()
 export class CourseRepository {
@@ -119,21 +120,31 @@ export class CourseRepository {
 
   async getCoursesByInstructorId(
     instructorId: string,
-    pageOptionsDto: PageOptionsDto,
+    body: GetCourseByInstructorRequest,
   ): Promise<{ count: number; entities: Course[] }> {
+    const { search, sortField, courseStatus, pageOptions } = body;
+
     const whereOptions: FindOptionsWhere<Course> = {
       user: {
         id: instructorId,
       },
     };
+    if (courseStatus) whereOptions.status = courseStatus;
+    if (search) whereOptions.title = ILike(`%${search}%`);
+
+    const orderOptions: FindOptionsOrder<Course> = {};
+    if (sortField) {
+      orderOptions[sortField] = pageOptions.order;
+    } else orderOptions.publishedDate = 'desc';
 
     const entities = await this.courseRepository.find({
       where: whereOptions,
       relations: {
         user: true,
       },
-      skip: (pageOptionsDto.page - 1) * pageOptionsDto.take,
-      take: pageOptionsDto.take,
+      order: orderOptions,
+      skip: (pageOptions.page - 1) * pageOptions.take,
+      take: pageOptions.take,
     });
 
     const count = await this.courseRepository.count({

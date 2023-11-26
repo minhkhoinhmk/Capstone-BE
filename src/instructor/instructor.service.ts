@@ -34,6 +34,7 @@ import { ViewInstructorResponse } from './dto/response/view-instructor-response.
 import { InstructorMapper } from './mapper/instructor.mapper';
 import { SetInstructorStatusRequest } from './dto/request/set-instructor-status-request.dto';
 import { UpdateInstructorProfileRequest } from './dto/request/update-profile-request.dto';
+import { GetCourseByInstructorRequest } from './dto/request/get-course-by-instructor.request.dto';
 
 @Injectable()
 export class InstructorService {
@@ -96,15 +97,17 @@ export class InstructorService {
         },
       });
 
+      console.log('alo 21356');
+
       this.logger.log(
         `method=uploadCertification, uploadCertification succeed`,
       );
-      return { staus: true };
+      return { status: true };
     } catch (error) {
       this.logger.error(
         `method=uploadCertification, uploadCertification failed: ${error.message}`,
       );
-      return { staus: false };
+      return { status: false };
     }
   }
 
@@ -219,10 +222,10 @@ export class InstructorService {
 
   async getCoursesByInstructorId(
     id: string,
-    pageOption: PageOptionsDto,
+    body: GetCourseByInstructorRequest,
   ): Promise<PageDto<FilterCourseByInstructorResponse>> {
     const { count, entities } =
-      await this.courseRepository.getCoursesByInstructorId(id, pageOption);
+      await this.courseRepository.getCoursesByInstructorId(id, body);
 
     const responses: FilterCourseByInstructorResponse[] = [];
 
@@ -236,7 +239,7 @@ export class InstructorService {
 
     const pageMetaDto = new PageMetaDto({
       itemCount,
-      pageOptionsDto: pageOption,
+      pageOptionsDto: body.pageOptions,
     });
 
     this.logger.log(`method=getCoursesByInstructorId, totalItems=${count}`);
@@ -255,6 +258,7 @@ export class InstructorService {
     } else {
       instructor.accountNumber = request.accountNumber;
       instructor.bank = request.bank;
+      instructor.accountHolderName = request.accountHolderName;
 
       await this.userRepository.save(instructor);
 
@@ -267,7 +271,7 @@ export class InstructorService {
   async getInstructors(
     status: InstructorStatus,
   ): Promise<ViewInstructorResponse[]> {
-    let response: ViewInstructorResponse[] = [];
+    const response: ViewInstructorResponse[] = [];
 
     const instructors = await this.userRepository.getInstructors(status);
 
@@ -354,6 +358,7 @@ export class InstructorService {
     instructor.phoneNumber = request.phoneNumber;
     instructor.bank = request.bank;
     instructor.accountNumber = request.accountNumber;
+    instructor.accountHolderName = request.accountHolderName;
 
     await this.userRepository.save(instructor);
   }

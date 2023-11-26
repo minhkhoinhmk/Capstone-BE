@@ -11,4 +11,12 @@ export class UpdateBankRequest {
   @IsString()
   @IsNotEmpty()
   accountNumber: string;
+
+  @ApiProperty({
+    type: 'string',
+    description: "instructor's account holder name",
+  })
+  @IsString()
+  @IsNotEmpty()
+  accountHolderName: string;
 }

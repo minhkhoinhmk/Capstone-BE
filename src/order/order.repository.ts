@@ -33,7 +33,7 @@ export class OrderRepository {
       relations: {
         user: true,
         paymentMethod: true,
-        orderDetails: { course: true },
+        orderDetails: { course: true, promotionCourse: true },
         transaction: true,
       },
     });
@@ -46,6 +46,9 @@ export class OrderRepository {
         user: true,
         paymentMethod: true,
         orderDetails: { course: true },
+      },
+      order: {
+        updatedDate: 'DESC',
       },
     });
   }
