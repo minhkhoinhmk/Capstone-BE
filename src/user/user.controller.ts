@@ -3,6 +3,7 @@ import {
   ClassSerializerInterceptor,
   Controller,
   Get,
+  Param,
   Patch,
   Post,
   Req,
@@ -87,5 +88,21 @@ export class UserController {
         request['user'] as User,
       );
     }
+  }
+
+  @Get('/customer/list')
+  @UseInterceptors(ClassSerializerInterceptor)
+  @UseGuards(AuthGuard(), RolesGuard)
+  @HasRoles(NameRole.Admin)
+  getCustomers(): Promise<User[]> {
+    return this.userService.getCustomers();
+  }
+
+  @Get('/customer/:id')
+  @UseInterceptors(ClassSerializerInterceptor)
+  @UseGuards(AuthGuard(), RolesGuard)
+  @HasRoles(NameRole.Admin)
+  getCustomerById(@Param('id') id: string): Promise<User> {
+    return this.userService.getCustomersById(id);
   }
 }

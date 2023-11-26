@@ -23,7 +23,7 @@ export class Refund {
   @Expose()
   accountNumber: string;
 
-  @Column()
+  @Column({ nullable: true })
   @Expose()
   accountName: string;
 
