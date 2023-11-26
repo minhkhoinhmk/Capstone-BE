@@ -1,17 +1,13 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Expose } from 'class-transformer';
-import { ChapterLecture } from 'src/chapter-lecture/entity/chapter-lecture.entity';
 import { Learner } from 'src/learner/entity/learner.entity';
+import { QuestionTopic } from 'src/question-topic/entity/question-topic.entity';
 import { User } from 'src/user/entity/user.entity';
 
-export class QuestionTopicResponse {
+export class QuestionAnswerResponse {
   @ApiProperty()
   @Expose()
   id: string;
-
-  @ApiProperty()
-  @Expose()
-  title: string;
 
   @ApiProperty()
   @Expose()
@@ -27,19 +23,11 @@ export class QuestionTopicResponse {
 
   @ApiProperty()
   @Expose()
-  type: string;
-
-  @ApiProperty()
-  @Expose()
-  rating: number;
-
-  @ApiProperty()
-  @Expose()
   active: boolean;
 
   @ApiProperty()
   @Expose()
-  chapterLecture: ChapterLecture;
+  questionTopic: QuestionTopic;
 
   @ApiProperty()
   @Expose()
@@ -48,8 +36,4 @@ export class QuestionTopicResponse {
   @ApiProperty()
   @Expose()
   learner: Learner | null;
-
-  @ApiProperty()
-  @Expose()
-  totalLengthQuestionAnswers: number;
 }

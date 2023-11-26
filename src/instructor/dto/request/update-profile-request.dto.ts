@@ -31,4 +31,9 @@ export class UpdateInstructorProfileRequest {
   @IsString()
   @IsNotEmpty()
   accountNumber: string;
+
+  @ApiProperty()
+  @IsString()
+  @IsNotEmpty()
+  accountHolderName: string;
 }

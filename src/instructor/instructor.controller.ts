@@ -33,6 +33,7 @@ import { ViewInstructorResponse } from './dto/response/view-instructor-response.
 import { InstructorStatus } from './enum/instructor-status.enum';
 import { SetInstructorStatusRequest } from './dto/request/set-instructor-status-request.dto';
 import { UpdateInstructorProfileRequest } from './dto/request/update-profile-request.dto';
+import { GetCourseByInstructorRequest } from './dto/request/get-course-by-instructor.request.dto';
 
 @Controller('instructor')
 @ApiTags('Intstructor')
@@ -140,16 +141,16 @@ export class InstructorController {
     }
   }
 
+  @Post('/course/own')
   @UseGuards(AuthGuard(), RolesGuard)
   @HasRoles(NameRole.Instructor)
-  @Post('/course/own')
   getCoursesByInstructor(
-    @Body() pageOption: PageOptionsDto,
+    @Body() body: GetCourseByInstructorRequest,
     @Req() request: Request,
   ): Promise<PageDto<FilterCourseByInstructorResponse>> {
     return this.instructorService.getCoursesByInstructorId(
       request['user']['id'],
-      pageOption,
+      body,
     );
   }
 

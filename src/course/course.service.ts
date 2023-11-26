@@ -22,6 +22,8 @@ import { FilterCourseByStaffResponse } from './dto/reponse/filter-by-staff.dt';
 import { PageOptionsDto } from 'src/common/pagination/dto/pageOptionsDto';
 import { SetStatusRequest } from './dto/request/set-status-request.dto';
 import { MailerService } from '@nestjs-modules/mailer';
+import * as cheerio from 'cheerio';
+import { ChapterLecture } from 'src/chapter-lecture/entity/chapter-lecture.entity';
 
 @Injectable()
 export class CourseService {
@@ -249,21 +251,19 @@ export class CourseService {
   }
 
   async setStatusForCourse(request: SetStatusRequest): Promise<void> {
-    const course = await this.courseRepository.getCourseById(request.courseId);
+    const { courseId, reason, status } = request;
+    const course = await this.courseRepository.getCourseById(courseId);
 
-    if (
-      request.status === CourseStatus.BANNED ||
-      request.status === CourseStatus.REJECTED
-    ) {
-      if (request.reason === null || request.reason === '') {
+    if (status === CourseStatus.BANNED || status === CourseStatus.REJECTED) {
+      if (!reason) {
         throw new BadRequestException('Reason can not be null');
       }
     }
 
-    course.status = request.status;
-    course.reason = request.reason;
+    course.status = status;
+    course.reason = reason;
 
-    if (request.status === CourseStatus.BANNED) {
+    if (status === CourseStatus.BANNED) {
       course.active = false;
       await this.mailsService.sendMail({
         to: course.user.email,
@@ -275,7 +275,7 @@ export class CourseService {
           REASON: request.reason,
         },
       });
-    } else if (request.status === CourseStatus.REJECTED) {
+    } else if (status === CourseStatus.REJECTED) {
       course.active = false;
       await this.mailsService.sendMail({
         to: course.user.email,
@@ -294,5 +294,92 @@ export class CourseService {
     this.logger.log(
       `method=setStatusForCourse, set status course with id=${request.courseId} successfully`,
     );
+  }
+
+  async checkCourseCreateValid(courseId: string) {
+    const course = await this.courseRepository.getCourseById(courseId);
+    const msgErrors = [];
+    const minChapterLectures = 6;
+
+    if (!course) {
+      this.logger.error(`Course with id ${courseId} not found`);
+      throw new NotFoundException(
+        `method=checkCourseCreateValid, Course with id ${courseId} not found`,
+      );
+    }
+
+    if (
+      !course.title ||
+      !course.description ||
+      !course.prepareMaterial ||
+      !course.thumbnailUrl ||
+      course.title.trim() === '' ||
+      cheerio.load(course.description).root().text().length === 0 ||
+      cheerio.load(course.prepareMaterial).root().text().length === 0
+    )
+      msgErrors.push(
+        `Tiêu đề, Miêu tả, Các Yêu cầu cần thiết hoặc Hình ảnh khóa học đang trống`,
+      );
+
+    if (
+      course.price === null ||
+      course.price < 10000 ||
+      course.price > 10000000
+    )
+      msgErrors.push(
+        `Giá khóa học đang trống và 10.000VND <= giá khóa học <= 10.000.000VND`,
+      );
+
+    if (!course.level || !course.category)
+      msgErrors.push('Thể loại hoặc cấp độ đang trống');
+
+    const chapterLectures = course.chapterLectures.filter(
+      (lecture) => lecture.active,
+    );
+
+    if (chapterLectures.length === 0)
+      msgErrors.push(`Bạn hiện chưa tạo bài giảng nào`);
+    else {
+      if (chapterLectures.length < minChapterLectures)
+        msgErrors.push(`Số lượng bài giảng nhỏ nhất là ${minChapterLectures}`);
+
+      let numsOfPreview = 0;
+      for (const chapter of chapterLectures) {
+        if (chapter.isPreviewed) numsOfPreview++;
+        if (
+          !chapter.title ||
+          !chapter.description ||
+          chapter.title.trim() === '' ||
+          chapter.description.trim() === '' ||
+          (!chapter.video && !chapter.resource)
+        )
+          msgErrors.push(
+            `Bài giảng ${chapter.index} ${chapter.title} có Tiêu đề, Miêu tả trống. Hoặc chưa có video bài giảng hoặc file bài giảng`,
+          );
+      }
+
+      if (
+        chapterLectures.length >= 1 &&
+        chapterLectures.length <= 10 &&
+        numsOfPreview > 1
+      )
+        msgErrors.push(
+          `Nếu Số lượng bài giảng nhỏ hơn 10 thì chỉ được xem trước 1 bài giảng`,
+        );
+      else if (chapterLectures.length > 10 && numsOfPreview > 2)
+        msgErrors.push(
+          `Nếu Số lượng bài giảng nhỏ hơn 10 thì chỉ được xem trước 2 bài giảng`,
+        );
+    }
+
+    if (msgErrors.length === 0) {
+      course.status = CourseStatus.PENDING;
+      await this.courseRepository.saveCourse(course);
+    }
+
+    this.logger.log(
+      `method=checkCourseCreateValid, totalLength of messages errors: ${msgErrors.length}`,
+    );
+    return { msgErrors };
   }
 }

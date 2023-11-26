@@ -1,34 +1,24 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import {
-  IsBoolean,
+  IsArray,
   IsEnum,
   IsNotEmpty,
   IsOptional,
   IsString,
 } from 'class-validator';
 import { PageOptionsDto } from 'src/common/pagination/dto/pageOptionsDto';
-import SortField from 'src/question-topic/type/enum/SortField';
+import { CourseStatus } from 'src/course/type/enum/CourseStatus';
+import SortField from 'src/course/type/enum/SortField';
 
-export class SearchQuestionTopicRequest {
-  @IsString()
-  @IsNotEmpty()
-  @ApiProperty({ type: String, description: 'courseId' })
-  courseId: string;
-
-  @IsString()
-  @IsNotEmpty()
+export class GetCourseByInstructorRequest {
+  @IsEnum(CourseStatus)
   @IsOptional()
-  @ApiProperty({ type: String, description: 'chapterLectureId' })
-  chapterLectureId?: string;
+  courseStatus: CourseStatus;
 
   @IsString()
-  @IsNotEmpty()
   @IsOptional()
   @ApiPropertyOptional({ type: String, description: 'search' })
-  search?: string;
-
-  @IsBoolean()
-  active: boolean;
+  search: string;
 
   @IsEnum(SortField)
   @IsOptional()

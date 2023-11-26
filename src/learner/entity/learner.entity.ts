@@ -2,6 +2,7 @@ import { CourseFeedback } from 'src/course-feedback/entity/course-feedbacl.entit
 import { CourseReport } from 'src/course-report/entity/course-report.entity';
 import { Device } from 'src/device/entity/device.entity';
 import { LearnerCourse } from 'src/learner-course/entity/learner-course.entity';
+import { QuestionAnswer } from 'src/question-answer/entity/question-answer.entity';
 import { QuestionTopic } from 'src/question-topic/entity/question-topic.entity';
 import { UserLecture } from 'src/user-lecture/entity/user-lecture.entity';
 import { User } from 'src/user/entity/user.entity';
@@ -73,4 +74,7 @@ export class Learner {
 
   @OneToMany(() => QuestionTopic, (questionTopic) => questionTopic.learner)
   questionTopics: QuestionTopic[];
+
+  @OneToMany(() => QuestionAnswer, (questionAnswer) => questionAnswer.learner)
+  questionAnswers: QuestionAnswer[];
 }

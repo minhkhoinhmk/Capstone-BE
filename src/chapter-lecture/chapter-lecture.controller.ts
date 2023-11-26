@@ -43,6 +43,15 @@ export class ChapterLectureController {
     );
   }
 
+  @Get(':chapterLectureId')
+  findByChapterLectureId(
+    @Param('chapterLectureId') chapterLectureId: string,
+  ): Promise<ChapterLecture> {
+    return this.chapterLectureService.getChapterLectureByChapterLectureId(
+      chapterLectureId,
+    );
+  }
+
   @Get('/courses/learner/study')
   @UseGuards(AuthGuard(), RolesGuard)
   @HasRoles(NameRole.Learner, NameRole.Customer)

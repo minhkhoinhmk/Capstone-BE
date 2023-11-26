@@ -56,6 +56,10 @@ export class ViewInstructorResponse {
 
   @ApiProperty()
   @Expose()
+  accountHolderName: string;
+
+  @ApiProperty()
+  @Expose()
   certificateUrl: string;
 
   @ApiProperty()

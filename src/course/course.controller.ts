@@ -3,9 +3,9 @@ import {
   Controller,
   Get,
   Param,
+  Patch,
   Post,
   Put,
-  Query,
   Req,
   UseGuards,
 } from '@nestjs/common';
@@ -82,7 +82,7 @@ export class CourseController {
     );
   }
 
-  @Put('/status')
+  @Patch('/status')
   @UseGuards(AuthGuard(), RolesGuard)
   @HasRoles(NameRole.Staff)
   async banCourse(@Body() request: SetStatusRequest): Promise<void> {
@@ -94,5 +94,12 @@ export class CourseController {
   @HasRoles(NameRole.Staff)
   async getCoursesForStaff(): Promise<Course[]> {
     return await this.courseService.getAllCoursesForStaff();
+  }
+
+  @Get('/instructor/create/valid/:courseId')
+  @UseGuards(AuthGuard(), RolesGuard)
+  @HasRoles(NameRole.Instructor)
+  checkCourseCreateValid(@Param('courseId') courseId: string) {
+    return this.courseService.checkCourseCreateValid(courseId);
   }
 }

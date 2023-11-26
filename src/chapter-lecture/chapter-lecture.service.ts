@@ -42,6 +42,16 @@ export class ChapterLectureService {
     return chapterLectures;
   }
 
+  async getChapterLectureByChapterLectureId(
+    chapterLectureId: string,
+  ): Promise<ChapterLecture> {
+    const chapterLecture =
+      await this.chapterLectureRepository.getChapterLectureById(
+        chapterLectureId,
+      );
+    return chapterLecture;
+  }
+
   async getChapterLectureByLearnerOrCustomer(
     userId: string,
     courseId: string,

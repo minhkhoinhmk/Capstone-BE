@@ -30,6 +30,11 @@ export class QuestionTopicRepository {
 
     const findOptionsWhere: FindOptionsWhere<QuestionTopic> = {
       active: searchCriterias.active,
+      chapterLecture: {
+        course: {
+          id: searchCriterias.courseId,
+        },
+      },
     };
     const findOptionsOrders: FindOptionsOrder<QuestionTopic> = {};
 
@@ -54,6 +59,7 @@ export class QuestionTopicRepository {
         chapterLecture: true,
         user: true,
         learner: true,
+        questionAnswers: true,
       },
     };
 

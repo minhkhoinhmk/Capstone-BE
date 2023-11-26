@@ -58,14 +58,16 @@ export class AuthService {
     // Check user isConfirmedEmail and learner is not check that
     if (user && (await bcrypt.compare(password, user.password))) {
       if (!user.active || (user.role?.name && !user.isConfirmedEmail))
-        throw new BadRequestException(`This account is not activated`);
+        throw new BadRequestException(`Tài khoản này vẫn chưa được kích hoạt`);
+      // throw new BadRequestException(`This account is not activated`);
 
       const tokensAndCount = await this.jwtStoreRepository.getTokenAndCount(
         user.id,
       );
       if (tokensAndCount >= 3)
         throw new BadRequestException(
-          `This account is already logged in current 3 devices. Please logout before continue logging in`,
+          'Tài khoản này đã đăng nhập trên 3 thiết bị hiện tại. Vui lòng đăng xuất trước khi tiếp tục đăng nhập.',
+          // `This account is already logged in current 3 devices. Please logout before continue logging in`,
         );
 
       const payload: JwtPayload = {

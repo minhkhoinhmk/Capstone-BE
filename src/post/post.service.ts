@@ -48,7 +48,6 @@ export class PostService {
     post.updatedBy = user;
     if (title) post.title = title;
     if (description) post.description = description;
-    console.log(active);
     if (!isUndefined(active)) post.active = active;
     if (resources) {
       try {
