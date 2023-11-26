@@ -91,4 +91,12 @@ export class UserService {
       this.logger.log(`method=uploadThumbnail, error:${error.message}`);
     }
   }
+
+  async getCustomers(): Promise<User[]> {
+    return await this.userRepository.getCustomers();
+  }
+
+  async getCustomersById(id: string): Promise<User> {
+    return await this.userRepository.getUserById(id);
+  }
 }

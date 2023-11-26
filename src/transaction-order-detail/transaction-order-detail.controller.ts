@@ -5,8 +5,10 @@ import { AuthGuard } from '@nestjs/passport';
 import { RolesGuard } from 'src/auth/role.guard';
 import { HasRoles } from 'src/auth/roles.decorator';
 import { NameRole } from 'src/role/enum/name-role.enum';
+import { ApiTags } from '@nestjs/swagger';
 
 @Controller('transaction-order-detail')
+@ApiTags('Transaction-Order-Detail')
 export class TransactionOrderDetailController {
   constructor(
     private readonly transactionOrderDetailService: TransactionOrderDetailService,

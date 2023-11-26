@@ -5,8 +5,10 @@ import { RolesGuard } from 'src/auth/role.guard';
 import { HasRoles } from 'src/auth/roles.decorator';
 import { NameRole } from 'src/role/enum/name-role.enum';
 import { Request } from 'express';
+import { ApiTags } from '@nestjs/swagger';
 
 @Controller('dynamodb')
+@ApiTags('Notification')
 export class DynamodbController {
   constructor(private readonly dynamoService: DynamodbService) {}
 
