@@ -29,11 +29,11 @@ export class LearnerCourseRepository {
   }
 
   async getLearnerCourseByCourseAndLearner(
-    course: Course,
-    learner: Learner,
+    courseId: string,
+    learnerId: string,
   ): Promise<LearnerCourse> {
     return await this.learnerCourseRepository.findOne({
-      where: { course: { id: course.id }, learner: { id: learner.id } },
+      where: { course: { id: courseId }, learner: { id: learnerId } },
       relations: { course: true, learner: true },
     });
   }

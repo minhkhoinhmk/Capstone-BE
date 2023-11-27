@@ -5,9 +5,24 @@ import { CourseFeedbackController } from './course-feedback.controller';
 import { CourseFeedbackService } from './course-feedback.service';
 import { CourseFeedbackRepository } from './course-feedback.repository';
 import { RoleModule } from 'src/role/role.module';
+import { LearnerCourseModule } from 'src/learner-course/learner-course.module';
+import { OrderModule } from 'src/order/order.module';
+import { LearnerModule } from 'src/learner/learner.module';
+import { UserModule } from 'src/user/user.module';
+import { CourseModule } from 'src/course/course.module';
+import { AuthModule } from 'src/auth/auth.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([CourseFeedback]), RoleModule],
+  imports: [
+    TypeOrmModule.forFeature([CourseFeedback]),
+    RoleModule,
+    LearnerCourseModule,
+    OrderModule,
+    LearnerModule,
+    UserModule,
+    CourseModule,
+    AuthModule,
+  ],
   controllers: [CourseFeedbackController],
   providers: [CourseFeedbackService, CourseFeedbackRepository],
 })

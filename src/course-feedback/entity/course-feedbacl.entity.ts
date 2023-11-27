@@ -35,7 +35,9 @@ export class CourseFeedback {
   @Column()
   active: boolean;
 
-  @ManyToOne(() => User, (user) => user.courseFeedbacks)
+  @ManyToOne(() => User, (user) => user.courseFeedbacks, {
+    nullable: true,
+  })
   @JoinColumn({ name: 'userId' })
   user: User;
 
@@ -43,7 +45,9 @@ export class CourseFeedback {
   @JoinColumn({ name: 'courseId' })
   course: Course;
 
-  @ManyToOne(() => Learner, (learner) => learner.courseFeedbacks)
+  @ManyToOne(() => Learner, (learner) => learner.courseFeedbacks, {
+    nullable: true,
+  })
   @JoinColumn({ name: 'learnerId' })
   learner: Learner;
 }

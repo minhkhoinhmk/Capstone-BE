@@ -56,7 +56,7 @@ export class Course {
   @Expose()
   totalChapter: number;
 
-  @UpdateDateColumn({ type: 'timestamp' })
+  @UpdateDateColumn({ type: 'timestamp', nullable: true })
   @Expose()
   publishedDate: Date;
 
