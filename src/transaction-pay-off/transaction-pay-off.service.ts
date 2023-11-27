@@ -34,7 +34,7 @@ export class TransactionPayOffService {
 
   async createTransactionPayOff(
     instructorId: string,
-    staffId: string,
+    adminId: string,
   ): Promise<void> {
     const orderDetailByInstructors =
       await this.orderDetailRepository.getOrderDetailByInstructor(instructorId);
@@ -62,7 +62,7 @@ export class TransactionPayOffService {
     ) {
       throw new NotFoundException(`Do not have any orders for this instructor`);
     } else {
-      let totalPaymentAmount: number = this.calculateTotalPaymentAmount(
+      const totalPaymentAmount: number = this.calculateTotalPaymentAmount(
         orderDetailByInstructors,
         refundInOrderDetailByInstructors,
       );
@@ -72,7 +72,7 @@ export class TransactionPayOffService {
       } else {
         const transactionPayOff =
           await this.transactionPayOfflRepository.createTransactionPayOff(
-            staffId,
+            adminId,
             totalPaymentAmount,
             user,
           );
@@ -98,7 +98,7 @@ export class TransactionPayOffService {
     orderDetailByInstructors: OrderDetail[],
     refundInOrderDetailByInstructors: OrderDetail[],
   ): number {
-    let totalPaymentAmount: number = 0;
+    let totalPaymentAmount = 0;
 
     orderDetailByInstructors.forEach((orderDetailByInstructor) => {
       totalPaymentAmount =
@@ -176,7 +176,7 @@ export class TransactionPayOffService {
   async getTransactionPayOff(
     instructorId: string,
   ): Promise<ViewTransactionPayOffResponse[]> {
-    let response: ViewTransactionPayOffResponse[] = [];
+    const response: ViewTransactionPayOffResponse[] = [];
 
     const transactionPayOffs =
       await this.transactionPayOfflRepository.getTransactionPayOff(

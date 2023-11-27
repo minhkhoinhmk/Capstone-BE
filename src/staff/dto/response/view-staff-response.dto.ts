@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Expose } from 'class-transformer';
 
-export class ViewStaffrResponse {
+export class ViewStaffResponse {
   @ApiProperty()
   @Expose()
   id: string;

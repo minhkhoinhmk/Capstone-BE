@@ -17,7 +17,7 @@ export class TransactionOrderDetailService {
   async viewTransactionOrderDetail(
     instructorId: string,
   ): Promise<ViewTransactionOrderDetailResponse[]> {
-    let response: ViewTransactionOrderDetailResponse[] = [];
+    const response: ViewTransactionOrderDetailResponse[] = [];
 
     const orderDetailByInstructors =
       await this.orderDetailRepository.getOrderDetailByInstructor(instructorId);
@@ -66,7 +66,7 @@ export class TransactionOrderDetailService {
   async getTransactionOrderDetailByTransactionPayOff(
     transactionPayOffId: string,
   ): Promise<ViewTransactionOrderDetailResponse[]> {
-    let response: ViewTransactionOrderDetailResponse[] = [];
+    const response: ViewTransactionOrderDetailResponse[] = [];
 
     const transactionOrderDetails =
       await this.transactionOrderDetailRepository.getTransactionOrderDetailsByTransactionPayOff(

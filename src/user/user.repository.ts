@@ -155,19 +155,13 @@ export class UserRepository {
     return this.save(user);
   }
 
-  async getInstructors(status: InstructorStatus): Promise<User[]> {
-    if (status.toString() === '') {
-      return await this.userRepository.find({
-        where: { role: { name: NameRole.Instructor } },
-      });
-    } else {
-      return await this.userRepository.find({
-        where: { role: { name: NameRole.Instructor }, status: status },
-      });
-    }
+  async getInstructors(status?: InstructorStatus): Promise<User[]> {
+    return await this.userRepository.find({
+      where: { role: { name: NameRole.Instructor }, status },
+    });
   }
 
-  async getStaff(): Promise<User[]> {
+  async getStaffs(): Promise<User[]> {
     return await this.userRepository.find({
       where: { role: { name: NameRole.Staff } },
     });
