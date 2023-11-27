@@ -41,8 +41,8 @@ export class LearnerCourseService {
 
     if (
       !(await this.learnerCourseRepository.getLearnerCourseByCourseAndLearner(
-        course,
-        learner,
+        course.id,
+        learner.id,
       ))
     ) {
       const learnerCourse: LearnerCourse =
@@ -98,8 +98,8 @@ export class LearnerCourseService {
       );
       const currentLearnerCourse =
         await this.learnerCourseRepository.getLearnerCourseByCourseAndLearner(
-          course,
-          currentLearner,
+          course.id,
+          currentLearner.id,
         );
 
       if (await this.checkLearnerIsLearningCourse(course, currentLearner))
@@ -120,8 +120,8 @@ export class LearnerCourseService {
       );
       const currentLearnerCourse =
         await this.learnerCourseRepository.getLearnerCourseByCourseAndLearner(
-          course,
-          currentLearner,
+          course.id,
+          currentLearner.id,
         );
       const newLearner = await this.learnerRepository.getLeanerById(
         newLearnerId,
@@ -171,8 +171,8 @@ export class LearnerCourseService {
     for (let index = 0; index < learners.length; index++) {
       const learnerCourse =
         await this.learnerCourseRepository.getLearnerCourseByCourseAndLearner(
-          course,
-          learners[index],
+          course.id,
+          learners[index].id,
         );
       if (learnerCourse) {
         learnerId = learnerCourse.learner.id;

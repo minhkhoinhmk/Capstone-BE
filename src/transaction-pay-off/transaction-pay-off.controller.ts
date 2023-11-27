@@ -31,17 +31,28 @@ export class TransactionPayOffController {
   @Get()
   @UseGuards(AuthGuard(), RolesGuard)
   @HasRoles(NameRole.Instructor)
-  async getTransactionPayOffs(
+  async getTransactionPayOffsByRecieve(
     @Req() req: Request,
   ): Promise<ViewTransactionPayOffResponse[]> {
-    return this.transactionPayOffService.getTransactionPayOff(
+    return this.transactionPayOffService.getTransactionPayOffByReciever(
+      req['user']['id'],
+    );
+  }
+
+  @Get()
+  @UseGuards(AuthGuard(), RolesGuard)
+  @HasRoles(NameRole.Admin)
+  async getTransactionPayOffsBySender(
+    @Req() req: Request,
+  ): Promise<ViewTransactionPayOffResponse[]> {
+    return this.transactionPayOffService.getTransactionPayOffBySender(
       req['user']['id'],
     );
   }
 
   @Get('/:id')
   @UseGuards(AuthGuard(), RolesGuard)
-  @HasRoles(NameRole.Instructor)
+  @HasRoles(NameRole.Instructor, NameRole.Admin)
   async getTransactionPayOffById(
     @Param('id') id: string,
   ): Promise<ViewTransactionPayOffResponse> {

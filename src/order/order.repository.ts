@@ -92,4 +92,16 @@ export class OrderRepository {
 
     return this.orderRepository.remove(order);
   }
+
+  async checkOrderExistedByUserAndCourse(
+    courseId: string,
+    userId: string,
+  ): Promise<Order> {
+    return this.orderRepository.findOne({
+      where: {
+        orderDetails: { course: { id: courseId } },
+        user: { id: userId },
+      },
+    });
+  }
 }

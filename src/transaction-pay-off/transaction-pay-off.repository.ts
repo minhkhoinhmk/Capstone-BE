@@ -37,9 +37,17 @@ export class TransactionPayOfflRepository {
     });
   }
 
-  getTransactionPayOff(instructorId: string): Promise<TransactionPayOff[]> {
+  getTransactionPayOffByReciever(
+    instructorId: string,
+  ): Promise<TransactionPayOff[]> {
     return this.transactionPayOfflRepository.find({
       where: { user: { id: instructorId } },
+    });
+  }
+
+  getTransactionPayOffBySender(senderId: string): Promise<TransactionPayOff[]> {
+    return this.transactionPayOfflRepository.find({
+      where: { senderId: senderId },
     });
   }
 }

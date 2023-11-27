@@ -173,13 +173,13 @@ export class TransactionPayOffService {
     });
   }
 
-  async getTransactionPayOff(
+  async getTransactionPayOffByReciever(
     instructorId: string,
   ): Promise<ViewTransactionPayOffResponse[]> {
     const response: ViewTransactionPayOffResponse[] = [];
 
     const transactionPayOffs =
-      await this.transactionPayOfflRepository.getTransactionPayOff(
+      await this.transactionPayOfflRepository.getTransactionPayOffByReciever(
         instructorId,
       );
 
@@ -192,7 +192,32 @@ export class TransactionPayOffService {
     });
 
     this.logger.log(
-      `method=getTransactionPayOff, total items=${response.length}`,
+      `method=getTransactionPayOffByReciever, total items=${response.length}`,
+    );
+
+    return response;
+  }
+
+  async getTransactionPayOffBySender(
+    senderId: string,
+  ): Promise<ViewTransactionPayOffResponse[]> {
+    let response: ViewTransactionPayOffResponse[] = [];
+
+    const transactionPayOffs =
+      await this.transactionPayOfflRepository.getTransactionPayOffBySender(
+        senderId,
+      );
+
+    transactionPayOffs.forEach((transactionPayOff) => {
+      response.push(
+        this.mapper.filterViewTransactionPayOffResponseFromTransactionPayOff(
+          transactionPayOff,
+        ),
+      );
+    });
+
+    this.logger.log(
+      `method=getTransactionPayOffBySender, total items=${response.length}`,
     );
 
     return response;
