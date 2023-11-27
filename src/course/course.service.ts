@@ -18,12 +18,9 @@ import { OrderDetail } from 'src/order-detail/entity/order-detail.entity';
 import { CourseMapper } from './mapper/course.mapper';
 import { User } from 'src/user/entity/user.entity';
 import { CourseStatus } from './type/enum/CourseStatus';
-import { FilterCourseByStaffResponse } from './dto/reponse/filter-by-staff.dt';
-import { PageOptionsDto } from 'src/common/pagination/dto/pageOptionsDto';
 import { SetStatusRequest } from './dto/request/set-status-request.dto';
 import { MailerService } from '@nestjs-modules/mailer';
 import * as cheerio from 'cheerio';
-import { ChapterLecture } from 'src/chapter-lecture/entity/chapter-lecture.entity';
 
 @Injectable()
 export class CourseService {
@@ -285,6 +282,17 @@ export class CourseService {
           SUBJECT: 'Khóa học',
           NAME: course.title,
           REASON: request.reason,
+        },
+      });
+    } else if (status === CourseStatus.APPROVED) {
+      course.active = true;
+      await this.mailsService.sendMail({
+        to: course.user.email,
+        subject: 'Xét Duyệt Khóa Học Thành Công',
+        template: './approve',
+        context: {
+          SUBJECT: `Khóa học ${course.title}`,
+          CONTENT: `Đã Được Xét Duyệt`,
         },
       });
     }
