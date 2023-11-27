@@ -2,7 +2,7 @@ import { ConflictException, Injectable, Logger } from '@nestjs/common';
 import { RoleRepository } from 'src/role/role.repository';
 import { UserRepository } from 'src/user/user.repository';
 import { CreateStaffRequest } from './dto/request/create-staff-request.dto';
-import { ViewStaffrResponse } from './dto/response/view-staff-resonse.dto';
+import { ViewStaffResponse } from './dto/response/view-staff-response.dto';
 import { StaffMapper } from './mapper/staff.mapper';
 import { UpdateStaffProfileRequest } from './dto/request/update-profile-request.dto';
 
@@ -32,10 +32,10 @@ export class StaffService {
     }
   }
 
-  async getStaffs(): Promise<ViewStaffrResponse[]> {
-    const staffs = await this.userRepository.getStaff();
+  async getStaffs(): Promise<ViewStaffResponse[]> {
+    const staffs = await this.userRepository.getStaffs();
 
-    let response: ViewStaffrResponse[] = [];
+    const response: ViewStaffResponse[] = [];
 
     staffs.forEach((staff) => {
       response.push(this.mapper.filterViewStaffResponseFromStaff(staff));
@@ -44,7 +44,7 @@ export class StaffService {
     return response;
   }
 
-  async getStaffById(id: string): Promise<ViewStaffrResponse> {
+  async getStaffById(id: string): Promise<ViewStaffResponse> {
     const staff = await this.userRepository.getUserById(id);
 
     return this.mapper.filterViewStaffResponseFromStaff(staff);

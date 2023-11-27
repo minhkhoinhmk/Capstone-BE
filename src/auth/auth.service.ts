@@ -50,7 +50,10 @@ export class AuthService {
           emailOrUsername,
         );
         if (!user) {
-          throw new NotFoundException('User not found');
+          throw new NotFoundException(
+            'Hãy kiểm tra lại tên đăng nhập/email hoặc mật khẩu của bạn',
+          );
+          // throw new NotFoundException('User not found');
         }
       }
     }
@@ -95,7 +98,8 @@ export class AuthService {
         `method=signin, email/username ${emailOrUsername} can not be authenticated`,
       );
       throw new UnauthorizedException(
-        'Please check your email/username and password',
+        'Hãy kiểm tra lại tên đăng nhập/email hoặc mật khẩu của bạn',
+        // 'Please check your email/username and password',
       );
     }
   }

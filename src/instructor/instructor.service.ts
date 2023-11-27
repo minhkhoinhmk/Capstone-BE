@@ -269,7 +269,7 @@ export class InstructorService {
   }
 
   async getInstructors(
-    status: InstructorStatus,
+    status?: InstructorStatus,
   ): Promise<ViewInstructorResponse[]> {
     const response: ViewInstructorResponse[] = [];
 
@@ -306,7 +306,7 @@ export class InstructorService {
     );
 
     if (request.status === InstructorStatus.Reject) {
-      if (request.reason === null || request.reason === '') {
+      if (!request.reason) {
         throw new BadRequestException('Reason can not be null');
       }
     }
