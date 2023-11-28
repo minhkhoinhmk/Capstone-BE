@@ -3,6 +3,7 @@ import {
   ConflictException,
   Injectable,
   Logger,
+  NotFoundException,
 } from '@nestjs/common';
 import { CreateLearnerRequest } from './dto/request/create-learner.dto';
 import { RoleRepository } from 'src/role/role.repository';
@@ -18,6 +19,10 @@ import { PageDto } from 'src/common/pagination/dto/pageDto';
 import { PageMetaDto } from 'src/common/pagination/dto/pageMetaDto';
 import { UserLectureRepository } from 'src/user-lecture/user-lecture.repository';
 import { FilterCourseByLearnerResponse } from 'src/course/dto/reponse/filter-by-learner.dto';
+import { UpdateLearnerRequest } from './dto/request/update-learner.dto';
+import { ChangePasswordLearnerRequest } from './dto/request/change-password-learner.request.dto';
+import * as bcrypt from 'bcrypt';
+import { hashPassword } from 'src/utils/hash-password.util';
 
 @Injectable()
 export class LearnerService {
@@ -41,7 +46,7 @@ export class LearnerService {
       this.logger.error(
         `method=createLearner, userName=${createLearnerRequest.userName} was existed`,
       );
-      throw new ConflictException('User name already exists');
+      throw new ConflictException('Tên đăng nhập đã tồn tại');
     } else {
       const customer = await this.userRepository.getUserById(id);
 
@@ -64,6 +69,48 @@ export class LearnerService {
         await this.learnerRepository.saveLearner(learner);
       }
     }
+  }
+
+  async updateLearner(body: UpdateLearnerRequest, id: string): Promise<void> {
+    const learner = await this.learnerRepository.getLeanerById(body.learnerId);
+
+    if (!learner) {
+      this.logger.error(
+        `method=updateLearner, learner with id ${id} not found`,
+      );
+      throw new NotFoundException(`Learner with id ${id} not found`);
+    }
+
+    learner.firstName = body.firstName;
+    learner.lastName = body.lastName;
+    learner.middleName = body.middleName;
+
+    await this.learnerRepository.saveLearner(learner);
+  }
+
+  async changePasswordLearner(body: ChangePasswordLearnerRequest) {
+    const { currentPassword, newPassword, learnerId } = body;
+
+    const learner = await this.learnerRepository.getLeanerById(body.learnerId);
+
+    if (!learner) {
+      this.logger.error(
+        `method=updateLearner, learner with id ${learnerId} not found`,
+      );
+      throw new NotFoundException(`Learner with id ${learnerId} not found`);
+    }
+
+    if (!(await bcrypt.compare(currentPassword, learner.password))) {
+      this.logger.error(
+        `method=changePasswordLearner, currentPassword=${currentPassword} not correct`,
+      );
+      throw new BadRequestException('Mật khẩu cũ không đúng');
+    }
+
+    const hashNewPassword = await hashPassword(newPassword);
+
+    learner.password = hashNewPassword;
+    await this.learnerRepository.saveLearner(learner);
   }
 
   async getLearnerByUserId(

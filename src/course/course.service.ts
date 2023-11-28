@@ -208,6 +208,7 @@ export class CourseService {
 
     for (const order of orders) {
       const courseIds = this.getCourseId(order.orderDetails);
+
       for (const courseId of courseIds) {
         const course = await this.courseRepository.getCourseById(courseId);
         response.push(
@@ -215,9 +216,11 @@ export class CourseService {
         );
       }
     }
+
     this.logger.log(
       `method=getCoursesByUserId, userId=${userId}, length=${response.length}`,
     );
+
     return response;
   }
 
@@ -225,7 +228,8 @@ export class CourseService {
     const results: string[] = [];
 
     for (const detail of orderDetails) {
-      results.push(detail.course.id);
+      if (!detail.refund || (detail.refund && !detail.refund.isApproved))
+        results.push(detail.course.id);
     }
 
     return results;
@@ -233,14 +237,19 @@ export class CourseService {
 
   async checkCourseIsOwnedByCourseId(courseId: string, user: User) {
     let status = false;
+    let isRefund = false;
     const orders = await this.orderRepository.getCoursesByUserId(user.id);
 
     for (const order of orders)
       order.orderDetails.forEach((orderDetail) => {
-        if (orderDetail.course.id === courseId) status = true;
+        if (orderDetail.course.id === courseId) {
+          status = true;
+          if (orderDetail.refund && orderDetail.refund.isApproved)
+            isRefund = true;
+        }
       });
 
-    return { status };
+    return { status, isRefund };
   }
 
   async getAllCoursesForStaff(): Promise<Course[]> {

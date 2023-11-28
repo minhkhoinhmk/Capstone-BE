@@ -3,6 +3,7 @@ import {
   Controller,
   Get,
   Post,
+  Put,
   Query,
   Req,
   UseGuards,
@@ -25,6 +26,8 @@ import { ApiPaginatedResponse } from 'src/common/decorator/api-pagination-respon
 import { PageOptionsDto } from 'src/common/pagination/dto/pageOptionsDto';
 import { PageDto } from 'src/common/pagination/dto/pageDto';
 import { FilterCourseByLearnerResponse } from 'src/course/dto/reponse/filter-by-learner.dto';
+import { UpdateLearnerRequest } from './dto/request/update-learner.dto';
+import { ChangePasswordLearnerRequest } from './dto/request/change-password-learner.request.dto';
 
 @Controller('learner')
 @ApiTags('Learner')
@@ -48,6 +51,29 @@ export class LearnerController {
       createLearnerRequest,
       request['user']['id'],
     );
+  }
+
+  @Put()
+  @UseGuards(AuthGuard(), RolesGuard)
+  @HasRoles(NameRole.Customer)
+  @ApiCreatedResponse({
+    description: 'Updated Learner Successfully',
+  })
+  updateLearner(
+    @Body() body: UpdateLearnerRequest,
+    @Req() request: Request,
+  ): Promise<void> {
+    return this.learnerService.updateLearner(body, request['user']['id']);
+  }
+
+  @Put('/passowrd/change')
+  @UseGuards(AuthGuard(), RolesGuard)
+  @HasRoles(NameRole.Customer)
+  @ApiCreatedResponse({
+    description: 'Updated Learner Successfully',
+  })
+  changePassword(@Body() body: ChangePasswordLearnerRequest): Promise<void> {
+    return this.learnerService.changePasswordLearner(body);
   }
 
   @Get('/user')

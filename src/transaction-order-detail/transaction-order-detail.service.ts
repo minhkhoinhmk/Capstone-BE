@@ -73,6 +73,8 @@ export class TransactionOrderDetailService {
         transactionPayOffId,
       );
 
+    console.log(transactionOrderDetails, transactionPayOffId);
+
     transactionOrderDetails.forEach((transactionOrderDetail) => {
       response.push({
         refundId: transactionOrderDetail.refundId,

@@ -54,7 +54,7 @@ export class UserService {
       this.logger.error(
         `method=changePasswordUser, currentPassword=${currentPassword} not correct`,
       );
-      throw new BadRequestException('Please check your current password');
+      throw new BadRequestException('Mật khẩu cũ không đúng');
     }
 
     const hashNewPassword = await hashPassword(newPassword);

@@ -45,7 +45,8 @@ export class CartService {
       this.logger.error(
         `method=addCourseToCartItem, course is existing in cart item`,
       );
-      throw new ConflictException('course is exsistent in cart item');
+      throw new ConflictException('Khóa học đã tồn tại trong giỏ hàng');
+      // throw new ConflictException('course is exsistent in cart item');
     }
 
     // Check can apply promotionCourseId
