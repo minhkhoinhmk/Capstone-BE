@@ -37,6 +37,11 @@ export class ChapterLectureRepository {
   ): Promise<ChapterLecture> {
     const chapterLecture = await this.chapterLectureRepository.findOne({
       where: { id: chapterLectureId },
+      relations: {
+        course: {
+          chapterLectures: true,
+        },
+      },
     });
 
     return chapterLecture;

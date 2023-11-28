@@ -33,7 +33,7 @@ export class OrderRepository {
       relations: {
         user: true,
         paymentMethod: true,
-        orderDetails: { course: true, promotionCourse: true },
+        orderDetails: { course: true, promotionCourse: true, refund: true },
         transaction: true,
       },
     });
@@ -60,7 +60,7 @@ export class OrderRepository {
         active: true,
         orderStatus: NameOrderStatus.Success,
       },
-      relations: { orderDetails: { course: true } },
+      relations: { orderDetails: { course: true, refund: true } },
     });
   }
 

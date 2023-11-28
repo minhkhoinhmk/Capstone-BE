@@ -54,15 +54,12 @@ export class RefundController {
     return this.refundService.createRefund(request, orderDetailId);
   }
 
-  @Post()
+  @Get()
   @UseGuards(AuthGuard(), RolesGuard)
-  @HasRoles(NameRole.Staff)
+  @HasRoles(NameRole.Admin)
   @ApiPaginatedResponse(RefundResponse)
-  getRefunds(
-    @Body() pageOption: PageOptionsDto,
-    @Query('isApproved') isApproved: boolean,
-  ): Promise<PageDto<RefundResponse>> {
-    return this.refundService.getRefunds(pageOption, isApproved);
+  getRefunds(): Promise<RefundResponse[]> {
+    return this.refundService.getRefunds();
   }
 
   @ApiOkResponse({
@@ -72,7 +69,7 @@ export class RefundController {
     description: 'Refund Not Found',
   })
   @UseGuards(AuthGuard(), RolesGuard)
-  @HasRoles(NameRole.Customer, NameRole.Staff)
+  @HasRoles(NameRole.Customer, NameRole.Admin)
   @Get('/:id')
   getRefundById(@Param('id') id: string): Promise<RefundResponse> {
     return this.refundService.getRefundById(id);
@@ -80,17 +77,14 @@ export class RefundController {
 
   @UseGuards(AuthGuard(), RolesGuard)
   @HasRoles(NameRole.Customer)
-  @Post('/customer/:id')
-  getRefundsByCsutomerId(
-    @Body() pageOption: PageOptionsDto,
-    @Param('id') id: string,
-  ): Promise<PageDto<RefundResponse>> {
-    return this.refundService.getRefundByCustomerId(id, pageOption);
+  @Get('/customer/:id')
+  getRefundsByCustomerId(@Param('id') id: string): Promise<RefundResponse[]> {
+    return this.refundService.getRefundByCustomerId(id);
   }
 
   @ApiOkResponse({ description: 'Approve refund successfully' })
   @UseGuards(AuthGuard(), RolesGuard)
-  @HasRoles(NameRole.Staff)
+  @HasRoles(NameRole.Admin)
   @Get('/approve/:id')
   approveRefund(@Param('id') id: string): Promise<void> {
     return this.refundService.approveRefund(id);

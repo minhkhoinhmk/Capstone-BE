@@ -33,12 +33,8 @@ export class RefundRepository {
     return this.refundRepository.save(refund);
   }
 
-  async getRefunds(
-    pageOptionsDto: PageOptionsDto,
-    isApproved: boolean,
-  ): Promise<{ count: number; entities: Refund[] }> {
+  async getRefunds(): Promise<{ count: number; entities: Refund[] }> {
     const entities = await this.refundRepository.find({
-      where: { isApproved: isApproved },
       relations: {
         orderDetail: {
           course: true,
@@ -48,13 +44,9 @@ export class RefundRepository {
         },
       },
       order: { insertedDate: 'DESC' },
-      skip: (pageOptionsDto.page - 1) * pageOptionsDto.take,
-      take: pageOptionsDto.take,
     });
 
-    const count = await this.refundRepository.count({
-      where: { isApproved: isApproved },
-    });
+    const count = await this.refundRepository.count();
 
     return { count: count, entities: entities };
   }
@@ -75,7 +67,6 @@ export class RefundRepository {
 
   async getRefundByCustomerId(
     customerId: string,
-    pageOptionsDto: PageOptionsDto,
   ): Promise<{ count: number; entities: Refund[] }> {
     const entities = await this.refundRepository.find({
       where: {
@@ -93,8 +84,6 @@ export class RefundRepository {
           },
         },
       },
-      skip: (pageOptionsDto.page - 1) * pageOptionsDto.take,
-      take: pageOptionsDto.take,
     });
 
     const count = await this.refundRepository.count({

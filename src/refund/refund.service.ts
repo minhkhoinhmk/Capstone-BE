@@ -44,6 +44,15 @@ export class RefundService {
       orderDetailId,
     );
 
+    if (this.isOverThirtyDaysAgo(orderDetail.order.insertedDate)) {
+      this.logger.error(
+        `method=createRefund, orderId=${orderDetail.order.id} is more than 30 days`,
+      );
+      throw new BadRequestException(`Đơn hàng này đã quá 30 ngày giao dịch`);
+    }
+
+    let isAvailableRefund = true;
+
     const course = await this.courseRepository.getCourseById(
       orderDetail.course.id,
     );
@@ -53,27 +62,38 @@ export class RefundService {
       orderDetail.order.user.id,
     );
 
-    if (countLectureCompleted == 0) {
-      countLectureCompleted = await this.countCompletedLectureForLearner(
-        course,
-        orderDetail.order.user.id,
-      );
-    }
-
     if (
       Math.floor(
         (countLectureCompleted / course.chapterLectures.length) * 100,
       ) > 20
-    ) {
+    )
+      isAvailableRefund = false;
+
+    if (isAvailableRefund) {
+      countLectureCompleted = await this.countCompletedLectureForLearner(
+        course,
+        orderDetail.order.user.id,
+      );
+
+      if (
+        Math.floor(
+          (countLectureCompleted / course.chapterLectures.length) * 100,
+        ) > 20
+      )
+        isAvailableRefund = false;
+    }
+
+    if (!isAvailableRefund) {
       this.logger.error(
         `method=createRefund, userId=${orderDetail.order.user.id} studied more than 20%`,
       );
-      throw new BadRequestException(`User studied more than 20%`);
+      // throw new BadRequestException(`User studied more than 20%`);
+      throw new BadRequestException(`Bạn đã học khóa học này hơn 20%`);
     } else {
       try {
         const refund = await this.refundRepository.createRefund(
           request,
-          orderDetail.price,
+          orderDetail.priceAfterPromotion,
           orderDetail,
         );
 
@@ -102,12 +122,27 @@ export class RefundService {
         );
       } catch (error) {
         if (error.code === '23505') {
+          // throw new ConflictException(
+          //   `Refund with orderDetail: ${orderDetail.id} was existed`,
+          // );
           throw new ConflictException(
-            `Refund with orderDetail: ${orderDetail.id} was existed`,
+            `Bạn đã yêu cầu hoàn tiền ở khóa học này`,
           );
         }
       }
     }
+  }
+
+  isOverThirtyDaysAgo(dateToCheck: Date): boolean {
+    const currentDate = new Date();
+    const thirtyDaysInMillis = 30 * 24 * 60 * 60 * 1000;
+
+    const currentTimeInMillis = currentDate.getTime();
+    const specifiedTimeInMillis = dateToCheck.getTime();
+
+    const differenceInMillis = currentTimeInMillis - specifiedTimeInMillis;
+
+    return differenceInMillis > thirtyDaysInMillis;
   }
 
   async countCompletedLectureForCustomer(
@@ -148,14 +183,8 @@ export class RefundService {
     return count;
   }
 
-  async getRefunds(
-    pageOption: PageOptionsDto,
-    isApproved: boolean,
-  ): Promise<PageDto<RefundResponse>> {
-    const { count, entities } = await this.refundRepository.getRefunds(
-      pageOption,
-      isApproved,
-    );
+  async getRefunds(): Promise<RefundResponse[]> {
+    const { count, entities } = await this.refundRepository.getRefunds();
 
     const responses: RefundResponse[] = [];
 
@@ -163,16 +192,9 @@ export class RefundService {
       responses.push(this.refundMapper.filterRefundResponseFromRefund(refund));
     }
 
-    const itemCount = count;
-
-    const pageMetaDto = new PageMetaDto({
-      itemCount,
-      pageOptionsDto: pageOption,
-    });
-
     this.logger.log(`method=getRefunds, totalItems=${count}`);
 
-    return new PageDto(responses, pageMetaDto);
+    return responses;
   }
 
   async getRefundById(id: string): Promise<RefundResponse> {
@@ -188,12 +210,9 @@ export class RefundService {
     return this.refundMapper.filterRefundResponseFromRefund(refund);
   }
 
-  async getRefundByCustomerId(
-    id: string,
-    pageOption: PageOptionsDto,
-  ): Promise<PageDto<RefundResponse>> {
+  async getRefundByCustomerId(id: string): Promise<RefundResponse[]> {
     const { count, entities } =
-      await this.refundRepository.getRefundByCustomerId(id, pageOption);
+      await this.refundRepository.getRefundByCustomerId(id);
 
     const responses: RefundResponse[] = [];
 
@@ -201,16 +220,9 @@ export class RefundService {
       responses.push(this.refundMapper.filterRefundResponseFromRefund(refund));
     }
 
-    const itemCount = count;
-
-    const pageMetaDto = new PageMetaDto({
-      itemCount,
-      pageOptionsDto: pageOption,
-    });
-
     this.logger.log(`method=getRefundByCustomerId, totalItems=${count}`);
 
-    return new PageDto(responses, pageMetaDto);
+    return responses;
   }
 
   async approveRefund(id: string): Promise<void> {
