@@ -22,6 +22,7 @@ import { CourseReport } from 'src/course-report/entity/course-report.entity';
 import { QuestionTopic } from 'src/question-topic/entity/question-topic.entity';
 import { TransactionPayOff } from 'src/transaction-pay-off/entity/transaction-pay-off.entity';
 import { QuestionAnswer } from 'src/question-answer/entity/question-answer.entity';
+import { Achievement } from 'src/achievement/entity/achievement.entity';
 
 @Entity()
 export class User {
@@ -162,4 +163,7 @@ export class User {
     (transactionPayOff) => transactionPayOff.user,
   )
   transactionPayOffs: TransactionPayOff[];
+
+  @OneToMany(() => Achievement, (achievement) => achievement.user)
+  achievements: Achievement[];
 }

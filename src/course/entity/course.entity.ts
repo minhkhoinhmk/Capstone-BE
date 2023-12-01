@@ -21,6 +21,7 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import { CourseStatus } from '../type/enum/CourseStatus';
+import { Achievement } from 'src/achievement/entity/achievement.entity';
 
 @Entity()
 export class Course {
@@ -95,6 +96,10 @@ export class Course {
   @OneToMany(() => CourseReport, (courseReport) => courseReport.course)
   @Expose()
   courseReports: CourseReport[];
+
+  @OneToMany(() => Achievement, (achievement) => achievement.course)
+  @Expose()
+  achievements: Achievement[];
 
   @ManyToOne(() => User, (user) => user.courses)
   @JoinColumn({ name: 'instructorId' })
