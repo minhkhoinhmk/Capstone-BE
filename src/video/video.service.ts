@@ -5,14 +5,12 @@ import {
   StreamableFile,
 } from '@nestjs/common';
 import { stat } from 'fs/promises';
-import { join } from 'path';
 import * as rangeParser from 'range-parser';
 import { ConfigService } from '@nestjs/config';
 import { S3Service } from 'src/s3/s3.service';
 import { v4 as uuidv4 } from 'uuid';
 import { COURSE_PATH } from 'src/common/s3/s3.constants';
 import getVideoDurationInSeconds from 'get-video-duration';
-import { createReadStream } from 'fs';
 import { Readable } from 'stream';
 import { ChapterLectureRepository } from 'src/chapter-lecture/chapter-lecture.repository';
 

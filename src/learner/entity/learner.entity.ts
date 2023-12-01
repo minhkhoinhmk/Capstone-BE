@@ -1,3 +1,4 @@
+import { Achievement } from 'src/achievement/entity/achievement.entity';
 import { CourseFeedback } from 'src/course-feedback/entity/course-feedbacl.entity';
 import { CourseReport } from 'src/course-report/entity/course-report.entity';
 import { Device } from 'src/device/entity/device.entity';
@@ -77,4 +78,7 @@ export class Learner {
 
   @OneToMany(() => QuestionAnswer, (questionAnswer) => questionAnswer.learner)
   questionAnswers: QuestionAnswer[];
+
+  @OneToMany(() => Achievement, (achievement) => achievement.learner)
+  achievements: Achievement[];
 }

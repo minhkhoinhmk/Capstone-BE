@@ -21,6 +21,11 @@ export class S3Service {
     return s3.getObject(options);
   }
 
+  async deleteObject(options: any) {
+    const s3 = this.s3Connection();
+    return s3.deleteObject(options);
+  }
+
   async headObject(options: any) {
     const s3 = this.s3Connection();
     return s3.headObject(options);

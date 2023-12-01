@@ -73,4 +73,36 @@ export class UserLectureRepository {
   async saveCompletedUserLecture(userLecture: UserLecture): Promise<void> {
     await this.userLectureRepository.save(userLecture);
   }
+
+  async getUserLectureByCourseAndCustomer(
+    courseId: string,
+    customerId: string,
+  ): Promise<UserLecture[]> {
+    return this.userLectureRepository.find({
+      where: {
+        user: { id: customerId },
+        chapterLecture: {
+          course: {
+            id: courseId,
+          },
+        },
+      },
+    });
+  }
+
+  async getUserLectureByCourseAndLearner(
+    courseId: string,
+    learnerId: string,
+  ): Promise<UserLecture[]> {
+    return this.userLectureRepository.find({
+      where: {
+        learner: { id: learnerId },
+        chapterLecture: {
+          course: {
+            id: courseId,
+          },
+        },
+      },
+    });
+  }
 }

@@ -52,6 +52,7 @@ import { TransactionPayOffModule } from './transaction-pay-off/transaction-pay-o
 import { StaffModule } from './staff/staff.module';
 import { QuestionAnswerModule } from './question-answer/question-answer.module';
 import { QuestionAnswer } from './question-answer/entity/question-answer.entity';
+import { AchievementModule } from './achievement/achievement.module';
 
 @Global()
 @Module({
@@ -155,6 +156,7 @@ import { QuestionAnswer } from './question-answer/entity/question-answer.entity'
     TransactionPayOffModule,
     StaffModule,
     QuestionAnswerModule,
+    AchievementModule,
   ],
 })
 export class AppModule {}
