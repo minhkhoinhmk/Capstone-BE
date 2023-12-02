@@ -7,9 +7,10 @@ import { FilterCourseByStaffResponse } from '../dto/reponse/filter-by-staff.dt';
 
 @Mapper()
 export class CourseMapper {
-  @Mappings()
+  @Mappings({ target: 'completedPercent', source: 'percent' })
   filterCourseByCustomerResponseFromCourse(
     course: Course,
+    percent: number,
   ): FilterCourseByCustomerResponse {
     return new FilterCourseByCustomerResponse();
   }

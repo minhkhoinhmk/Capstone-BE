@@ -99,8 +99,11 @@ export class OrderRepository {
   ): Promise<Order> {
     return this.orderRepository.findOne({
       where: {
-        orderDetails: { course: { id: courseId } },
+        orderDetails: { course: { id: courseId }, active: true },
         user: { id: userId },
+      },
+      relations: {
+        orderDetails: true,
       },
     });
   }

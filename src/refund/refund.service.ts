@@ -16,10 +16,8 @@ import { DeviceRepository } from 'src/device/device.repository';
 import { NameRole } from 'src/role/enum/name-role.enum';
 import { RefundMapper } from './mapper/refund.mapper';
 import { RefundResponse } from './dto/response/refund-response.dto';
-import { PageOptionsDto } from 'src/common/pagination/dto/pageOptionsDto';
-import { PageDto } from 'src/common/pagination/dto/pageDto';
-import { PageMetaDto } from 'src/common/pagination/dto/pageMetaDto';
 import { MailerService } from '@nestjs-modules/mailer';
+import { LearnerCourseRepository } from 'src/learner-course/learner-course.repository';
 
 @Injectable()
 export class RefundService {
@@ -34,6 +32,7 @@ export class RefundService {
     private readonly deviceRepository: DeviceRepository,
     private readonly refundMapper: RefundMapper,
     private mailsService: MailerService,
+    private readonly learnerCourseRepository: LearnerCourseRepository,
   ) {}
 
   async createRefund(
@@ -70,9 +69,15 @@ export class RefundService {
       isAvailableRefund = false;
 
     if (isAvailableRefund) {
+      const learnerCourse =
+        await this.learnerCourseRepository.getLearnerCourseByCourseAndCustomer(
+          course.id,
+          orderDetail.order.user.id,
+        );
+
       countLectureCompleted = await this.countCompletedLectureForLearner(
         course,
-        orderDetail.order.user.id,
+        learnerCourse.learner.id,
       );
 
       if (
@@ -87,8 +92,9 @@ export class RefundService {
       this.logger.error(
         `method=createRefund, userId=${orderDetail.order.user.id} studied more than 20%`,
       );
-      // throw new BadRequestException(`User studied more than 20%`);
-      throw new BadRequestException(`Bạn đã học khóa học này hơn 20%`);
+      throw new BadRequestException(
+        `Bạn hoặc người thân đã học khóa học này hơn 20%`,
+      );
     } else {
       try {
         const refund = await this.refundRepository.createRefund(
@@ -122,9 +128,6 @@ export class RefundService {
         );
       } catch (error) {
         if (error.code === '23505') {
-          // throw new ConflictException(
-          //   `Refund with orderDetail: ${orderDetail.id} was existed`,
-          // );
           throw new ConflictException(
             `Bạn đã yêu cầu hoàn tiền ở khóa học này`,
           );
@@ -231,6 +234,22 @@ export class RefundService {
     refund.isApproved = true;
 
     this.refundRepository.saveRefund(refund);
+
+    let learnerCourse =
+      await this.learnerCourseRepository.getLearnerCourseByCourseAndCustomer(
+        refund.orderDetail.course.id,
+        refund.orderDetail.order.user.id,
+      );
+
+    let orderDetail = await this.orderDetailRepository.getOrderDetailById(
+      refund.orderDetail.id,
+    );
+
+    learnerCourse.active = false;
+    orderDetail.active = false;
+
+    await this.learnerCourseRepository.saveLearnerCourse(learnerCourse);
+    await this.orderDetailRepository.saveOrderDetail(orderDetail);
 
     await this.mailsService.sendMail({
       to: refund.orderDetail.order.user.email,
