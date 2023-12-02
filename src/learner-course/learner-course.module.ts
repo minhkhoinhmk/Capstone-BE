@@ -13,9 +13,9 @@ import { UserLectureModule } from 'src/user-lecture/user-lecture.module';
   imports: [
     TypeOrmModule.forFeature([LearnerCourse]),
     forwardRef(() => LearnerModule),
-    CourseModule,
+    forwardRef(() => CourseModule),
     forwardRef(() => AuthModule),
-    UserLectureModule,
+    forwardRef(() => UserLectureModule),
   ],
   providers: [LearnerCourseService, LearnerCourseRepository],
   controllers: [LearnerCourseController],

@@ -21,6 +21,10 @@ import { CourseStatus } from './type/enum/CourseStatus';
 import { SetStatusRequest } from './dto/request/set-status-request.dto';
 import { MailerService } from '@nestjs-modules/mailer';
 import * as cheerio from 'cheerio';
+import { UserLectureRepository } from 'src/user-lecture/user-lecture.repository';
+import { LearnerRepository } from 'src/learner/learner.repository';
+import { UserRepository } from 'src/user/user.repository';
+import { LearnerCourseRepository } from 'src/learner-course/learner-course.repository';
 
 @Injectable()
 export class CourseService {
@@ -31,6 +35,10 @@ export class CourseService {
     private orderRepository: OrderRepository,
     private courserMapper: CourseMapper,
     private mailsService: MailerService,
+    private userLectureRepository: UserLectureRepository,
+    private learnerRepository: LearnerRepository,
+    private userRepository: UserRepository,
+    private learnerCourseRepository: LearnerCourseRepository,
   ) {}
 
   async searchAndFilter(
@@ -205,14 +213,30 @@ export class CourseService {
   ): Promise<FilterCourseByCustomerResponse[]> {
     const orders = await this.orderRepository.getCoursesByUserId(userId);
     const response: FilterCourseByCustomerResponse[] = [];
+    let completedCount = 0;
 
     for (const order of orders) {
       const courseIds = this.getCourseId(order.orderDetails);
 
       for (const courseId of courseIds) {
         const course = await this.courseRepository.getCourseById(courseId);
+
+        for (const chapter of course.chapterLectures) {
+          if (
+            await this.userLectureRepository.checkChapterLectureIsCompletedForCustomer(
+              chapter.id,
+              userId,
+            )
+          ) {
+            completedCount++;
+          }
+        }
+
         response.push(
-          this.courserMapper.filterCourseByCustomerResponseFromCourse(course),
+          this.courserMapper.filterCourseByCustomerResponseFromCourse(
+            course,
+            Math.floor((completedCount / course.chapterLectures.length) * 100),
+          ),
         );
       }
     }
@@ -398,5 +422,30 @@ export class CourseService {
       `method=checkCourseCreateValid, totalLength of messages errors: ${msgErrors.length}`,
     );
     return { msgErrors };
+  }
+
+  async checkCourseAndUserIsValid(
+    userId: string,
+    courseId: string,
+  ): Promise<{ status: boolean }> {
+    const order = await this.orderRepository.checkOrderExistedByUserAndCourse(
+      courseId,
+      userId,
+    );
+    const leanerCourse =
+      await this.learnerCourseRepository.getLearnerCourseByCourseAndLearner(
+        courseId,
+        userId,
+      );
+
+    if (order) {
+      return { status: true };
+    } else {
+      if (leanerCourse) {
+        return { status: true };
+      } else {
+        return { status: false };
+      }
+    }
   }
 }

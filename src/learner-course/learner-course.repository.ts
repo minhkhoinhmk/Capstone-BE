@@ -33,7 +33,24 @@ export class LearnerCourseRepository {
     learnerId: string,
   ): Promise<LearnerCourse> {
     return await this.learnerCourseRepository.findOne({
-      where: { course: { id: courseId }, learner: { id: learnerId } },
+      where: {
+        course: { id: courseId },
+        learner: { id: learnerId },
+        active: true,
+      },
+      relations: { course: true, learner: true },
+    });
+  }
+
+  async getLearnerCourseByCourseAndCustomer(
+    courseId: string,
+    customerId: string,
+  ): Promise<LearnerCourse> {
+    return await this.learnerCourseRepository.findOne({
+      where: {
+        course: { id: courseId },
+        learner: { user: { id: customerId } },
+      },
       relations: { course: true, learner: true },
     });
   }

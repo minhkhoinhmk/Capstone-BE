@@ -6,6 +6,7 @@ import {
   Patch,
   Post,
   Put,
+  Query,
   Req,
   UseGuards,
 } from '@nestjs/common';
@@ -101,5 +102,18 @@ export class CourseController {
   @HasRoles(NameRole.Instructor)
   checkCourseCreateValid(@Param('courseId') courseId: string) {
     return this.courseService.checkCourseCreateValid(courseId);
+  }
+
+  @Get('/user/valid')
+  @UseGuards(AuthGuard(), RolesGuard)
+  @HasRoles(NameRole.Customer, NameRole.Learner)
+  checkCourseAndUserValid(
+    @Query('courseId') courseId: string,
+    @Req() request: Request,
+  ): Promise<{ status: boolean }> {
+    return this.courseService.checkCourseAndUserIsValid(
+      request['user']['id'],
+      courseId,
+    );
   }
 }

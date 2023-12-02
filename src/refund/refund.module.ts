@@ -11,6 +11,7 @@ import { AuthModule } from 'src/auth/auth.module';
 import { NotificationModule } from 'src/notification/notification.module';
 import { DeviceModule } from 'src/device/device.module';
 import { RefundMapper } from './mapper/refund.mapper';
+import { LearnerCourseModule } from 'src/learner-course/learner-course.module';
 
 @Module({
   imports: [
@@ -21,6 +22,7 @@ import { RefundMapper } from './mapper/refund.mapper';
     AuthModule,
     NotificationModule,
     DeviceModule,
+    LearnerCourseModule,
   ],
   providers: [RefundService, RefundRepository, RefundMapper],
   controllers: [RefundController],

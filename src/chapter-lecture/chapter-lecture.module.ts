@@ -21,7 +21,7 @@ import { VideoModule } from 'src/video/video.module';
     forwardRef(() => AuthModule),
     forwardRef(() => LearnerModule),
     UserModule,
-    CourseModule,
+    forwardRef(() => CourseModule),
     S3Module,
     ConfigModule,
     VideoModule,
