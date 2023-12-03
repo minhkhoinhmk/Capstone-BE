@@ -9,8 +9,6 @@ import { PromotionCourseModule } from 'src/promotion-course/promotion-course.mod
 import { OrderModule } from 'src/order/order.module';
 import { CourseMapper } from './mapper/course.mapper';
 import { UserLectureModule } from 'src/user-lecture/user-lecture.module';
-import { LearnerModule } from 'src/learner/learner.module';
-import { UserModule } from 'src/user/user.module';
 import { LearnerCourseModule } from 'src/learner-course/learner-course.module';
 
 @Module({
