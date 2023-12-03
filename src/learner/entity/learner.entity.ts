@@ -7,6 +7,7 @@ import { QuestionAnswer } from 'src/question-answer/entity/question-answer.entit
 import { QuestionTopic } from 'src/question-topic/entity/question-topic.entity';
 import { UserLecture } from 'src/user-lecture/entity/user-lecture.entity';
 import { User } from 'src/user/entity/user.entity';
+import { Vote } from 'src/vote/entity/vote.entity';
 import {
   Column,
   Entity,
@@ -81,4 +82,7 @@ export class Learner {
 
   @OneToMany(() => Achievement, (achievement) => achievement.learner)
   achievements: Achievement[];
+
+  @OneToMany(() => Vote, (vote) => vote.learner)
+  votes: Vote[];
 }

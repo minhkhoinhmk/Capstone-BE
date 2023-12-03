@@ -36,8 +36,6 @@ export class CourseService {
     private courserMapper: CourseMapper,
     private mailsService: MailerService,
     private userLectureRepository: UserLectureRepository,
-    private learnerRepository: LearnerRepository,
-    private userRepository: UserRepository,
     private learnerCourseRepository: LearnerCourseRepository,
   ) {}
 
