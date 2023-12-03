@@ -1,6 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { PromotionCourse } from 'src/promotion-course/entity/promotion-course.entity';
 import { User } from 'src/user/entity/user.entity';
+import { Winner } from 'src/winner/entity/winner.entity';
 import {
   Column,
   CreateDateColumn,
@@ -44,6 +45,9 @@ export default class Promotion {
     (promotionCourse) => promotionCourse.promotion,
   )
   promotionCourses: PromotionCourse[];
+
+  @OneToMany(() => Winner, (winner) => winner.promotion)
+  winners: Winner[];
 
   @ManyToOne(() => User, (user) => user.promotions)
   @JoinColumn({ name: 'userId' })

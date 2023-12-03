@@ -53,6 +53,10 @@ import { StaffModule } from './staff/staff.module';
 import { QuestionAnswerModule } from './question-answer/question-answer.module';
 import { QuestionAnswer } from './question-answer/entity/question-answer.entity';
 import { AchievementModule } from './achievement/achievement.module';
+import { ContestModule } from './contest/contest.module';
+import { CustomerDrawingModule } from './customer-drawing/customer-drawing.module';
+import { VoteModule } from './vote/vote.module';
+import { WinnerModule } from './winner/winner.module';
 
 @Global()
 @Module({
@@ -157,6 +161,10 @@ import { AchievementModule } from './achievement/achievement.module';
     StaffModule,
     QuestionAnswerModule,
     AchievementModule,
+    ContestModule,
+    CustomerDrawingModule,
+    VoteModule,
+    WinnerModule,
   ],
 })
 export class AppModule {}

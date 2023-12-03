@@ -20,8 +20,6 @@ import { LearnerCourseModule } from 'src/learner-course/learner-course.module';
     PromotionCourseModule,
     forwardRef(() => OrderModule),
     forwardRef(() => UserLectureModule),
-    forwardRef(() => LearnerModule),
-    forwardRef(() => UserModule),
     forwardRef(() => LearnerCourseModule),
   ],
   providers: [CourseService, CourseRepository, CourseMapper],

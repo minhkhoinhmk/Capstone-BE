@@ -23,6 +23,9 @@ import { QuestionTopic } from 'src/question-topic/entity/question-topic.entity';
 import { TransactionPayOff } from 'src/transaction-pay-off/entity/transaction-pay-off.entity';
 import { QuestionAnswer } from 'src/question-answer/entity/question-answer.entity';
 import { Achievement } from 'src/achievement/entity/achievement.entity';
+import { Contest } from 'src/contest/entity/contest.entity';
+import { CustomerDrawing } from 'src/customer-drawing/entity/customer-drawing.entity';
+import { Vote } from 'src/vote/entity/vote.entity';
 
 @Entity()
 export class User {
@@ -166,4 +169,13 @@ export class User {
 
   @OneToMany(() => Achievement, (achievement) => achievement.user)
   achievements: Achievement[];
+
+  @OneToMany(() => Contest, (contest) => contest.user)
+  contests: Contest[];
+
+  @OneToMany(() => CustomerDrawing, (customerDrawing) => customerDrawing.user)
+  customerDrawings: CustomerDrawing[];
+
+  @OneToMany(() => Vote, (vote) => vote.user)
+  votes: Vote[];
 }
