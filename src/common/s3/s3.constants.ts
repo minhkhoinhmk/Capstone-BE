@@ -11,3 +11,7 @@ export const USER_AVATAR_PATH = 'users/avatar/';
 export const POST_THUBMNAIL_PATH = 'posts/thumbnails/';
 
 export const ACHIEVEMENT_PATH = 'users/achievements/';
+
+export const CONTEST_THUMBNAIL_PATH = 'contests/thumbnails/';
+
+export const CUSTOMER_DRAWING_PATH = 'customerDrawings/images/';

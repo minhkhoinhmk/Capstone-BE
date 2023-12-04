@@ -23,8 +23,8 @@ async function bootstrap() {
   });
 
   const config = new DocumentBuilder()
-    .setTitle('Game Character API')
-    .setDescription('This swagger is about Game Character API')
+    .setTitle('VeCungTreEm API')
+    .setDescription('This swagger is about VeCungTreEm API')
     .setVersion('1.0')
     .addTag('APIs')
     .build();
