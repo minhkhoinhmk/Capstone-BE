@@ -8,7 +8,6 @@ import { UserRepository } from 'src/user/user.repository';
 import { CreateContestRequest } from './dto/request/create-contest-request.dto';
 import { CONTEST_THUMBNAIL_PATH } from 'src/common/s3/s3.constants';
 import { S3Service } from 'src/s3/s3.service';
-import { PageOptionsDto } from 'src/common/pagination/dto/pageOptionsDto';
 import { PageDto } from 'src/common/pagination/dto/pageDto';
 import { ViewContestResponse } from './dto/response/view-contest-reponse.dto';
 import { Contest } from './entity/contest.entity';
