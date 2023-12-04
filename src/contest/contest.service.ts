@@ -169,7 +169,7 @@ export class ContestService {
     );
   }
 
-  @Cron(CronExpression.EVERY_30_SECONDS)
+  @Cron(CronExpression.EVERY_6_HOURS)
   async setStatusContest() {
     const contests = await this.contestRepository.getContestsNotPagination();
     contests.forEach(async (contest) => {
