@@ -40,6 +40,10 @@ export class ViewContestResponse {
 
   @ApiProperty()
   @Expose()
+  status: string;
+
+  @ApiProperty()
+  @Expose()
   staffName: string;
 
   @ApiProperty()

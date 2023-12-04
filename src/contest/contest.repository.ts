@@ -4,6 +4,8 @@ import { Contest } from './entity/contest.entity';
 import { Repository } from 'typeorm';
 import { CreateContestRequest } from './dto/request/create-contest-request.dto';
 import { PageOptionsDto } from 'src/common/pagination/dto/pageOptionsDto';
+import ContestStatus from './enum/contest-status.enum';
+import { FilterContestRequest } from './dto/request/filter-contest-request.dto';
 
 @Injectable()
 export class ContestRepository {
@@ -12,7 +14,10 @@ export class ContestRepository {
     private contestRepository: Repository<Contest>,
   ) {}
 
-  async createContest(request: CreateContestRequest): Promise<Contest> {
+  async createContest(
+    request: CreateContestRequest,
+    status: ContestStatus,
+  ): Promise<Contest> {
     return this.contestRepository.create({
       title: request.title,
       description: request.description,
@@ -22,6 +27,7 @@ export class ContestRepository {
       startedDate: request.startedDate,
       expiredDate: request.expiredDate,
       active: true,
+      status: status,
     });
   }
 
@@ -37,26 +43,36 @@ export class ContestRepository {
   }
 
   async getContests(
-    pageOptionsDto: PageOptionsDto,
+    request: FilterContestRequest,
   ): Promise<{ count: number; entites: Contest[] }> {
     const contests = await this.contestRepository.find({
-      where: { active: true },
+      where: { active: true, status: request.status },
       relations: { user: true, customerDrawings: true },
-      skip: (pageOptionsDto.page - 1) * pageOptionsDto.take,
-      take: pageOptionsDto.take,
+      skip: (request.pageOptions.page - 1) * request.pageOptions.take,
+      take: request.pageOptions.take,
     });
 
     const entites = contests;
     const count = await this.contestRepository.count({
-      where: { active: true },
+      where: { active: true, status: request.status },
     });
 
     return { count, entites };
   }
 
-  async getContestByStaffId(staffId: string): Promise<Contest[]> {
+  async getContestsNotPagination(): Promise<Contest[]> {
+    return await this.contestRepository.find({
+      where: { active: true },
+      relations: { user: true, customerDrawings: true },
+    });
+  }
+
+  async getContestByStaffId(
+    staffId: string,
+    status: string,
+  ): Promise<Contest[]> {
     return this.contestRepository.find({
-      where: { user: { id: staffId }, active: true },
+      where: { user: { id: staffId }, active: true, status: status },
       relations: { user: true, customerDrawings: true },
     });
   }

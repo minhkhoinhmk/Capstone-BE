@@ -44,6 +44,10 @@ export class Contest {
   @Expose()
   expiredDate: Date;
 
+  @Column({ nullable: true })
+  @Expose()
+  status: string;
+
   @Column()
   @Expose()
   active: boolean;
@@ -53,7 +57,10 @@ export class Contest {
   @Expose()
   user: User;
 
-  @OneToMany(() => CustomerDrawing, (customerDrawing) => customerDrawing.user)
+  @OneToMany(
+    () => CustomerDrawing,
+    (customerDrawing) => customerDrawing.contest,
+  )
   @Expose()
   customerDrawings: CustomerDrawing[];
 }

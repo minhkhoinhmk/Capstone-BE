@@ -6,6 +6,8 @@ import { CreateCustomerDrawingRequest } from './dto/request/create-customer-draw
 import { User } from 'src/user/entity/user.entity';
 import { PageOptionsDto } from 'src/common/pagination/dto/pageOptionsDto';
 import { Contest } from 'src/contest/entity/contest.entity';
+import { FilterCustomerDrawingRequest } from './dto/request/filter-customer-drawing-request.dto';
+import CustomerDrawingSortField from './enum/customer-drawing-sort-field';
 
 @Injectable()
 export class CustomerDrawingRepository {
@@ -25,6 +27,7 @@ export class CustomerDrawingRepository {
       description: request.description,
       imageUrl: null,
       insertedDate: insertedDate,
+      updatedDate: null,
       approved: false,
       active: false,
       user,
@@ -49,19 +52,81 @@ export class CustomerDrawingRepository {
 
   async getCustomerDrawingByContest(
     contestId: string,
-    pageOptionsDto: PageOptionsDto,
+    request: FilterCustomerDrawingRequest,
   ): Promise<{ count: number; entites: CustomerDrawing[] }> {
-    const customerDrawings = await this.customerDrawingRepository.find({
-      where: { active: true, approved: true, contest: { id: contestId } },
-      relations: { user: true, contest: true, votes: true },
-      skip: (pageOptionsDto.page - 1) * pageOptionsDto.take,
-      take: pageOptionsDto.take,
-    });
+    const pageOptionsDto: PageOptionsDto = request.pageOptions;
 
-    const entites = customerDrawings;
-    const count = await this.customerDrawingRepository.count({
-      where: { active: true, approved: true, contest: { id: contestId } },
-    });
+    const queryBuilder = this.customerDrawingRepository.createQueryBuilder('c');
+    queryBuilder.andWhere('c.active = :active', { active: true });
+    queryBuilder.andWhere('c.approved = :approved', { approved: true });
+    queryBuilder.andWhere('c.contest.id = :id', { id: contestId });
+
+    queryBuilder.leftJoinAndSelect('c.user', 'user');
+    queryBuilder.leftJoinAndSelect('c.contest', 'contest');
+    queryBuilder.leftJoinAndSelect('c.votes', 'votes');
+
+    queryBuilder
+      .skip((pageOptionsDto.page - 1) * pageOptionsDto.take)
+      .take(pageOptionsDto.take);
+
+    let entites: CustomerDrawing[];
+    let count: number = 0;
+
+    if (request.customerDrawingSortField === CustomerDrawingSortField.VOTE) {
+      entites = await queryBuilder.getMany().then((data) =>
+        data
+          .map((a) => ({ ...a, total_likes: a.votes.length }))
+          .sort(function (a, b) {
+            if (request.pageOptions.order === 'DESC')
+              return b.total_likes - a.total_likes;
+            else return a.total_likes - b.total_likes;
+          }),
+      );
+      count = await queryBuilder.getCount();
+    }
+
+    return { count, entites };
+  }
+
+  async getCustomerDrawing(
+    request: FilterCustomerDrawingRequest,
+  ): Promise<{ count: number; entites: CustomerDrawing[] }> {
+    const pageOptionsDto: PageOptionsDto = request.pageOptions;
+
+    const queryBuilder = this.customerDrawingRepository.createQueryBuilder('c');
+    queryBuilder.andWhere('c.active = :active', { active: true });
+    queryBuilder.andWhere('c.approved = :approved', { approved: true });
+
+    queryBuilder.leftJoinAndSelect('c.user', 'user');
+    queryBuilder.leftJoinAndSelect('c.contest', 'contest');
+    queryBuilder.leftJoinAndSelect('c.votes', 'votes');
+
+    queryBuilder
+      .skip((pageOptionsDto.page - 1) * pageOptionsDto.take)
+      .take(pageOptionsDto.take);
+
+    let entites: CustomerDrawing[];
+    let count: number = 0;
+
+    if (request.customerDrawingSortField === CustomerDrawingSortField.VOTE) {
+      entites = await queryBuilder.getMany().then((data) =>
+        data
+          .map((a) => ({ ...a, total_likes: a.votes.length }))
+          .sort(function (a, b) {
+            if (request.pageOptions.order === 'DESC')
+              return b.total_likes - a.total_likes;
+            else return a.total_likes - b.total_likes;
+          }),
+      );
+      count = await queryBuilder.getCount();
+    } else {
+      queryBuilder.orderBy(
+        `c.${request.customerDrawingSortField}`,
+        pageOptionsDto.order,
+      );
+      entites = await queryBuilder.getMany();
+      count = await queryBuilder.getCount();
+    }
 
     return { count, entites };
   }

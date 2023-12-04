@@ -16,6 +16,7 @@ import { PageDto } from 'src/common/pagination/dto/pageDto';
 import { ViewCustomerDrawingResponse } from './dto/response/view-customer-drawing-response.dto';
 import { PageMetaDto } from 'src/common/pagination/dto/pageMetaDto';
 import { CustomerDrawingMapper } from './mapper/customer-drawing.mapper';
+import { FilterCustomerDrawingRequest } from './dto/request/filter-customer-drawing-request.dto';
 
 @Injectable()
 export class CustomerDrawingService {
@@ -106,7 +107,7 @@ export class CustomerDrawingService {
 
   async getCustomerDrawingByContest(
     contestId: string,
-    pageOption: PageOptionsDto,
+    request: FilterCustomerDrawingRequest,
   ): Promise<PageDto<ViewCustomerDrawingResponse>> {
     let customerDrawings: CustomerDrawing[] = [];
     const responses: ViewCustomerDrawingResponse[] = [];
@@ -114,7 +115,7 @@ export class CustomerDrawingService {
     const { count, entites } =
       await this.customerDrawingRepository.getCustomerDrawingByContest(
         contestId,
-        pageOption,
+        request,
       );
 
     customerDrawings = entites;
@@ -123,7 +124,7 @@ export class CustomerDrawingService {
 
     const pageMetaDto = new PageMetaDto({
       itemCount,
-      pageOptionsDto: pageOption,
+      pageOptionsDto: request.pageOptions,
     });
 
     for (const customerDrawing of customerDrawings) {
@@ -138,6 +139,44 @@ export class CustomerDrawingService {
         ),
       );
     }
+
+    this.logger.log(`method=getCustomerDrawingByContest, total = ${itemCount}`);
+
+    return new PageDto(responses, pageMetaDto);
+  }
+
+  async getCustomerDrawings(
+    request: FilterCustomerDrawingRequest,
+  ): Promise<PageDto<ViewCustomerDrawingResponse>> {
+    let customerDrawings: CustomerDrawing[] = [];
+    const responses: ViewCustomerDrawingResponse[] = [];
+
+    const { count, entites } =
+      await this.customerDrawingRepository.getCustomerDrawing(request);
+
+    customerDrawings = entites;
+
+    const itemCount = count;
+
+    const pageMetaDto = new PageMetaDto({
+      itemCount,
+      pageOptionsDto: request.pageOptions,
+    });
+
+    for (const customerDrawing of customerDrawings) {
+      let cusomerName = `${customerDrawing.user.lastName} ${customerDrawing.user.middleName} ${customerDrawing.user.firstName}`;
+      let totalVotes = customerDrawing.votes.length;
+
+      responses.push(
+        this.mapper.filterViewCustomerDrawingResponseFromCustomerDrawing(
+          customerDrawing,
+          cusomerName,
+          totalVotes,
+        ),
+      );
+    }
+
+    this.logger.log(`method=getCustomerDrawings, total = ${itemCount}`);
 
     return new PageDto(responses, pageMetaDto);
   }

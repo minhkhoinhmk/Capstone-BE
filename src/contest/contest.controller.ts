@@ -3,6 +3,7 @@ import {
   Controller,
   Get,
   HttpCode,
+  Param,
   Post,
   Put,
   Query,
@@ -21,9 +22,9 @@ import { CreateContestRequest } from './dto/request/create-contest-request.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiPaginatedResponse } from 'src/common/decorator/api-pagination-response';
 import { ViewContestResponse } from './dto/response/view-contest-reponse.dto';
-import { PageOptionsDto } from 'src/common/pagination/dto/pageOptionsDto';
 import { PageDto } from 'src/common/pagination/dto/pageDto';
 import { Contest } from './entity/contest.entity';
+import { FilterContestRequest } from './dto/request/filter-contest-request.dto';
 
 @Controller('contest')
 @ApiTags('Contest')
@@ -79,9 +80,9 @@ export class ContestController {
   @HasRoles(NameRole.Customer)
   @HttpCode(200)
   async getContests(
-    @Body() pageOption: PageOptionsDto,
+    @Body() request: FilterContestRequest,
   ): Promise<PageDto<ViewContestResponse>> {
-    return await this.contestService.getContests(pageOption);
+    return await this.contestService.getContests(request);
   }
 
   @Get('/staff')
@@ -92,7 +93,21 @@ export class ContestController {
   @HasRoles(NameRole.Staff)
   async getContestsByStaff(
     @Req() request: Request,
+    @Query('status') status: string,
   ): Promise<ViewContestResponse[]> {
-    return await this.contestService.getContestByStaffId(request['user']['id']);
+    return await this.contestService.getContestByStaffId(
+      request['user']['id'],
+      status,
+    );
+  }
+
+  @Get(':id')
+  @ApiOkResponse({
+    description: 'Get Contests By Id Successfully',
+  })
+  @UseGuards(AuthGuard(), RolesGuard)
+  @HasRoles(NameRole.Staff, NameRole.Customer)
+  async getContestsById(@Param('id') id: string): Promise<ViewContestResponse> {
+    return await this.contestService.getContestById(id);
   }
 }

@@ -14,6 +14,9 @@ import { ViewContestResponse } from './dto/response/view-contest-reponse.dto';
 import { Contest } from './entity/contest.entity';
 import { PageMetaDto } from 'src/common/pagination/dto/pageMetaDto';
 import { ContestMapper } from './mapper/contest.mapper';
+import ContestStatus from './enum/contest-status.enum';
+import { Cron, CronExpression } from '@nestjs/schedule';
+import { FilterContestRequest } from './dto/request/filter-contest-request.dto';
 
 @Injectable()
 export class ContestService {
@@ -32,16 +35,34 @@ export class ContestService {
   ): Promise<Contest> {
     const staff = await this.userRepository.getUserById(staffId);
 
-    if (request.startedDate >= request.expiredDate) {
+    if (
+      new Date(request.startedDate).getDate() >=
+      new Date(request.expiredDate).getDate()
+    ) {
       throw new InternalServerErrorException(
         'Ngày bắt đầu phải bé hơn ngày hết hạn',
       );
     }
 
-    let contest = await this.contestRepository.createContest(request);
+    let contest: Contest;
+
+    if (new Date(request.startedDate).getDate() > new Date().getDate()) {
+      contest = await this.contestRepository.createContest(
+        request,
+        ContestStatus.PENDING,
+      );
+    } else {
+      contest = await this.contestRepository.createContest(
+        request,
+        ContestStatus.ACTIVE,
+      );
+    }
+
     contest.user = staff;
 
     const createdContest = await this.contestRepository.save(contest);
+
+    this.logger.log(`method=createContest, created contest successfully`);
 
     return await this.contestRepository.getContestById(createdContest.id);
   }
@@ -71,13 +92,13 @@ export class ContestService {
   }
 
   async getContests(
-    pageOption: PageOptionsDto,
+    request: FilterContestRequest,
   ): Promise<PageDto<ViewContestResponse>> {
     let contests: Contest[] = [];
     const responses: ViewContestResponse[] = [];
 
     const { count, entites } = await this.contestRepository.getContests(
-      pageOption,
+      request,
     );
 
     contests = entites;
@@ -86,7 +107,7 @@ export class ContestService {
 
     const pageMetaDto = new PageMetaDto({
       itemCount,
-      pageOptionsDto: pageOption,
+      pageOptionsDto: request.pageOptions,
     });
 
     for (const contest of contests) {
@@ -102,11 +123,19 @@ export class ContestService {
       );
     }
 
+    this.logger.log(`method=getContests, total = ${itemCount}`);
+
     return new PageDto(responses, pageMetaDto);
   }
 
-  async getContestByStaffId(staffId: string): Promise<ViewContestResponse[]> {
-    let contests = await this.contestRepository.getContestByStaffId(staffId);
+  async getContestByStaffId(
+    staffId: string,
+    status: string,
+  ): Promise<ViewContestResponse[]> {
+    let contests = await this.contestRepository.getContestByStaffId(
+      staffId,
+      status,
+    );
     const responses: ViewContestResponse[] = [];
 
     for (const contest of contests) {
@@ -122,6 +151,50 @@ export class ContestService {
       );
     }
 
+    this.logger.log(`method=getContestByStaffId, total = ${responses.length}`);
+
     return responses;
+  }
+
+  async getContestById(contestId: string): Promise<ViewContestResponse> {
+    const contest = await this.contestRepository.getContestById(contestId);
+    let staffName = `${contest.user.lastName} ${contest.user.middleName} ${contest.user.firstName}`;
+    let total = contest.customerDrawings.length;
+
+    this.logger.log(`method=getContestById, id = ${contest.id}`);
+
+    return this.mapper.filterViewContestResponseFromContest(
+      contest,
+      staffName,
+      total,
+    );
+  }
+
+  @Cron(CronExpression.EVERY_30_SECONDS)
+  async setStatusContest() {
+    const contests = await this.contestRepository.getContestsNotPagination();
+    contests.forEach(async (contest) => {
+      if (
+        contest.status === ContestStatus.PENDING &&
+        contest.startedDate.getDate() === new Date().getDate()
+      ) {
+        contest.status = ContestStatus.ACTIVE;
+        await this.contestRepository.save(contest);
+
+        this.logger.log(
+          `method=setStatusContest, contestId=${contest.id} move to active`,
+        );
+      } else if (
+        contest.status === ContestStatus.ACTIVE &&
+        contest.expiredDate.getDate() <= new Date().getDate()
+      ) {
+        contest.status = ContestStatus.EXPIRED;
+        await this.contestRepository.save(contest);
+
+        this.logger.log(
+          `method=setStatusContest, contestId=${contest.id} move to expired`,
+        );
+      }
+    });
   }
 }
