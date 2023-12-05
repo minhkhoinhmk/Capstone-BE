@@ -61,4 +61,46 @@ export class AchievementRepository {
       },
     });
   }
+
+  async getAchievementByCustomerAndCourse(
+    customerId: string,
+    courseId: string,
+  ): Promise<Achievement> {
+    return await this.achievementRepository.findOne({
+      where: {
+        user: {
+          id: customerId,
+        },
+        course: {
+          id: courseId,
+        },
+      },
+      relations: {
+        course: true,
+        user: true,
+        learner: true,
+      },
+    });
+  }
+
+  async getAchievementByLearnerAndCourse(
+    learnerId: string,
+    courseId: string,
+  ): Promise<Achievement> {
+    return await this.achievementRepository.findOne({
+      where: {
+        learner: {
+          id: learnerId,
+        },
+        course: {
+          id: courseId,
+        },
+      },
+      relations: {
+        course: true,
+        user: true,
+        learner: true,
+      },
+    });
+  }
 }

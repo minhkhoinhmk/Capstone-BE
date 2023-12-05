@@ -13,7 +13,6 @@ import { RolesGuard } from 'src/auth/role.guard';
 import { HasRoles } from 'src/auth/roles.decorator';
 import { NameRole } from 'src/role/enum/name-role.enum';
 import { ApiTags } from '@nestjs/swagger';
-import { Achievement } from './entity/achievement.entity';
 import { ViewAchievementReponse } from './dto/response/view-achievement-response.dto';
 
 @Controller('achievement')
@@ -47,9 +46,11 @@ export class AchievementController {
       path,
     );
 
+    const achievementId = path.split('/').pop()?.split('.')[0];
+
     res.set({
       'Content-Type': 'application/pdf',
-      'Content-Disposition': 'attachment; filename=example.pdf',
+      'Content-Disposition': `attachment; filename=${achievementId}.pdf`,
       'Content-Length': achievement.ContentLength,
     });
 

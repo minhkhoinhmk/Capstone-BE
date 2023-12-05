@@ -1,4 +1,5 @@
 import {
+  ConflictException,
   Injectable,
   InternalServerErrorException,
   Logger,
@@ -13,7 +14,6 @@ import { UserLecture } from 'src/user-lecture/entity/user-lecture.entity';
 import { UserLectureRepository } from 'src/user-lecture/user-lecture.repository';
 import { UserRepository } from 'src/user/user.repository';
 import { AchievementRepository } from './achievement.repository';
-import { Achievement } from './entity/achievement.entity';
 import { AchievementMapper } from './mapper/achievement.mapper';
 import { ViewAchievementReponse } from './dto/response/view-achievement-response.dto';
 const PDFDocument = require('pdfkit');
@@ -34,64 +34,79 @@ export class AchievementService {
   ) {}
 
   async generatePdf(userId: string, courseId: string): Promise<Buffer> {
-    const learner = await this.learnerRepository.getLeanerById(userId);
-    const customer = await this.userRepository.getUserById(userId);
-    const course = await this.courseRepository.getCourseById(courseId);
+    if (
+      (await this.achievementRepository.getAchievementByCustomerAndCourse(
+        userId,
+        courseId,
+      )) === null &&
+      (await this.achievementRepository.getAchievementByLearnerAndCourse(
+        userId,
+        courseId,
+      )) === null
+    ) {
+      const learner = await this.learnerRepository.getLeanerById(userId);
+      const customer = await this.userRepository.getUserById(userId);
+      const course = await this.courseRepository.getCourseById(courseId);
 
-    let userLectures: UserLecture[] = [];
+      let userLectures: UserLecture[] = [];
 
-    if (learner) {
-      userLectures =
-        await this.userLectureRepository.getUserLectureByCourseAndLearner(
-          courseId,
-          learner.id,
+      if (learner) {
+        userLectures =
+          await this.userLectureRepository.getUserLectureByCourseAndLearner(
+            courseId,
+            learner.id,
+          );
+      } else if (customer) {
+        userLectures =
+          await this.userLectureRepository.getUserLectureByCourseAndCustomer(
+            courseId,
+            customer.id,
+          );
+      }
+
+      if (userLectures.length === course.chapterLectures.length) {
+        const achievement = await this.achievementRepository.createAchievement(
+          customer,
+          learner,
+          course,
         );
-    } else if (customer) {
-      userLectures =
-        await this.userLectureRepository.getUserLectureByCourseAndCustomer(
-          courseId,
-          customer.id,
+
+        const response = await this.achievementRepository.save(achievement);
+
+        const pdfBuffer: Buffer = await new Promise((resolve) => {
+          this.template(
+            resolve,
+            course.title,
+            `${course.user.lastName} ${course.user.middleName} ${course.user.firstName}`,
+            learner
+              ? `${learner.lastName} ${learner.middleName} ${learner.firstName}`
+              : `${customer.lastName} ${customer.middleName} ${customer.firstName}`,
+          );
+        });
+
+        await this.s3Service.putObject(
+          pdfBuffer,
+          `${ACHIEVEMENT_PATH}${response.id}.pdf`,
+          'application/pdf',
         );
-    }
 
-    if (userLectures.length === course.chapterLectures.length) {
-      const achievement = await this.achievementRepository.createAchievement(
-        customer,
-        learner,
-        course,
-      );
+        response.path = `${ACHIEVEMENT_PATH}${response.id}.pdf`;
 
-      const response = await this.achievementRepository.save(achievement);
+        await this.achievementRepository.save(response);
 
-      const pdfBuffer: Buffer = await new Promise((resolve) => {
-        this.template(
-          resolve,
-          course.title,
-          `${course.user.lastName} ${course.user.middleName} ${course.user.firstName}`,
-          learner
-            ? `${learner.lastName} ${learner.middleName} ${learner.firstName}`
-            : `${customer.lastName} ${customer.middleName} ${customer.firstName}`,
+        this.logger.log(
+          `method=generatePdf, path=${response.path} generated successfully`,
         );
-      });
 
-      await this.s3Service.putObject(
-        pdfBuffer,
-        `${ACHIEVEMENT_PATH}${response.id}.pdf`,
-        'application/pdf',
-      );
-
-      response.path = `${ACHIEVEMENT_PATH}${response.id}.pdf`;
-
-      await this.achievementRepository.save(response);
-
-      this.logger.log(
-        `method=generatePdf, path=${response.path} generated successfully`,
-      );
-
-      return pdfBuffer;
+        return pdfBuffer;
+      } else {
+        throw new InternalServerErrorException(
+          `Bạn chưa hoàn thành hết khóa học`,
+        );
+      }
     } else {
-      throw new InternalServerErrorException(
-        `Bạn chưa hoàn thành hết khóa học`,
+      throw new ConflictException(
+        `Chứng nhận hoànn thành khóa học đã được cấp. Vui lòng kiểm ta lại`,
       );
     }
   }
