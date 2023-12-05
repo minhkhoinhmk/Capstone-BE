@@ -15,16 +15,17 @@ import { AuthGuard } from '@nestjs/passport';
 import { RolesGuard } from 'src/auth/role.guard';
 import { HasRoles } from 'src/auth/roles.decorator';
 import { NameRole } from 'src/role/enum/name-role.enum';
-import { ApiCreatedResponse, ApiOkResponse } from '@nestjs/swagger';
+import { ApiCreatedResponse, ApiOkResponse, ApiTags } from '@nestjs/swagger';
 import { CreateCustomerDrawingRequest } from './dto/request/create-customer-drawing-request.dto';
 import { CustomerDrawing } from './entity/customer-drawing.entity';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiPaginatedResponse } from 'src/common/decorator/api-pagination-response';
 import { ViewCustomerDrawingResponse } from './dto/response/view-customer-drawing-response.dto';
-import { PageOptionsDto } from 'src/common/pagination/dto/pageOptionsDto';
 import { PageDto } from 'src/common/pagination/dto/pageDto';
+import { FilterCustomerDrawingRequest } from './dto/request/filter-customer-drawing-request.dto';
 
 @Controller('customer-drawing')
+@ApiTags('Customer-Drawing')
 export class CustomerDrawingController {
   constructor(
     private readonly customerDrawingService: CustomerDrawingService,
@@ -72,6 +73,24 @@ export class CustomerDrawingController {
     }
   }
 
+  @Post('/contest')
+  @ApiOkResponse({
+    description: 'Get Customer Drawings By Contest Successfully',
+  })
+  @ApiPaginatedResponse(ViewCustomerDrawingResponse)
+  @UseGuards(AuthGuard(), RolesGuard)
+  @HasRoles(NameRole.Customer)
+  @HttpCode(200)
+  async getCustomerDrawingsByContest(
+    @Body() request: FilterCustomerDrawingRequest,
+    @Query('contestId') contestId: string,
+  ): Promise<PageDto<ViewCustomerDrawingResponse>> {
+    return await this.customerDrawingService.getCustomerDrawingByContest(
+      contestId,
+      request,
+    );
+  }
+
   @Post()
   @ApiOkResponse({
     description: 'Get Customer Drawings Successfully',
@@ -80,13 +99,9 @@ export class CustomerDrawingController {
   @UseGuards(AuthGuard(), RolesGuard)
   @HasRoles(NameRole.Customer)
   @HttpCode(200)
-  async getContests(
-    @Body() pageOption: PageOptionsDto,
-    @Query('contestId') contestId: string,
+  async getCustomerDrawings(
+    @Body() request: FilterCustomerDrawingRequest,
   ): Promise<PageDto<ViewCustomerDrawingResponse>> {
-    return await this.customerDrawingService.getCustomerDrawingByContest(
-      contestId,
-      pageOption,
-    );
+    return await this.customerDrawingService.getCustomerDrawings(request);
   }
 }

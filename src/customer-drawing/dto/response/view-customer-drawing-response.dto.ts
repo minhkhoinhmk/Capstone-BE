@@ -24,6 +24,10 @@ export class ViewCustomerDrawingResponse {
 
   @ApiProperty()
   @Expose()
+  updatedDate: Date;
+
+  @ApiProperty()
+  @Expose()
   approved: boolean;
 
   @ApiProperty()

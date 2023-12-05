@@ -34,6 +34,10 @@ export class CustomerDrawing {
   @Expose()
   insertedDate: Date;
 
+  @Column({ nullable: true })
+  @Expose()
+  updatedDate: Date;
+
   @Column()
   @Expose()
   approved: boolean;
