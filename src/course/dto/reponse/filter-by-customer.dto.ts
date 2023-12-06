@@ -52,5 +52,5 @@ export class FilterCourseByCustomerResponse {
 
   @ApiProperty()
   @Expose()
-  completedPercent: number;
+  completedPercent: number | null;
 }

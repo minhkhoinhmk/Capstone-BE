@@ -5,6 +5,7 @@ import { Repository } from 'typeorm';
 import { User } from 'src/user/entity/user.entity';
 import { Learner } from 'src/learner/entity/learner.entity';
 import { Course } from 'src/course/entity/course.entity';
+import { dateInVietnam } from 'src/utils/date-vietnam.util';
 
 @Injectable()
 export class AchievementRepository {
@@ -20,7 +21,7 @@ export class AchievementRepository {
   ): Promise<Achievement> {
     return this.achievementRepository.create({
       path: '',
-      insertedDate: new Date(),
+      insertedDate: dateInVietnam(),
       active: true,
       user: customer,
       learner: learner,

@@ -18,6 +18,7 @@ import { RefundMapper } from './mapper/refund.mapper';
 import { RefundResponse } from './dto/response/refund-response.dto';
 import { MailerService } from '@nestjs-modules/mailer';
 import { LearnerCourseRepository } from 'src/learner-course/learner-course.repository';
+import { dateInVietnam } from 'src/utils/date-vietnam.util';
 
 @Injectable()
 export class RefundService {
@@ -137,7 +138,7 @@ export class RefundService {
   }
 
   isOverThirtyDaysAgo(dateToCheck: Date): boolean {
-    const currentDate = new Date();
+    const currentDate = dateInVietnam();
     const thirtyDaysInMillis = 30 * 24 * 60 * 60 * 1000;
 
     const currentTimeInMillis = currentDate.getTime();
@@ -235,13 +236,13 @@ export class RefundService {
 
     this.refundRepository.saveRefund(refund);
 
-    let learnerCourse =
+    const learnerCourse =
       await this.learnerCourseRepository.getLearnerCourseByCourseAndCustomer(
         refund.orderDetail.course.id,
         refund.orderDetail.order.user.id,
       );
 
-    let orderDetail = await this.orderDetailRepository.getOrderDetailById(
+    const orderDetail = await this.orderDetailRepository.getOrderDetailById(
       refund.orderDetail.id,
     );
 

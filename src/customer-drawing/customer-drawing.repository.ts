@@ -88,6 +88,20 @@ export class CustomerDrawingRepository {
     return { count, entites };
   }
 
+  async getCustomerDrawingByContestId(contestId: string) {
+    return this.customerDrawingRepository.find({
+      where: {
+        contest: {
+          id: contestId,
+        },
+      },
+      relations: {
+        user: true,
+        votes: true,
+      },
+    });
+  }
+
   async getCustomerDrawing(
     request: FilterCustomerDrawingRequest,
   ): Promise<{ count: number; entites: CustomerDrawing[] }> {

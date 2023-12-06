@@ -14,6 +14,7 @@ import { HasRoles } from 'src/auth/roles.decorator';
 import { NameRole } from 'src/role/enum/name-role.enum';
 import { ApiTags } from '@nestjs/swagger';
 import { ViewAchievementReponse } from './dto/response/view-achievement-response.dto';
+import { Request } from 'express';
 
 @Controller('achievement')
 @ApiTags('Achievement')

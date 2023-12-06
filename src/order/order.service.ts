@@ -14,6 +14,11 @@ import { UpdateTransactionRequest } from './dto/request/update-order.request.dto
 import { User } from 'src/user/entity/user.entity';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { NameOrderStatus } from './enum/name-order-status.enum';
+import { dateInVietnam } from 'src/utils/date-vietnam.util';
+import { GetOrderByUserRequest } from './dto/request/get-order-by-user.request.dto';
+import { PageMetaDto } from 'src/common/pagination/dto/pageMetaDto';
+import { PageDto } from 'src/common/pagination/dto/pageDto';
+import { PromotionCourseRepository } from 'src/promotion-course/promotion-course.repository';
 
 @Injectable()
 export class OrderService {
@@ -29,6 +34,7 @@ export class OrderService {
     private courseService: CourseService,
     private cartItemRepository: CartItemRepository,
     private paymentMethodRepository: PaymentMethodRepository,
+    private promotionCourseRepository: PromotionCourseRepository,
   ) {}
 
   async createOrder(user: User): Promise<Order> {
@@ -50,18 +56,28 @@ export class OrderService {
         orderStatus,
         note: '',
         active: true,
-        insertedDate: new Date(),
+        insertedDate: dateInVietnam(),
       }),
     );
 
     // Handle order details
     const arrayOfPromises = [];
+    const arrayOfPromises2 = [];
     customer.cart.cartItems.forEach((cartItem) => {
       const price = cartItem.course.price;
       const discount = cartItem.promotionCourse
         ? cartItem.promotionCourse.promotion.discountPercent
         : 0;
       const priceAfterPromotion = price - (price * discount) / 100;
+
+      if (cartItem.promotionCourse) {
+        cartItem.promotionCourse.used = cartItem.promotionCourse.used + 1;
+        arrayOfPromises2.push(
+          this.promotionCourseRepository.savePromotionCourse(
+            cartItem.promotionCourse,
+          ),
+        );
+      }
 
       arrayOfPromises.push(
         this.orderDetailRepository.saveOrderDetail(
@@ -80,6 +96,7 @@ export class OrderService {
       );
     });
     const orderDetails = await Promise.all(arrayOfPromises);
+    await Promise.all(arrayOfPromises2);
     order.orderDetails = orderDetails;
 
     return order;
@@ -103,9 +120,25 @@ export class OrderService {
     return this.orderRepository.saveOrder(order);
   }
 
-  async findOrdersByUser(user: User) {
-    const orders = await this.orderRepository.getOrdersByUser(user);
-    return orders;
+  async findOrdersByUser(
+    body: GetOrderByUserRequest,
+    user: User,
+  ): Promise<PageDto<Order>> {
+    const { count, entities } = await this.orderRepository.getOrdersByUser(
+      body,
+      user,
+    );
+
+    const itemCount = count;
+
+    const pageMetaDto = new PageMetaDto({
+      itemCount,
+      pageOptionsDto: body.pageOptions,
+    });
+
+    this.logger.log(`method=findOrdersByUser, totalItems=${count}`);
+
+    return new PageDto(entities, pageMetaDto);
   }
 
   async findOrderByOrderId(orderId: string, user: User) {
@@ -119,7 +152,7 @@ export class OrderService {
     const ordersPending = await this.getOrdersPending();
 
     for (const order of ordersPending) {
-      if (this.diffMinutes(order.insertedDate, new Date()) >= 30) {
+      if (this.diffMinutes(order.insertedDate, dateInVietnam()) >= 30) {
         this.logger.log(
           `method=deletePedingOrder, remove order with id ${order.id}`,
         );

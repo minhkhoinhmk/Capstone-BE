@@ -9,6 +9,7 @@ import { UserUpdateRequest } from './dto/request/user-update.request.dto';
 import { NameRole } from 'src/role/enum/name-role.enum';
 import { InstructorStatus } from 'src/instructor/enum/instructor-status.enum';
 import { CreateStaffRequest } from 'src/staff/dto/request/create-staff-request.dto';
+import { dateInVietnam } from 'src/utils/date-vietnam.util';
 
 @Injectable()
 export class UserRepository {
@@ -74,7 +75,7 @@ export class UserRepository {
       phoneNumber: phoneNumber,
       email: email,
       active: false,
-      otpCreatedDate: new Date(),
+      otpCreatedDate: dateInVietnam(),
       otp: otp,
       isConfirmedEmail: false,
       role: role,
