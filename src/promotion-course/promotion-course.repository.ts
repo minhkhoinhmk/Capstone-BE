@@ -4,6 +4,7 @@ import { LessThanOrEqual, MoreThanOrEqual, Repository } from 'typeorm';
 import { PromotionCourse } from './entity/promotion-course.entity';
 import { NameRole } from 'src/role/enum/name-role.enum';
 import { RoleRepository } from 'src/role/role.repository';
+import { dateInVietnam } from 'src/utils/date-vietnam.util';
 
 @Injectable()
 export class PromotionCourseRepository {
@@ -15,35 +16,100 @@ export class PromotionCourseRepository {
     private roleRepository: RoleRepository,
   ) {}
 
-  async getPromotionCoursesByCourseIdCanApply(
-    courseId: string,
-    userNameRole?: NameRole,
-  ): Promise<PromotionCourse[]> {
-    const date = new Date();
-    const role = await this.roleRepository.getRoleByName(userNameRole);
+  async getPromotionCoursesViewByCourseId(courseId: string) {
+    const date = dateInVietnam();
 
     const promotionCourses = await this.promotionCourseRepository.find({
       where: {
+        course: {
+          id: courseId,
+        },
         active: true,
-        course: { id: courseId },
-        effectiveDate: LessThanOrEqual(date),
-        expiredDate: MoreThanOrEqual(date),
+        isView: true,
+        isFull: false,
         promotion: {
+          effectiveDate: LessThanOrEqual(date),
+          expiredDate: MoreThanOrEqual(date),
           active: true,
         },
       },
       relations: {
         promotion: {
-          user: {
-            role: true,
-          },
+          user: true,
         },
+        orderDetails: true,
+        cartItems: true,
       },
     });
+    return promotionCourses;
+  }
 
-    return promotionCourses.filter((promotionCourse) => {
-      return promotionCourse.promotion.user.role.name === userNameRole;
+  async getPromotionCourseCanApplyById(id: string) {
+    const date = dateInVietnam();
+
+    const promotionCourse = await this.promotionCourseRepository.findOne({
+      where: {
+        id,
+        active: true,
+        isView: true,
+        promotion: {
+          effectiveDate: LessThanOrEqual(date),
+          expiredDate: MoreThanOrEqual(date),
+          active: true,
+        },
+      },
+      relations: {
+        promotion: {
+          user: true,
+        },
+        orderDetails: true,
+        cartItems: true,
+      },
     });
+    return promotionCourse;
+  }
+
+  async getPromotionCourseCanApplyByCode(code: string, courseId: string) {
+    const date = dateInVietnam();
+
+    const promotionCourse = await this.promotionCourseRepository.findOne({
+      where: {
+        course: { id: courseId },
+        active: true,
+        isView: false,
+        promotion: {
+          code,
+          effectiveDate: LessThanOrEqual(date),
+          expiredDate: MoreThanOrEqual(date),
+          active: true,
+        },
+      },
+      relations: {
+        promotion: {
+          user: true,
+        },
+        orderDetails: true,
+        cartItems: true,
+      },
+    });
+    return promotionCourse;
+  }
+
+  async getPromotionCourseActiveById(id: string) {
+    const promotionCourse = await this.promotionCourseRepository.findOne({
+      where: {
+        id,
+        active: true,
+      },
+      relations: {
+        promotion: {
+          user: true,
+        },
+        orderDetails: true,
+        cartItems: true,
+      },
+    });
+    return promotionCourse;
   }
 
   async getPromotionCourseById(id: string) {
@@ -55,8 +121,35 @@ export class PromotionCourseRepository {
         promotion: {
           user: true,
         },
+        orderDetails: true,
+        cartItems: true,
       },
     });
     return promotionCourse;
+  }
+
+  async getPromotionCoursesByPromotionId(promotionId: string) {
+    const promotionCourses = await this.promotionCourseRepository.find({
+      where: {
+        promotion: {
+          id: promotionId,
+        },
+      },
+      relations: {
+        promotion: true,
+        course: true,
+        orderDetails: true,
+        cartItems: true,
+      },
+    });
+    return promotionCourses;
+  }
+
+  async savePromotionCourse(promotionCourse: PromotionCourse) {
+    return await this.promotionCourseRepository.save(promotionCourse);
+  }
+
+  async removePromotionCourse(promotionCourse: PromotionCourse) {
+    return await this.promotionCourseRepository.remove(promotionCourse);
   }
 }

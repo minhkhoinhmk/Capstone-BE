@@ -114,7 +114,7 @@ export class AchievementService {
   async getListAchievements(id: string): Promise<ViewAchievementReponse[]> {
     const learner = await this.learnerRepository.getLeanerById(id);
     const customer = await this.userRepository.getUserById(id);
-    let response: ViewAchievementReponse[] = [];
+    const response: ViewAchievementReponse[] = [];
 
     if (learner) {
       const result = await this.achievementRepository.getAchievementByLeaner(

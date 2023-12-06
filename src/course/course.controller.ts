@@ -26,6 +26,7 @@ import { User } from 'src/user/entity/user.entity';
 import { Request } from 'express';
 import { SetStatusRequest } from './dto/request/set-status-request.dto';
 import { Course } from './entity/course.entity';
+import { CourseLearnStatus } from './type/enum/CourseLearnStatus';
 
 @Controller('course')
 @ApiTags('Courses')
@@ -66,8 +67,13 @@ export class CourseController {
   @HasRoles(NameRole.Customer)
   async getCoursesByUserId(
     @Req() request: Request,
+    @Query('status') status: CourseLearnStatus,
   ): Promise<FilterCourseByCustomerResponse[]> {
-    return await this.courseService.getCoursesByUserId(request['user']['id']);
+    console.log(status);
+    return await this.courseService.getCoursesByUserId(
+      request['user']['id'],
+      status,
+    );
   }
 
   @Get('/order/check-owned/:id')

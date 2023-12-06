@@ -7,6 +7,7 @@ import { CreateCourseFeedbackRequest } from './dto/request/create-course-feedbac
 import { Course } from 'src/course/entity/course.entity';
 import { Learner } from 'src/learner/entity/learner.entity';
 import { User } from 'src/user/entity/user.entity';
+import { dateInVietnam } from 'src/utils/date-vietnam.util';
 
 @Injectable()
 export class CourseFeedbackRepository {
@@ -69,11 +70,11 @@ export class CourseFeedbackRepository {
     return this.courseFeedbackRepository.create({
       ratedStar: request.ratedStar,
       description: request.description,
-      insertedDate: new Date(),
+      insertedDate: dateInVietnam(),
       insertedBy: user
         ? `${user.lastName} ${user.middleName} ${user.firstName}`
         : `${learner.lastName} ${learner.middleName} ${learner.firstName}`,
-      updatedDate: new Date(),
+      updatedDate: dateInVietnam(),
       updatedBy: user
         ? `${user.lastName} ${user.middleName} ${user.firstName}`
         : `${learner.lastName} ${learner.middleName} ${learner.firstName}`,

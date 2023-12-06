@@ -73,7 +73,7 @@ export class ContestService {
     contestId: string,
   ): Promise<void> {
     try {
-      let contest = await this.contestRepository.getContestById(contestId);
+      const contest = await this.contestRepository.getContestById(contestId);
       const key = `${CONTEST_THUMBNAIL_PATH}${contest.id}${substringAfterDot}`;
 
       contest.thumbnailUrl = key;

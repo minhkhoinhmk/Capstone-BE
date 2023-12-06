@@ -13,6 +13,7 @@ import { CartItemRepository } from 'src/cart-item/cart-item.repository';
 import { CartItem } from 'src/cart-item/entity/cart-item.entity';
 import { Cart } from './entity/cart.entity';
 import { CourseService } from 'src/course/course.service';
+import { dateInVietnam } from 'src/utils/date-vietnam.util';
 
 @Injectable()
 export class CartService {
@@ -126,12 +127,13 @@ export class CartService {
 
       if (!promotionCourse) return true;
 
-      const date = new Date();
+      const date = dateInVietnam();
       const isPromotionCourseValid =
         promotionCourse.active &&
-        promotionCourse.effectiveDate <= date &&
-        promotionCourse.expiredDate >= date &&
-        promotionCourse.promotion.active;
+        promotionCourse.promotion.effectiveDate <= date &&
+        promotionCourse.promotion.expiredDate >= date &&
+        promotionCourse.promotion.active &&
+        promotionCourse.used < promotionCourse.promotion.amount;
 
       if (!isPromotionCourseValid) {
         cartItem.promotionCourse = null;

@@ -48,6 +48,7 @@
     "get-video-duration": "^4.1.0",
     "hbs": "^4.2.0",
     "luxon": "^3.4.3",
+    "moment-timezone": "^0.5.43",
     "nestjs-typeorm-paginate": "^4.0.4",
     "nodemailer": "^6.9.5",
     "passport": "^0.6.0",

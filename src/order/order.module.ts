@@ -12,6 +12,7 @@ import { PaymentMethodModule } from 'src/payment-method/payment-method.module';
 import { CartModule } from 'src/cart/cart.module';
 import { OrderDetailModule } from 'src/order-detail/order-detail.module';
 import { TransactionModule } from 'src/transaction/transaction.module';
+import { PromotionCourseModule } from 'src/promotion-course/promotion-course.module';
 
 @Module({
   providers: [OrderService, OrderRepository],
@@ -25,6 +26,7 @@ import { TransactionModule } from 'src/transaction/transaction.module';
     CartModule,
     OrderDetailModule,
     TransactionModule,
+    PromotionCourseModule,
     // forwardRef(() => TransactionModule),
   ],
   controllers: [OrderController],
