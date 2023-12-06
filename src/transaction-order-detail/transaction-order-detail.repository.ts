@@ -4,6 +4,7 @@ import { OrderDetail } from 'src/order-detail/entity/order-detail.entity';
 import { TransactionPayOff } from 'src/transaction-pay-off/entity/transaction-pay-off.entity';
 import { Repository } from 'typeorm';
 import { TransactionOrderDetail } from './entity/transaction-order-detail.entity';
+import { dateInVietnam } from 'src/utils/date-vietnam.util';
 
 @Injectable()
 export class TransactionOrderDetailRepository {
@@ -24,7 +25,7 @@ export class TransactionOrderDetailRepository {
       refundAmount: orderDetail.refund
         ? orderDetail.refund.refundPrice * 0.8
         : 0,
-      insertedDate: new Date(),
+      insertedDate: dateInVietnam(),
       active: true,
       orderDetail: orderDetail,
       transactionPayOff: transactionPayOff,

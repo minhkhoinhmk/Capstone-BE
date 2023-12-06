@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { TransactionPayOff } from 'src/transaction-pay-off/entity/transaction-pay-off.entity';
 import { User } from 'src/user/entity/user.entity';
+import { dateInVietnam } from 'src/utils/date-vietnam.util';
 import { Repository } from 'typeorm';
 
 @Injectable()
@@ -19,7 +20,7 @@ export class TransactionPayOfflRepository {
     return this.transactionPayOfflRepository.create({
       senderId: senderId,
       totalPaymentAmount: totalPaymentAmount,
-      insertedDate: new Date(),
+      insertedDate: dateInVietnam(),
       active: true,
       user: user,
     });

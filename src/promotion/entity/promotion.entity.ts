@@ -18,6 +18,9 @@ export default class Promotion {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
+  @Column({ nullable: true })
+  title: string;
+
   @Column()
   discountPercent: number;
 
@@ -36,6 +39,20 @@ export default class Promotion {
 
   @Column()
   note: string;
+
+  @ApiProperty({ type: Date, description: 'Effective date of the Promotion' })
+  @Column({ nullable: true })
+  effectiveDate: Date;
+
+  @ApiProperty({ type: Date, description: 'Expire date of the Promotion' })
+  @Column({ nullable: true })
+  expiredDate: Date;
+
+  @Column({ unique: true, nullable: true })
+  code: string;
+
+  @Column({ nullable: true })
+  amount: number;
 
   @Column()
   active: boolean;

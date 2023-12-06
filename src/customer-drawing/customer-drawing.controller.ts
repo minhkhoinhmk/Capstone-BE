@@ -1,7 +1,10 @@
 import {
   Body,
   Controller,
+  Get,
   HttpCode,
+  Param,
+  Patch,
   Post,
   Put,
   Query,
@@ -23,6 +26,7 @@ import { ApiPaginatedResponse } from 'src/common/decorator/api-pagination-respon
 import { ViewCustomerDrawingResponse } from './dto/response/view-customer-drawing-response.dto';
 import { PageDto } from 'src/common/pagination/dto/pageDto';
 import { FilterCustomerDrawingRequest } from './dto/request/filter-customer-drawing-request.dto';
+import { Request } from 'express';
 
 @Controller('customer-drawing')
 @ApiTags('Customer-Drawing')
@@ -37,7 +41,7 @@ export class CustomerDrawingController {
   @ApiCreatedResponse({
     description: 'Created Customer Drawing Successfully',
   })
-  createContest(
+  createCustomerDrawing(
     @Body() ceateCustomerDrawingRequest: CreateCustomerDrawingRequest,
     @Req() request: Request,
     @Query('contestId') contestId: string,
@@ -73,13 +77,19 @@ export class CustomerDrawingController {
     }
   }
 
+  @Patch('/approve/:id')
+  @HasRoles(NameRole.Staff)
+  async approveCustomerDrawing(@Param('id') id: string): Promise<void> {
+    return this.customerDrawingService.approveCustomerDrawing(id);
+  }
+
   @Post('/contest')
   @ApiOkResponse({
     description: 'Get Customer Drawings By Contest Successfully',
   })
   @ApiPaginatedResponse(ViewCustomerDrawingResponse)
   @UseGuards(AuthGuard(), RolesGuard)
-  @HasRoles(NameRole.Customer)
+  @HasRoles(NameRole.Customer, NameRole.Staff)
   @HttpCode(200)
   async getCustomerDrawingsByContest(
     @Body() request: FilterCustomerDrawingRequest,
@@ -88,6 +98,21 @@ export class CustomerDrawingController {
     return await this.customerDrawingService.getCustomerDrawingByContest(
       contestId,
       request,
+    );
+  }
+
+  @Get('/contest/staff')
+  @ApiOkResponse({
+    description: 'Get Customer Drawings By Contest Successfully',
+  })
+  @UseGuards(AuthGuard(), RolesGuard)
+  @HasRoles(NameRole.Staff)
+  @HttpCode(200)
+  async getCustomerDrawingsByStaff(
+    @Query('contestId') contestId: string,
+  ): Promise<CustomerDrawing[]> {
+    return await this.customerDrawingService.getCustomerDrawingByContestId(
+      contestId,
     );
   }
 

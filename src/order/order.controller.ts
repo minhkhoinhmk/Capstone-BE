@@ -18,6 +18,8 @@ import { Order } from './entity/order.entity';
 import { UpdateTransactionRequest } from './dto/request/update-order.request.dto';
 import { Request } from 'express';
 import { User } from 'src/user/entity/user.entity';
+import { GetOrderByUserRequest } from './dto/request/get-order-by-user.request.dto';
+import { PageDto } from 'src/common/pagination/dto/pageDto';
 
 @Controller('order')
 @ApiTags('Order')
@@ -41,11 +43,14 @@ export class OrderController {
     return this.orderService.updateOrder(body);
   }
 
-  @Get('/user')
+  @Post('/user')
   @UseGuards(AuthGuard(), RolesGuard)
   @HasRoles(NameRole.Customer)
-  findOrdersByUser(@Req() request: Request): Promise<Order[]> {
-    return this.orderService.findOrdersByUser(request['user'] as User);
+  findOrdersByUser(
+    @Body() body: GetOrderByUserRequest,
+    @Req() request: Request,
+  ): Promise<PageDto<Order>> {
+    return this.orderService.findOrdersByUser(body, request['user'] as User);
   }
 
   @Get('/user/:id')

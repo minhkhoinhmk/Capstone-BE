@@ -7,6 +7,7 @@ import { CreateOrderBody } from './types/create-order-body';
 import { OrderDetailRepository } from 'src/order-detail/order-detail.repository';
 import { TransactionRepository } from 'src/transaction/transaction.repository';
 import { NameOrderStatus } from './enum/name-order-status.enum';
+import { GetOrderByUserRequest } from './dto/request/get-order-by-user.request.dto';
 
 @Injectable()
 export class OrderRepository {
@@ -39,18 +40,37 @@ export class OrderRepository {
     });
   }
 
-  async getOrdersByUser(user: User): Promise<Order[]> {
-    return this.orderRepository.find({
-      where: { user },
+  async getOrdersByUser(
+    body: GetOrderByUserRequest,
+    user: User,
+  ): Promise<{ count: number; entities: Order[] }> {
+    const { orderStatus, pageOptions } = body;
+
+    const entities = await this.orderRepository.find({
+      where: {
+        user,
+        orderStatus: orderStatus ? orderStatus : undefined,
+      },
       relations: {
         user: true,
         paymentMethod: true,
         orderDetails: { course: true },
       },
       order: {
-        updatedDate: 'DESC',
+        updatedDate: pageOptions.order,
+      },
+      skip: (pageOptions.page - 1) * pageOptions.take,
+      take: pageOptions.take,
+    });
+
+    const count = await this.orderRepository.count({
+      where: {
+        user,
+        orderStatus: orderStatus ? orderStatus : undefined,
       },
     });
+
+    return { count: count, entities: entities };
   }
 
   async getCoursesByUserId(userId: string): Promise<Order[]> {

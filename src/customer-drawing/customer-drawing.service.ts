@@ -17,6 +17,7 @@ import { ViewCustomerDrawingResponse } from './dto/response/view-customer-drawin
 import { PageMetaDto } from 'src/common/pagination/dto/pageMetaDto';
 import { CustomerDrawingMapper } from './mapper/customer-drawing.mapper';
 import { FilterCustomerDrawingRequest } from './dto/request/filter-customer-drawing-request.dto';
+import { response } from 'express';
 
 @Injectable()
 export class CustomerDrawingService {
@@ -105,6 +106,37 @@ export class CustomerDrawingService {
     }
   }
 
+  async approveCustomerDrawing(customerDrawingId: string): Promise<void> {
+    try {
+      const customerDrawing =
+        await this.customerDrawingRepository.getCustomerDrawingByIdForUpdateImageUrl(
+          customerDrawingId,
+        );
+
+      customerDrawing.active = true;
+      customerDrawing.approved = true;
+
+      await this.customerDrawingRepository.saveCustomerDrawing(customerDrawing);
+
+      // await this.mailService.sendMail({
+      //   to: customerDrawing.user.email,
+      //   subject: 'xét duyệt thành công',
+      //   template: './waitingApproval',
+      //   context: {
+      //     CONTENT: `Bài dự thi cuộc thi ${customerDrawing.contest.title} đang chờ xét duyệt`,
+      //   },
+      // });
+
+      this.logger.log(
+        `method=approveCustomerDrawing, uploaded thumbnail successfully`,
+      );
+    } catch (error) {
+      this.logger.error(
+        `method=approveCustomerDrawing, error:${error.message}`,
+      );
+    }
+  }
+
   async getCustomerDrawingByContest(
     contestId: string,
     request: FilterCustomerDrawingRequest,
@@ -128,8 +160,8 @@ export class CustomerDrawingService {
     });
 
     for (const customerDrawing of customerDrawings) {
-      let cusomerName = `${customerDrawing.user.lastName} ${customerDrawing.user.middleName} ${customerDrawing.user.firstName}`;
-      let totalVotes = customerDrawing.votes.length;
+      const cusomerName = `${customerDrawing.user.lastName} ${customerDrawing.user.middleName} ${customerDrawing.user.firstName}`;
+      const totalVotes = customerDrawing.votes.length;
 
       responses.push(
         this.mapper.filterViewCustomerDrawingResponseFromCustomerDrawing(
@@ -143,6 +175,17 @@ export class CustomerDrawingService {
     this.logger.log(`method=getCustomerDrawingByContest, total = ${itemCount}`);
 
     return new PageDto(responses, pageMetaDto);
+  }
+
+  async getCustomerDrawingByContestId(
+    contestId: string,
+  ): Promise<CustomerDrawing[]> {
+    const customerDrawings =
+      await this.customerDrawingRepository.getCustomerDrawingByContestId(
+        contestId,
+      );
+
+    return customerDrawings;
   }
 
   async getCustomerDrawings(
@@ -164,8 +207,8 @@ export class CustomerDrawingService {
     });
 
     for (const customerDrawing of customerDrawings) {
-      let cusomerName = `${customerDrawing.user.lastName} ${customerDrawing.user.middleName} ${customerDrawing.user.firstName}`;
-      let totalVotes = customerDrawing.votes.length;
+      const cusomerName = `${customerDrawing.user.lastName} ${customerDrawing.user.middleName} ${customerDrawing.user.firstName}`;
+      const totalVotes = customerDrawing.votes.length;
 
       responses.push(
         this.mapper.filterViewCustomerDrawingResponseFromCustomerDrawing(

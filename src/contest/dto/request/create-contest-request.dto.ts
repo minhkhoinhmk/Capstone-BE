@@ -17,11 +17,13 @@ export class CreateContestRequest {
   @IsNotEmpty()
   prize: string;
 
+  @IsString()
   @ApiProperty()
   @IsNotEmpty()
-  startedDate: Date;
+  startedDate: string;
 
+  @IsString()
   @ApiProperty()
   @IsNotEmpty()
-  expiredDate: Date;
+  expiredDate: string;
 }

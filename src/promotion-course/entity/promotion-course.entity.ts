@@ -16,17 +16,17 @@ export class PromotionCourse {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column()
-  effectiveDate: Date;
+  @Column({ nullable: true })
+  isView: boolean;
 
-  @Column()
-  expiredDate: Date;
+  @Column({ nullable: true })
+  isFull: boolean;
+
+  @Column({ nullable: true })
+  used: number;
 
   @Column()
   active: boolean;
-
-  @Column({ unique: true })
-  code: string;
 
   @ManyToOne(() => Promotion, (promotion) => promotion.promotionCourses)
   @JoinColumn({ name: 'promotionId' })

@@ -1,4 +1,5 @@
 import { CreateNotificationRequest } from 'src/dynamodb/dto/create-notification-request.dto';
+import { dateInVietnam } from 'src/utils/date-vietnam.util';
 
 export class Notification {
   userId: string;
@@ -29,7 +30,7 @@ export class Notification {
     const result = new Notification();
     result.title = data.title;
     result.body = data.body;
-    result.createdDate = new Date();
+    result.createdDate = dateInVietnam();
     result.isSeen = false;
     result.data = data.data;
     result.userId = data.userId;

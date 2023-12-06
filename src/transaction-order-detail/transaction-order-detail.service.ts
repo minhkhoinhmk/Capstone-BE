@@ -2,6 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { OrderDetailRepository } from 'src/order-detail/order-detail.repository';
 import { ViewTransactionOrderDetailResponse } from './dto/response/view-transaction-order-detail-response.dto';
 import { TransactionOrderDetailRepository } from './transaction-order-detail.repository';
+import { dateInVietnam } from 'src/utils/date-vietnam.util';
 
 @Injectable()
 export class TransactionOrderDetailService {
@@ -32,7 +33,7 @@ export class TransactionOrderDetailService {
         refundId: null,
         paymentAmount: orderDetailByInstructor.priceAfterPromotion * 0.8,
         refundAmount: null,
-        insertedDate: new Date(),
+        insertedDate: dateInVietnam(),
         active: true,
         courseName: orderDetailByInstructor.course.title,
         author: `${orderDetailByInstructor.course.user.firstName} ${orderDetailByInstructor.course.user.middleName} ${orderDetailByInstructor.course.user.lastName}`,
@@ -47,7 +48,7 @@ export class TransactionOrderDetailService {
           paymentAmount: null,
           refundAmount:
             refundInOrderDetailByInstructor.refund.refundPrice * 0.8,
-          insertedDate: new Date(),
+          insertedDate: dateInVietnam(),
           active: true,
           courseName: refundInOrderDetailByInstructor.course.title,
           author: `${refundInOrderDetailByInstructor.course.user.firstName} ${refundInOrderDetailByInstructor.course.user.middleName} ${refundInOrderDetailByInstructor.course.user.lastName}`,

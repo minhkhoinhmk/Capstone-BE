@@ -13,14 +13,14 @@ export class SearchCourseReponse {
   @ApiProperty()
   price: number;
 
-  @ApiProperty()
-  discount: number;
+  // @ApiProperty()
+  // discount: number;
 
-  @ApiProperty()
-  discountPrice: number;
+  // @ApiProperty()
+  // discountPrice: number;
 
-  @ApiProperty()
-  promotionCourseByStaffId: string | null;
+  // @ApiProperty()
+  // promotionCourseByStaffId: string | null;
 
   @ApiProperty()
   ratedStar: number;
