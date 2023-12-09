@@ -17,6 +17,7 @@ import { AchievementRepository } from './achievement.repository';
 import { AchievementMapper } from './mapper/achievement.mapper';
 import { ViewAchievementReponse } from './dto/response/view-achievement-response.dto';
 const PDFDocument = require('pdfkit');
+import { format } from 'date-fns';
 
 @Injectable()
 export class AchievementService {
@@ -334,6 +335,40 @@ export class AchievementService {
       });
 
     jumpLine(doc, 4);
+
+    // Validation link
+    const link = format(new Date(), 'dd-MM-yyyy');
+
+    const linkWidth = doc.widthOfString(link);
+    const linkHeight = doc.currentLineHeight();
+
+    doc
+      .underline(
+        doc.page.width / 2 - linkWidth / 2,
+        448,
+        linkWidth,
+        linkHeight,
+        { color: '#021c27' },
+      )
+      .link(
+        doc.page.width / 2 - linkWidth / 2,
+        448,
+        linkWidth,
+        linkHeight,
+        link,
+      );
+
+    doc
+      .font('src/fonts/NotoSansJP-Light.otf')
+      .fontSize(10)
+      .fill('#021c27')
+      .text(
+        link,
+        doc.page.width / 2 - linkWidth / 2,
+        448,
+        linkWidth,
+        linkHeight,
+      );
 
     const buffer = [];
     doc.on('data', buffer.push.bind(buffer));
