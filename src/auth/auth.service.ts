@@ -245,4 +245,15 @@ export class AuthService {
       },
     });
   }
+
+  async checkToekenExpired(token: string): Promise<boolean> {
+    try {
+      const decoded = this.jwtService.verify(token);
+      const currentTimestamp = Math.floor(Date.now() / 1000);
+
+      return decoded.exp > currentTimestamp;
+    } catch (error) {
+      return false;
+    }
+  }
 }

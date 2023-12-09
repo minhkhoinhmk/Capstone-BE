@@ -79,4 +79,13 @@ export class AuthController {
   resendOtp(@Query('email') email: string): Promise<void> {
     return this.authService.resendOtp(email);
   }
+
+  @ApiOkResponse({
+    description: 'Check Token Expired Successfully',
+  })
+  @ApiParam({ name: 'token', description: 'Token' })
+  @Get('/token')
+  checkToken(@Query('token') token: string): Promise<boolean> {
+    return this.authService.checkToekenExpired(token);
+  }
 }
