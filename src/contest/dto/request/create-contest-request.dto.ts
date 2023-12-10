@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNotEmpty, IsString } from 'class-validator';
+import { IsBoolean, IsNotEmpty, IsString } from 'class-validator';
 
 export class CreateContestRequest {
   @ApiProperty()
@@ -26,4 +26,9 @@ export class CreateContestRequest {
   @ApiProperty()
   @IsNotEmpty()
   expiredDate: string;
+
+  @IsBoolean()
+  @ApiProperty()
+  @IsNotEmpty()
+  isVisible: boolean;
 }

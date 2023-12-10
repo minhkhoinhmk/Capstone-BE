@@ -8,6 +8,7 @@ import { PageOptionsDto } from 'src/common/pagination/dto/pageOptionsDto';
 import { Contest } from 'src/contest/entity/contest.entity';
 import { FilterCustomerDrawingRequest } from './dto/request/filter-customer-drawing-request.dto';
 import CustomerDrawingSortField from './enum/customer-drawing-sort-field';
+import CustomerDrawingStatus from './enum/customer-drawing-status.enum';
 
 @Injectable()
 export class CustomerDrawingRepository {
@@ -28,7 +29,7 @@ export class CustomerDrawingRepository {
       imageUrl: null,
       insertedDate: insertedDate,
       updatedDate: null,
-      approved: false,
+      status: CustomerDrawingStatus.PENDING,
       active: false,
       user,
       contest,
@@ -58,7 +59,9 @@ export class CustomerDrawingRepository {
 
     const queryBuilder = this.customerDrawingRepository.createQueryBuilder('c');
     queryBuilder.andWhere('c.active = :active', { active: true });
-    queryBuilder.andWhere('c.approved = :approved', { approved: true });
+    queryBuilder.andWhere('c.status = :status', {
+      status: CustomerDrawingStatus.APPROVED,
+    });
     queryBuilder.andWhere('c.contest.id = :id', { id: contestId });
 
     queryBuilder.leftJoinAndSelect('c.user', 'user');
@@ -109,7 +112,9 @@ export class CustomerDrawingRepository {
 
     const queryBuilder = this.customerDrawingRepository.createQueryBuilder('c');
     queryBuilder.andWhere('c.active = :active', { active: true });
-    queryBuilder.andWhere('c.approved = :approved', { approved: true });
+    queryBuilder.andWhere('c.status = :status', {
+      status: CustomerDrawingStatus.APPROVED,
+    });
 
     queryBuilder.leftJoinAndSelect('c.user', 'user');
     queryBuilder.leftJoinAndSelect('c.contest', 'contest');
@@ -148,7 +153,9 @@ export class CustomerDrawingRepository {
   async defineWinner(contestId: string): Promise<CustomerDrawing[]> {
     const queryBuilder = this.customerDrawingRepository.createQueryBuilder('c');
     queryBuilder.andWhere('c.active = :active', { active: true });
-    queryBuilder.andWhere('c.approved = :approved', { approved: true });
+    queryBuilder.andWhere('c.status = :status', {
+      status: CustomerDrawingStatus.APPROVED,
+    });
     queryBuilder.andWhere('c.contest.id = :id', { id: contestId });
 
     queryBuilder.leftJoinAndSelect('c.user', 'user');
@@ -173,5 +180,14 @@ export class CustomerDrawingRepository {
     );
 
     return entites;
+  }
+
+  async checkCustomerDrawingExisted(
+    contestId: string,
+    userId: string,
+  ): Promise<CustomerDrawing[]> {
+    return this.customerDrawingRepository.find({
+      where: { user: { id: userId }, contest: { id: contestId } },
+    });
   }
 }

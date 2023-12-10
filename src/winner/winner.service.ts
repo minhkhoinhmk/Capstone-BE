@@ -1,10 +1,8 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ContestRepository } from 'src/contest/contest.repository';
 import { CustomerDrawingRepository } from 'src/customer-drawing/customer-drawing.repository';
-import { CustomerDrawing } from 'src/customer-drawing/entity/customer-drawing.entity';
 import { WinnerRepository } from './winner.repository';
 import { Cron, CronExpression } from '@nestjs/schedule';
-import { Winner } from './entity/winner.entity';
 import { ViewWinnerReponse } from './dto/response/view-winner-reponse.entity';
 import { WinnerMapper } from './mapper/winner.mapper';
 
@@ -19,7 +17,7 @@ export class WinnerService {
     private readonly mapper: WinnerMapper,
   ) {}
 
-  //   @Cron(CronExpression.EVERY_5_MINUTES)
+  @Cron(CronExpression.EVERY_5_MINUTES)
   async defineWinner(): Promise<void> {
     const contests = await this.contestRepository.getContestsToDefineWinner(
       new Date(),

@@ -1,4 +1,5 @@
 import {
+  ConflictException,
   Injectable,
   InternalServerErrorException,
   Logger,
@@ -16,6 +17,7 @@ import { ViewCustomerDrawingResponse } from './dto/response/view-customer-drawin
 import { PageMetaDto } from 'src/common/pagination/dto/pageMetaDto';
 import { CustomerDrawingMapper } from './mapper/customer-drawing.mapper';
 import { FilterCustomerDrawingRequest } from './dto/request/filter-customer-drawing-request.dto';
+import CustomerDrawingStatus from './enum/customer-drawing-status.enum';
 
 @Injectable()
 export class CustomerDrawingService {
@@ -37,32 +39,66 @@ export class CustomerDrawingService {
   ): Promise<CustomerDrawing> {
     const customer = await this.userRepository.getUserById(userId);
     const contest = await this.contestRepository.getContestById(contestId);
+    let flag: boolean = true;
 
     const insertedDate = new Date();
     if (
       insertedDate.getDate() >= contest.startedDate.getDate() &&
       insertedDate.getDate() <= contest.expiredDate.getDate()
     ) {
-      const customerDrawing =
-        await this.customerDrawingRepository.createCustomerDrawing(
-          request,
-          customer,
-          contest,
-          insertedDate,
+      const checkedCustomerDrawings =
+        await this.customerDrawingRepository.checkCustomerDrawingExisted(
+          contest.id,
+          customer.id,
         );
 
-      this.logger.log(
-        `method=createCustomerDrawing, created customer drawing successfully`,
-      );
+      if (checkedCustomerDrawings) {
+        for (const customerDrawing of checkedCustomerDrawings) {
+          if (customerDrawing) {
+            if (customerDrawing.status === CustomerDrawingStatus.APPROVED) {
+              flag = false;
+              throw new ConflictException('Bạn đã nộp bài dự thi');
+            } else if (
+              customerDrawing.status === CustomerDrawingStatus.PENDING
+            ) {
+              flag = false;
+              throw new ConflictException(
+                'Bạn đã nộp bài dự thi và đang đợi xét duyệt',
+              );
+            } else if (
+              customerDrawing.status === CustomerDrawingStatus.BANNED
+            ) {
+              flag = false;
+              throw new ConflictException('Bạn đã bị chặn khỏi cuộc thi này');
+            }
+          }
+        }
+      }
 
-      const createdCustomerDrawing =
-        await this.customerDrawingRepository.saveCustomerDrawing(
-          customerDrawing,
+      console.log(flag);
+
+      if (flag) {
+        const customerDrawing =
+          await this.customerDrawingRepository.createCustomerDrawing(
+            request,
+            customer,
+            contest,
+            insertedDate,
+          );
+
+        this.logger.log(
+          `method=createCustomerDrawing, created customer drawing successfully`,
         );
 
-      return await this.customerDrawingRepository.getCustomerDrawingByIdForUpdateImageUrl(
-        createdCustomerDrawing.id,
-      );
+        const createdCustomerDrawing =
+          await this.customerDrawingRepository.saveCustomerDrawing(
+            customerDrawing,
+          );
+
+        return await this.customerDrawingRepository.getCustomerDrawingByIdForUpdateImageUrl(
+          createdCustomerDrawing.id,
+        );
+      }
     } else {
       throw new InternalServerErrorException(
         'Đã hết hạn nộp bài dự thi hoặc cuộc thi chưa bắt đầu',
@@ -112,7 +148,7 @@ export class CustomerDrawingService {
         );
 
       customerDrawing.active = true;
-      customerDrawing.approved = true;
+      customerDrawing.status = CustomerDrawingStatus.APPROVED;
 
       await this.customerDrawingRepository.saveCustomerDrawing(customerDrawing);
 
@@ -126,7 +162,7 @@ export class CustomerDrawingService {
       // });
 
       this.logger.log(
-        `method=approveCustomerDrawing, uploaded thumbnail successfully`,
+        `method=approveCustomerDrawing, aprroved customer drawing successfully`,
       );
     } catch (error) {
       this.logger.error(
