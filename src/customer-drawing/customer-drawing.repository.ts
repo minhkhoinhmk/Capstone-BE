@@ -144,4 +144,34 @@ export class CustomerDrawingRepository {
 
     return { count, entites };
   }
+
+  async defineWinner(contestId: string): Promise<CustomerDrawing[]> {
+    const queryBuilder = this.customerDrawingRepository.createQueryBuilder('c');
+    queryBuilder.andWhere('c.active = :active', { active: true });
+    queryBuilder.andWhere('c.approved = :approved', { approved: true });
+    queryBuilder.andWhere('c.contest.id = :id', { id: contestId });
+
+    queryBuilder.leftJoinAndSelect('c.user', 'user');
+    queryBuilder.leftJoinAndSelect('c.contest', 'contest');
+    queryBuilder.leftJoinAndSelect('c.votes', 'votes');
+
+    let entites: CustomerDrawing[];
+
+    entites = await queryBuilder.getMany().then((data) =>
+      data
+        .map((a) => ({ ...a, total_likes: a.votes.length }))
+        .sort(function (a, b) {
+          if (b.total_likes !== a.total_likes) {
+            return b.total_likes - a.total_likes;
+          }
+          return (
+            new Date(a.insertedDate).getTime() -
+            new Date(b.insertedDate).getTime()
+          );
+        })
+        .slice(0, 3),
+    );
+
+    return entites;
+  }
 }
