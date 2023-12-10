@@ -52,6 +52,10 @@ export class Contest {
   @Expose()
   active: boolean;
 
+  @Column({ nullable: true })
+  @Expose()
+  isPrized: boolean;
+
   @ManyToOne(() => User, (user) => user.contests)
   @JoinColumn({ name: 'userId' })
   @Expose()

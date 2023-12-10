@@ -1,9 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Contest } from './entity/contest.entity';
-import { Repository } from 'typeorm';
+import { LessThan, Repository } from 'typeorm';
 import { CreateContestRequest } from './dto/request/create-contest-request.dto';
-import { PageOptionsDto } from 'src/common/pagination/dto/pageOptionsDto';
 import ContestStatus from './enum/contest-status.enum';
 import { FilterContestRequest } from './dto/request/filter-contest-request.dto';
 
@@ -73,6 +72,18 @@ export class ContestRepository {
   ): Promise<Contest[]> {
     return this.contestRepository.find({
       where: { user: { id: staffId }, active: true, status: status },
+      relations: { user: true, customerDrawings: true },
+    });
+  }
+
+  async getContestsToDefineWinner(date: Date): Promise<Contest[]> {
+    return this.contestRepository.find({
+      where: {
+        active: true,
+        status: ContestStatus.EXPIRED,
+        isPrized: false,
+        expiredDate: LessThan(date),
+      },
       relations: { user: true, customerDrawings: true },
     });
   }

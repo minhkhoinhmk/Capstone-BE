@@ -185,7 +185,7 @@ export class ContestService {
         );
       } else if (
         contest.status === ContestStatus.ACTIVE &&
-        contest.expiredDate.getDate() <= new Date().getDate()
+        contest.expiredDate.getDate() < new Date().getDate()
       ) {
         contest.status = ContestStatus.EXPIRED;
         await this.contestRepository.save(contest);

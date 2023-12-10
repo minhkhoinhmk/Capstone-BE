@@ -11,13 +11,11 @@ import { CreateCustomerDrawingRequest } from './dto/request/create-customer-draw
 import { ContestRepository } from 'src/contest/contest.repository';
 import { CustomerDrawing } from './entity/customer-drawing.entity';
 import { CUSTOMER_DRAWING_PATH } from 'src/common/s3/s3.constants';
-import { PageOptionsDto } from 'src/common/pagination/dto/pageOptionsDto';
 import { PageDto } from 'src/common/pagination/dto/pageDto';
 import { ViewCustomerDrawingResponse } from './dto/response/view-customer-drawing-response.dto';
 import { PageMetaDto } from 'src/common/pagination/dto/pageMetaDto';
 import { CustomerDrawingMapper } from './mapper/customer-drawing.mapper';
 import { FilterCustomerDrawingRequest } from './dto/request/filter-customer-drawing-request.dto';
-import { response } from 'express';
 
 @Injectable()
 export class CustomerDrawingService {

@@ -24,5 +24,6 @@ import { CustomerDrawingMapper } from './mapper/customer-drawing.mapper';
     CustomerDrawingMapper,
   ],
   controllers: [CustomerDrawingController],
+  exports: [CustomerDrawingRepository],
 })
 export class CustomerDrawingModule {}

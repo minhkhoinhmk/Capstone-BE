@@ -1,3 +1,4 @@
+import { Expose } from 'class-transformer';
 import { CustomerDrawing } from 'src/customer-drawing/entity/customer-drawing.entity';
 import Promotion from 'src/promotion/entity/promotion.entity';
 import {
@@ -11,12 +12,15 @@ import {
 @Entity()
 export class Winner {
   @PrimaryGeneratedColumn('uuid')
+  @Expose()
   id: string;
 
   @Column()
+  @Expose()
   position: number;
 
   @Column()
+  @Expose()
   active: boolean;
 
   @ManyToOne(
@@ -24,9 +28,11 @@ export class Winner {
     (customerDrawing) => customerDrawing.winners,
   )
   @JoinColumn({ name: 'customerDrawingId' })
+  @Expose()
   customerDrawing: CustomerDrawing;
 
   @ManyToOne(() => Promotion, (promotion) => promotion.winners)
   @JoinColumn({ name: 'promotionId' })
+  @Expose()
   promotion: Promotion;
 }
