@@ -28,7 +28,11 @@ export class ViewCustomerDrawingResponse {
 
   @ApiProperty()
   @Expose()
-  approved: boolean;
+  status: string;
+
+  @ApiProperty()
+  @Expose()
+  reason: string;
 
   @ApiProperty()
   @Expose()

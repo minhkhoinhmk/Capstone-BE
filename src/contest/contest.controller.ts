@@ -77,8 +77,8 @@ export class ContestController {
     description: 'Get Contests Successfully',
   })
   @ApiPaginatedResponse(ViewContestResponse)
-  // @UseGuards(AuthGuard(), RolesGuard)
-  // @HasRoles(NameRole.Customer)
+  @UseGuards(AuthGuard(), RolesGuard)
+  @HasRoles(NameRole.Customer)
   @HttpCode(200)
   async getContests(
     @Body() request: FilterContestRequest,
@@ -106,8 +106,8 @@ export class ContestController {
   @ApiOkResponse({
     description: 'Get Contests By Id Successfully',
   })
-  // @UseGuards(AuthGuard(), RolesGuard)
-  // @HasRoles(NameRole.Staff, NameRole.Customer)
+  @UseGuards(AuthGuard(), RolesGuard)
+  @HasRoles(NameRole.Staff, NameRole.Customer)
   async getContestsById(@Param('id') id: string): Promise<ViewContestResponse> {
     return await this.contestService.getContestById(id);
   }

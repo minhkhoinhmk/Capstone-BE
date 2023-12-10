@@ -40,11 +40,15 @@ export class CustomerDrawing {
 
   @Column()
   @Expose()
-  approved: boolean;
-
-  @Column()
-  @Expose()
   active: boolean;
+
+  @Column({ nullable: true })
+  @Expose()
+  status: string;
+
+  @Column({ nullable: true })
+  @Expose()
+  reason: string;
 
   @ManyToOne(() => User, (user) => user.customerDrawings)
   @JoinColumn({ name: 'userId' })
