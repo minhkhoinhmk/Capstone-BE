@@ -2,6 +2,8 @@ import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import Promotion from './entity/promotion.entity';
+import { User } from 'src/user/entity/user.entity';
+import { dateInVietnam } from 'src/utils/date-vietnam.util';
 
 @Injectable()
 export class PromotionRepository {
@@ -9,11 +11,11 @@ export class PromotionRepository {
 
   constructor(
     @InjectRepository(Promotion)
-    private PromotionRepository: Repository<Promotion>,
+    private promotionRepository: Repository<Promotion>,
   ) {}
 
   async getAllPromotionsActiveByUserId(userId: string) {
-    return this.PromotionRepository.find({
+    return this.promotionRepository.find({
       where: {
         user: {
           id: userId,
@@ -26,25 +28,47 @@ export class PromotionRepository {
     });
   }
 
+  createPromotionForStaff(
+    staff: User,
+    title: string,
+    discountPercent: number,
+    effectiveDate: string,
+    expiredDate: string,
+    code: string,
+  ) {
+    return this.promotionRepository.create({
+      discountPercent,
+      effectiveDate,
+      expiredDate,
+      active: true,
+      user: staff,
+      title,
+      code,
+      amount: 1,
+      insertedDate: dateInVietnam(),
+      updatedDate: dateInVietnam(),
+    });
+  }
+
   async getPromotionById(id: string) {
-    return this.PromotionRepository.findOne({
+    return this.promotionRepository.findOne({
       where: { id },
       relations: { promotionCourses: true, user: true },
     });
   }
 
   async getPromotionByCode(code: string) {
-    return this.PromotionRepository.findOne({
+    return this.promotionRepository.findOne({
       where: { code },
       relations: { promotionCourses: true, user: true },
     });
   }
 
-  async savePromotion(promotion: Promotion): Promise<void> {
-    await this.PromotionRepository.save(promotion);
+  async savePromotion(promotion: Promotion): Promise<Promotion> {
+    return await this.promotionRepository.save(promotion);
   }
 
   async removePromotion(promotion: Promotion): Promise<void> {
-    await this.PromotionRepository.remove(promotion);
+    await this.promotionRepository.remove(promotion);
   }
 }

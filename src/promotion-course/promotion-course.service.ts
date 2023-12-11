@@ -7,7 +7,6 @@ import {
 import { PromotionCourseRepository } from './promotion-course.repository';
 import { NameRole } from 'src/role/enum/name-role.enum';
 import { PromotionCourse } from './entity/promotion-course.entity';
-import { CheckPromotionCourseRequest } from './request/check-promotion-course-request.dto';
 import { CreatePromotionCourseRequest } from './request/create-promotion-course-request.dto';
 import { User } from 'src/user/entity/user.entity';
 import { PromotionRepository } from 'src/promotion/promotion.repository';

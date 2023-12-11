@@ -11,12 +11,16 @@ import Promotion from './entity/promotion.entity';
 import { UpdatePromotionRequest } from './dto/request/update-promtion-request.dto';
 import { User } from 'src/user/entity/user.entity';
 import { dateInVietnam } from 'src/utils/date-vietnam.util';
+import { PromotionCourseRepository } from 'src/promotion-course/promotion-course.repository';
 
 @Injectable()
 export class PromotionService {
   private logger = new Logger('PromotionService', { timestamp: true });
 
-  constructor(private promotionRepository: PromotionRepository) {}
+  constructor(
+    private promotionRepository: PromotionRepository,
+    private promotionCourseRepository: PromotionCourseRepository,
+  ) {}
 
   async getAllPromotionsByUserId(userId: string): Promise<Promotion[]> {
     return this.promotionRepository.getAllPromotionsActiveByUserId(userId);
@@ -48,6 +52,32 @@ export class PromotionService {
     await this.promotionRepository.savePromotion(promotion);
 
     this.logger.log(`method=createPromotion, Promotion created successfully`);
+  }
+
+  async createPromotionByStaff(
+    staff: User,
+    title: string,
+    discountPercent: number,
+    effectiveDate: string,
+    expiredDate: string,
+    code: string,
+  ) {
+    const promotion = await this.promotionRepository.savePromotion(
+      this.promotionRepository.createPromotionForStaff(
+        staff,
+        title,
+        discountPercent,
+        effectiveDate,
+        expiredDate,
+        code,
+      ),
+    );
+
+    await this.promotionCourseRepository.savePromotionCourse(
+      this.promotionCourseRepository.createPromotionCourseByStaff(promotion),
+    );
+
+    return promotion;
   }
 
   async updatePromotion(

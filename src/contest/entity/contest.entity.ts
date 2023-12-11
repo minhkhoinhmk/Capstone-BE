@@ -1,13 +1,16 @@
 import { Expose } from 'class-transformer';
 import { CustomerDrawing } from 'src/customer-drawing/entity/customer-drawing.entity';
 import { User } from 'src/user/entity/user.entity';
+import { Winner } from 'src/winner/entity/winner.entity';
 import {
   Column,
+  CreateDateColumn,
   Entity,
   JoinColumn,
   ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn,
+  UpdateDateColumn,
 } from 'typeorm';
 
 @Entity()
@@ -28,9 +31,14 @@ export class Contest {
   @Expose()
   thumbnailUrl: string;
 
-  @Column()
-  @Expose()
+  @CreateDateColumn({
+    type: 'timestamp',
+    nullable: true,
+  })
   insertedDate: Date;
+
+  @UpdateDateColumn({ type: 'timestamp', nullable: true })
+  updatedDate: Date;
 
   @Column()
   @Expose()
@@ -68,7 +76,12 @@ export class Contest {
   @OneToMany(
     () => CustomerDrawing,
     (customerDrawing) => customerDrawing.contest,
+    { nullable: true },
   )
   @Expose()
   customerDrawings: CustomerDrawing[];
+
+  @OneToMany(() => Winner, (winner) => winner.contest)
+  @Expose()
+  winners: Winner[];
 }

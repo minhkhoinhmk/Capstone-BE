@@ -2,9 +2,9 @@ import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { LessThanOrEqual, MoreThanOrEqual, Repository } from 'typeorm';
 import { PromotionCourse } from './entity/promotion-course.entity';
-import { NameRole } from 'src/role/enum/name-role.enum';
 import { RoleRepository } from 'src/role/role.repository';
 import { dateInVietnam } from 'src/utils/date-vietnam.util';
+import Promotion from 'src/promotion/entity/promotion.entity';
 
 @Injectable()
 export class PromotionCourseRepository {
@@ -151,5 +151,16 @@ export class PromotionCourseRepository {
 
   async removePromotionCourse(promotionCourse: PromotionCourse) {
     return await this.promotionCourseRepository.remove(promotionCourse);
+  }
+
+  createPromotionCourseByStaff(promotion: Promotion) {
+    return this.promotionCourseRepository.create({
+      promotion,
+      active: true,
+      course: null,
+      isView: true,
+      isFull: true,
+      used: 0,
+    });
   }
 }
