@@ -49,4 +49,12 @@ export class ViewCustomerDrawingResponse {
   @ApiProperty()
   @Expose()
   totalVotes: number;
+
+  @ApiProperty()
+  @Expose()
+  isVoted: boolean;
+
+  @ApiProperty()
+  @Expose()
+  isOwned: boolean;
 }

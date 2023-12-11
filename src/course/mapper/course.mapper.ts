@@ -8,17 +8,21 @@ import { FilterCourseByStaffResponse } from '../dto/reponse/filter-by-staff.dt';
 @Mapper()
 export class CourseMapper {
   @Mappings({ target: 'completedPercent', source: 'percent' })
+  @Mappings({ target: 'isCertified', source: 'isCertified' })
   filterCourseByCustomerResponseFromCourse(
     course: Course,
     percent: number,
+    isCertified: boolean,
   ): FilterCourseByCustomerResponse {
     return new FilterCourseByCustomerResponse();
   }
 
   @Mappings({ target: 'completedPercent', source: 'percent' })
+  @Mappings({ target: 'isCertified', source: 'isCertified' })
   filterCourseByLearnerResponseFromCourse(
     course: Course,
     percent: number,
+    isCertified: boolean,
   ): FilterCourseByLearnerResponse {
     return new FilterCourseByLearnerResponse();
   }

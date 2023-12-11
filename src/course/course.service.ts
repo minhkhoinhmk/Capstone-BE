@@ -220,6 +220,13 @@ export class CourseService {
 
       for (const courseId of courseIds) {
         const course = await this.courseRepository.getCourseById(courseId);
+        let isCertified = false;
+
+        for (const achievement of course.achievements) {
+          if (achievement.user.id === userId) {
+            isCertified = true;
+          }
+        }
 
         for (const chapter of course.chapterLectures) {
           if (
@@ -240,6 +247,7 @@ export class CourseService {
               : Math.floor(
                   (completedCount / course.chapterLectures.length) * 100,
                 ),
+            isCertified,
           ),
         );
 

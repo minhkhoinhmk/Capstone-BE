@@ -8,8 +8,25 @@ export class CustomerDrawingMapper {
     { target: 'customerName', source: 'customerName' },
     { target: 'totalVotes', source: 'totalVotes' },
     { target: 'contestName', source: 'customerDrawing.contest.title' },
+    { target: 'isVoted', source: 'isVoted' },
+    { target: 'isOwned', source: 'isOwned' },
   )
-  filterViewCustomerDrawingResponseFromCustomerDrawing(
+  filterViewCustomerDrawingResponseFromCustomerDrawingV2(
+    customerDrawing: CustomerDrawing,
+    customerName: string,
+    totalVotes: number,
+    isVoted: boolean,
+    isOwned: boolean,
+  ): ViewCustomerDrawingResponse {
+    return new ViewCustomerDrawingResponse();
+  }
+
+  @Mappings(
+    { target: 'customerName', source: 'customerName' },
+    { target: 'totalVotes', source: 'totalVotes' },
+    { target: 'contestName', source: 'customerDrawing.contest.title' },
+  )
+  filterViewCustomerDrawingResponseFromCustomerDrawingV1(
     customerDrawing: CustomerDrawing,
     customerName: string,
     totalVotes: number,
