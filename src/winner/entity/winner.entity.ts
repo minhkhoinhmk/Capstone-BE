@@ -1,4 +1,5 @@
 import { Expose } from 'class-transformer';
+import { Contest } from 'src/contest/entity/contest.entity';
 import { CustomerDrawing } from 'src/customer-drawing/entity/customer-drawing.entity';
 import Promotion from 'src/promotion/entity/promotion.entity';
 import {
@@ -35,4 +36,9 @@ export class Winner {
   @JoinColumn({ name: 'promotionId' })
   @Expose()
   promotion: Promotion;
+
+  @ManyToOne(() => Contest, (contest) => contest.winners)
+  @JoinColumn({ name: 'contestId' })
+  @Expose()
+  contest: Contest;
 }

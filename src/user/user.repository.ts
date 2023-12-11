@@ -23,6 +23,7 @@ export class UserRepository {
       where: { id },
       relations: {
         role: true,
+        learners: true,
       },
     });
     return user;

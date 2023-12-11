@@ -27,6 +27,9 @@ import { ViewCustomerDrawingResponse } from './dto/response/view-customer-drawin
 import { PageDto } from 'src/common/pagination/dto/pageDto';
 import { FilterCustomerDrawingRequest } from './dto/request/filter-customer-drawing-request.dto';
 import { Request } from 'express';
+import CustomerDrawingStatus from './enum/customer-drawing-status.enum';
+import { User } from 'src/user/entity/user.entity';
+import { Learner } from 'src/learner/entity/learner.entity';
 
 @Controller('customer-drawing')
 @ApiTags('Customer-Drawing')
@@ -53,7 +56,7 @@ export class CustomerDrawingController {
     );
   }
 
-  @Get('submit/:id')
+  @Get('/submit/:id')
   @UseGuards(AuthGuard(), RolesGuard)
   @HasRoles(NameRole.Customer)
   @ApiOkResponse({
@@ -95,8 +98,11 @@ export class CustomerDrawingController {
 
   @Patch('/approve/:id')
   @HasRoles(NameRole.Staff)
-  async approveCustomerDrawing(@Param('id') id: string): Promise<void> {
-    return this.customerDrawingService.approveCustomerDrawing(id);
+  async setStatusCustomerDrawing(
+    @Param('id') id: string,
+    @Query('status') status: CustomerDrawingStatus,
+  ): Promise<void> {
+    return this.customerDrawingService.setStatusCustomerDrawing(id, status);
   }
 
   @Post('/contest')
@@ -130,6 +136,20 @@ export class CustomerDrawingController {
     @Query('contestId') contestId: string,
   ): Promise<CustomerDrawing[]> {
     return await this.customerDrawingService.getCustomerDrawingByContestId(
+      contestId,
+    );
+  }
+
+  @Get('/contest/customer')
+  @UseGuards(AuthGuard(), RolesGuard)
+  @HasRoles(NameRole.Customer, NameRole.Learner)
+  @HttpCode(200)
+  async getCustomerDrawingOfCustomerInContest(
+    @Query('contestId') contestId: string,
+    @Req() request: Request,
+  ): Promise<CustomerDrawing[]> {
+    return await this.customerDrawingService.getCustomerDrawingOfCustomerInContest(
+      request['user'] as User | Learner,
       contestId,
     );
   }

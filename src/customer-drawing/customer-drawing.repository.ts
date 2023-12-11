@@ -74,7 +74,7 @@ export class CustomerDrawingRepository {
       .take(pageOptionsDto.take);
 
     let entites: CustomerDrawing[];
-    let count: number = 0;
+    let count = 0;
 
     if (request.customerDrawingSortField === CustomerDrawingSortField.VOTE) {
       entites = await queryBuilder.getMany().then((data) =>
@@ -127,7 +127,7 @@ export class CustomerDrawingRepository {
       .take(pageOptionsDto.take);
 
     let entites: CustomerDrawing[];
-    let count: number = 0;
+    let count = 0;
 
     if (request.customerDrawingSortField === CustomerDrawingSortField.VOTE) {
       entites = await queryBuilder.getMany().then((data) =>
@@ -164,21 +164,20 @@ export class CustomerDrawingRepository {
     queryBuilder.leftJoinAndSelect('c.contest', 'contest');
     queryBuilder.leftJoinAndSelect('c.votes', 'votes');
 
-    let entites: CustomerDrawing[];
-
-    entites = await queryBuilder.getMany().then((data) =>
-      data
-        .map((a) => ({ ...a, total_likes: a.votes.length }))
-        .sort(function (a, b) {
-          if (b.total_likes !== a.total_likes) {
-            return b.total_likes - a.total_likes;
-          }
-          return (
-            new Date(a.insertedDate).getTime() -
-            new Date(b.insertedDate).getTime()
-          );
-        })
-        .slice(0, 3),
+    const entites: CustomerDrawing[] = await queryBuilder.getMany().then(
+      (data) =>
+        data
+          .map((a) => ({ ...a, total_likes: a.votes.length }))
+          .sort(function (a, b) {
+            if (b.total_likes !== a.total_likes) {
+              return b.total_likes - a.total_likes;
+            }
+            return (
+              new Date(a.insertedDate).getTime() -
+              new Date(b.insertedDate).getTime()
+            );
+          }),
+      // .slice(0, 3),
     );
 
     return entites;
@@ -190,6 +189,33 @@ export class CustomerDrawingRepository {
   ): Promise<CustomerDrawing[]> {
     return this.customerDrawingRepository.find({
       where: { user: { id: userId }, contest: { id: contestId } },
+      relations: {
+        votes: true,
+      },
+    });
+  }
+
+  async getCustomerDrawingById(customerDrawingId: string) {
+    return this.customerDrawingRepository.findOne({
+      where: {
+        id: customerDrawingId,
+      },
+      relations: {
+        contest: true,
+      },
+    });
+  }
+
+  async getListCustomerDrawingByCustomerId(customerId: string) {
+    return this.customerDrawingRepository.find({
+      where: {
+        user: {
+          id: customerId,
+        },
+      },
+      relations: {
+        contest: true,
+      },
     });
   }
 }

@@ -4,6 +4,7 @@ import { Winner } from './entity/winner.entity';
 import { Repository } from 'typeorm';
 import { CustomerDrawing } from 'src/customer-drawing/entity/customer-drawing.entity';
 import Promotion from 'src/promotion/entity/promotion.entity';
+import { Contest } from 'src/contest/entity/contest.entity';
 
 @Injectable()
 export class WinnerRepository {
@@ -12,16 +13,24 @@ export class WinnerRepository {
     private winnerRepository: Repository<Winner>,
   ) {}
 
-  async createWinner(
+  createWinner(
     position: number,
     customerDrawing: CustomerDrawing,
     promotion: Promotion,
-  ): Promise<Winner> {
+    contest: Contest,
+  ): Winner {
     return this.winnerRepository.create({
       position,
-      active: true,
+      active: false,
       customerDrawing,
       promotion,
+      contest,
+    });
+  }
+
+  async getWinnerByPostionAndContest(contestId: string, position: number) {
+    return this.winnerRepository.findOne({
+      where: { position, contest: { id: contestId } },
     });
   }
 

@@ -37,7 +37,7 @@ export default class Promotion {
   @Column()
   updatedDate: Date;
 
-  @Column()
+  @Column({ nullable: true })
   note: string;
 
   @ApiProperty({ type: Date, description: 'Effective date of the Promotion' })
