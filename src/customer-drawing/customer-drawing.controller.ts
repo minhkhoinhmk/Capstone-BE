@@ -53,6 +53,22 @@ export class CustomerDrawingController {
     );
   }
 
+  @Get('submit/:id')
+  @UseGuards(AuthGuard(), RolesGuard)
+  @HasRoles(NameRole.Customer)
+  @ApiOkResponse({
+    description: 'Check Customer Drawing Submitted Successfully',
+  })
+  checkCustomerDrawingSubmitted(
+    @Req() request: Request,
+    @Param('id') contestId: string,
+  ): Promise<boolean> {
+    return this.customerDrawingService.checkCustomerDrawingSubmitted(
+      contestId,
+      request['user']['id'],
+    );
+  }
+
   @Put('/image')
   @ApiOkResponse({
     description: 'Uploaded ImageURL Successfully',
@@ -92,12 +108,14 @@ export class CustomerDrawingController {
   @HasRoles(NameRole.Customer, NameRole.Staff)
   @HttpCode(200)
   async getCustomerDrawingsByContest(
+    @Req() req: Request,
     @Body() request: FilterCustomerDrawingRequest,
     @Query('contestId') contestId: string,
   ): Promise<PageDto<ViewCustomerDrawingResponse>> {
     return await this.customerDrawingService.getCustomerDrawingByContest(
       contestId,
       request,
+      req['user']['id'],
     );
   }
 

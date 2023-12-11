@@ -75,8 +75,6 @@ export class CustomerDrawingService {
         }
       }
 
-      console.log(flag);
-
       if (flag) {
         const customerDrawing =
           await this.customerDrawingRepository.createCustomerDrawing(
@@ -152,14 +150,15 @@ export class CustomerDrawingService {
 
       await this.customerDrawingRepository.saveCustomerDrawing(customerDrawing);
 
-      // await this.mailService.sendMail({
-      //   to: customerDrawing.user.email,
-      //   subject: 'xét duyệt thành công',
-      //   template: './waitingApproval',
-      //   context: {
-      //     CONTENT: `Bài dự thi cuộc thi ${customerDrawing.contest.title} đang chờ xét duyệt`,
-      //   },
-      // });
+      await this.mailService.sendMail({
+        to: customerDrawing.user.email,
+        subject: 'Xét Duyệt Thành Công',
+        template: './approve',
+        context: {
+          SUBJECT: `Bài dự thi cuộc thi ${customerDrawing.contest.title}`,
+          CONTENT: `Đã Được Xét Duyệt`,
+        },
+      });
 
       this.logger.log(
         `method=approveCustomerDrawing, aprroved customer drawing successfully`,
@@ -174,6 +173,7 @@ export class CustomerDrawingService {
   async getCustomerDrawingByContest(
     contestId: string,
     request: FilterCustomerDrawingRequest,
+    userId: string,
   ): Promise<PageDto<ViewCustomerDrawingResponse>> {
     let customerDrawings: CustomerDrawing[] = [];
     const responses: ViewCustomerDrawingResponse[] = [];
@@ -196,12 +196,26 @@ export class CustomerDrawingService {
     for (const customerDrawing of customerDrawings) {
       const cusomerName = `${customerDrawing.user.lastName} ${customerDrawing.user.middleName} ${customerDrawing.user.firstName}`;
       const totalVotes = customerDrawing.votes.length;
+      let isVoted = false;
+      let isOwned = false;
+
+      if (customerDrawing.user.id === userId) {
+        isOwned = true;
+      }
+
+      for (const vote of customerDrawing.votes) {
+        if (vote.user.id === userId) {
+          isVoted = true;
+        }
+      }
 
       responses.push(
-        this.mapper.filterViewCustomerDrawingResponseFromCustomerDrawing(
+        this.mapper.filterViewCustomerDrawingResponseFromCustomerDrawingV2(
           customerDrawing,
           cusomerName,
           totalVotes,
+          isVoted,
+          isOwned,
         ),
       );
     }
@@ -245,7 +259,7 @@ export class CustomerDrawingService {
       const totalVotes = customerDrawing.votes.length;
 
       responses.push(
-        this.mapper.filterViewCustomerDrawingResponseFromCustomerDrawing(
+        this.mapper.filterViewCustomerDrawingResponseFromCustomerDrawingV1(
           customerDrawing,
           cusomerName,
           totalVotes,
@@ -256,5 +270,45 @@ export class CustomerDrawingService {
     this.logger.log(`method=getCustomerDrawings, total = ${itemCount}`);
 
     return new PageDto(responses, pageMetaDto);
+  }
+
+  async checkCustomerDrawingSubmitted(
+    contestId: string,
+    userId: string,
+  ): Promise<boolean> {
+    const customer = await this.userRepository.getUserById(userId);
+    const contest = await this.contestRepository.getContestById(contestId);
+    let isSubmitted: boolean = false;
+
+    const insertedDate = new Date();
+    if (
+      insertedDate.getDate() >= contest.startedDate.getDate() &&
+      insertedDate.getDate() <= contest.expiredDate.getDate()
+    ) {
+      const checkedCustomerDrawings =
+        await this.customerDrawingRepository.checkCustomerDrawingExisted(
+          contest.id,
+          customer.id,
+        );
+
+      if (checkedCustomerDrawings) {
+        for (const customerDrawing of checkedCustomerDrawings) {
+          if (customerDrawing) {
+            if (customerDrawing.status === CustomerDrawingStatus.APPROVED) {
+              isSubmitted = true;
+            } else if (
+              customerDrawing.status === CustomerDrawingStatus.PENDING
+            ) {
+              isSubmitted = true;
+            } else if (
+              customerDrawing.status === CustomerDrawingStatus.BANNED
+            ) {
+              isSubmitted = true;
+            }
+          }
+        }
+      }
+    }
+    return isSubmitted;
   }
 }

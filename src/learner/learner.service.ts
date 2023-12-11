@@ -155,6 +155,13 @@ export class LearnerService {
       const course = await this.courseRepository.getCourseById(
         leanerCourse.course.id,
       );
+      let isCertified = false;
+
+      for (const achievement of course.achievements) {
+        if (achievement.user.id === userId) {
+          isCertified = true;
+        }
+      }
 
       for (const chapter of course.chapterLectures) {
         if (
@@ -171,6 +178,7 @@ export class LearnerService {
         this.courserMapper.filterCourseByLearnerResponseFromCourse(
           course,
           Math.floor((completedCount / course.chapterLectures.length) * 100),
+          isCertified,
         ),
       );
 

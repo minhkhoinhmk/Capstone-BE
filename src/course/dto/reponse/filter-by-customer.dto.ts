@@ -53,4 +53,8 @@ export class FilterCourseByCustomerResponse {
   @ApiProperty()
   @Expose()
   completedPercent: number | null;
+
+  @ApiProperty()
+  @Expose()
+  isCertified: boolean;
 }

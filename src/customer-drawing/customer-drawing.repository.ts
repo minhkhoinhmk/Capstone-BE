@@ -67,6 +67,7 @@ export class CustomerDrawingRepository {
     queryBuilder.leftJoinAndSelect('c.user', 'user');
     queryBuilder.leftJoinAndSelect('c.contest', 'contest');
     queryBuilder.leftJoinAndSelect('c.votes', 'votes');
+    queryBuilder.leftJoinAndSelect('votes.user', 'votesUser');
 
     queryBuilder
       .skip((pageOptionsDto.page - 1) * pageOptionsDto.take)
@@ -119,6 +120,7 @@ export class CustomerDrawingRepository {
     queryBuilder.leftJoinAndSelect('c.user', 'user');
     queryBuilder.leftJoinAndSelect('c.contest', 'contest');
     queryBuilder.leftJoinAndSelect('c.votes', 'votes');
+    queryBuilder.leftJoinAndSelect('votes.user', 'votesUser');
 
     queryBuilder
       .skip((pageOptionsDto.page - 1) * pageOptionsDto.take)
