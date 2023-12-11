@@ -32,7 +32,9 @@ export class PromotionCourse {
   @JoinColumn({ name: 'promotionId' })
   promotion: Promotion;
 
-  @ManyToOne(() => Course, (course) => course.promotionCourses)
+  @ManyToOne(() => Course, (course) => course.promotionCourses, {
+    nullable: true,
+  })
   @JoinColumn({ name: 'courseId' })
   course: Course;
 

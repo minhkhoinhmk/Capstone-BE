@@ -47,7 +47,9 @@ export class ContestRepository {
     request: FilterContestRequest,
   ): Promise<{ count: number; entites: Contest[] }> {
     const order = {};
+
     order['expiredDate'] = request.pageOptions.order;
+
     const contests = await this.contestRepository.find({
       where: { active: true, status: request.status, isVisible: true },
       relations: { user: true, customerDrawings: true },

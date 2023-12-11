@@ -56,6 +56,9 @@ export class LearnerRepository {
   async getLeanerById(id: string): Promise<Learner> {
     const learner = await this.learnerRepository.findOne({
       where: { id },
+      relations: {
+        user: true,
+      },
     });
     return learner;
   }

@@ -8,6 +8,7 @@ import { ContestRepository } from './contest.repository';
 import { S3Module } from 'src/s3/s3.module';
 import { AuthModule } from 'src/auth/auth.module';
 import { ContestMapper } from './mapper/contest.mapper';
+import { PromotionModule } from 'src/promotion/promotion.module';
 
 @Module({
   imports: [
@@ -15,6 +16,7 @@ import { ContestMapper } from './mapper/contest.mapper';
     UserModule,
     S3Module,
     AuthModule,
+    PromotionModule,
   ],
   providers: [ContestService, ContestRepository, ContestMapper],
   controllers: [ContestController],

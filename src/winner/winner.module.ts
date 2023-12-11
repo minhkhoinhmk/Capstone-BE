@@ -7,12 +7,20 @@ import { CustomerDrawingModule } from 'src/customer-drawing/customer-drawing.mod
 import { ContestModule } from 'src/contest/contest.module';
 import { WinnerRepository } from './winner.repository';
 import { WinnerMapper } from './mapper/winner.mapper';
+import { PromotionModule } from 'src/promotion/promotion.module';
+import { VoteModule } from 'src/vote/vote.module';
+import { UserModule } from 'src/user/user.module';
+import { AuthModule } from 'src/auth/auth.module';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([Winner]),
+    AuthModule,
     CustomerDrawingModule,
     ContestModule,
+    PromotionModule,
+    VoteModule,
+    UserModule,
   ],
   providers: [WinnerService, WinnerRepository, WinnerMapper],
   controllers: [WinnerController],

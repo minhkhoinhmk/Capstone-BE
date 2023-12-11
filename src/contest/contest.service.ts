@@ -16,6 +16,7 @@ import { ContestMapper } from './mapper/contest.mapper';
 import ContestStatus from './enum/contest-status.enum';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { FilterContestRequest } from './dto/request/filter-contest-request.dto';
+import { PromotionRepository } from 'src/promotion/promotion.repository';
 
 @Injectable()
 export class ContestService {
@@ -23,6 +24,7 @@ export class ContestService {
 
   constructor(
     private readonly contestRepository: ContestRepository,
+    private readonly promotionReposiotory: PromotionRepository,
     private readonly userRepository: UserRepository,
     private readonly s3Service: S3Service,
     private readonly mapper: ContestMapper,
@@ -110,8 +112,8 @@ export class ContestService {
     });
 
     for (const contest of contests) {
-      let staffName = `${contest.user.lastName} ${contest.user.middleName} ${contest.user.firstName}`;
-      let total = contest.customerDrawings.length;
+      const staffName = `${contest.user.lastName} ${contest.user.middleName} ${contest.user.firstName}`;
+      const total = contest.customerDrawings.length;
 
       responses.push(
         this.mapper.filterViewContestResponseFromContest(
@@ -131,15 +133,15 @@ export class ContestService {
     staffId: string,
     status: string,
   ): Promise<ViewContestResponse[]> {
-    let contests = await this.contestRepository.getContestByStaffId(
+    const contests = await this.contestRepository.getContestByStaffId(
       staffId,
       status,
     );
     const responses: ViewContestResponse[] = [];
 
     for (const contest of contests) {
-      let staffName = `${contest.user.lastName} ${contest.user.middleName} ${contest.user.firstName}`;
-      let total = contest.customerDrawings.length;
+      const staffName = `${contest.user.lastName} ${contest.user.middleName} ${contest.user.firstName}`;
+      const total = contest.customerDrawings.length;
 
       responses.push(
         this.mapper.filterViewContestResponseFromContest(
@@ -157,8 +159,8 @@ export class ContestService {
 
   async getContestById(contestId: string): Promise<ViewContestResponse> {
     const contest = await this.contestRepository.getContestById(contestId);
-    let staffName = `${contest.user.lastName} ${contest.user.middleName} ${contest.user.firstName}`;
-    let total = contest.customerDrawings.length;
+    const staffName = `${contest.user.lastName} ${contest.user.middleName} ${contest.user.firstName}`;
+    const total = contest.customerDrawings.length;
 
     this.logger.log(`method=getContestById, id = ${contest.id}`);
 
@@ -169,13 +171,13 @@ export class ContestService {
     );
   }
 
-  @Cron(CronExpression.EVERY_6_HOURS)
+  @Cron(CronExpression.EVERY_10_SECONDS)
   async setStatusContest() {
     const contests = await this.contestRepository.getContestsNotPagination();
     contests.forEach(async (contest) => {
       if (
         contest.status === ContestStatus.PENDING &&
-        contest.startedDate.getDate() === new Date().getDate()
+        contest.startedDate.getTime() === new Date().getTime()
       ) {
         contest.status = ContestStatus.ACTIVE;
         await this.contestRepository.save(contest);
@@ -185,7 +187,7 @@ export class ContestService {
         );
       } else if (
         contest.status === ContestStatus.ACTIVE &&
-        contest.expiredDate.getDate() < new Date().getDate()
+        contest.expiredDate.getTime() < new Date().getTime()
       ) {
         contest.status = ContestStatus.EXPIRED;
         await this.contestRepository.save(contest);

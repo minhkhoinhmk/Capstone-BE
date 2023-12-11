@@ -24,6 +24,10 @@ export class ViewContestResponse {
 
   @ApiProperty()
   @Expose()
+  updatedDate: Date;
+
+  @ApiProperty()
+  @Expose()
   prize: string;
 
   @ApiProperty()

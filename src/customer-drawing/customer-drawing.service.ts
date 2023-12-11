@@ -18,6 +18,9 @@ import { PageMetaDto } from 'src/common/pagination/dto/pageMetaDto';
 import { CustomerDrawingMapper } from './mapper/customer-drawing.mapper';
 import { FilterCustomerDrawingRequest } from './dto/request/filter-customer-drawing-request.dto';
 import CustomerDrawingStatus from './enum/customer-drawing-status.enum';
+import { User } from 'src/user/entity/user.entity';
+import { Learner } from 'src/learner/entity/learner.entity';
+import { NameRole } from 'src/role/enum/name-role.enum';
 
 @Injectable()
 export class CustomerDrawingService {
@@ -39,7 +42,7 @@ export class CustomerDrawingService {
   ): Promise<CustomerDrawing> {
     const customer = await this.userRepository.getUserById(userId);
     const contest = await this.contestRepository.getContestById(contestId);
-    let flag: boolean = true;
+    let flag = true;
 
     const insertedDate = new Date();
     if (
@@ -111,7 +114,7 @@ export class CustomerDrawingService {
     customerDrawingId: string,
   ): Promise<void> {
     try {
-      let customerDrawing =
+      const customerDrawing =
         await this.customerDrawingRepository.getCustomerDrawingByIdForUpdateImageUrl(
           customerDrawingId,
         );
@@ -138,15 +141,20 @@ export class CustomerDrawingService {
     }
   }
 
-  async approveCustomerDrawing(customerDrawingId: string): Promise<void> {
+  async setStatusCustomerDrawing(
+    customerDrawingId: string,
+    status: CustomerDrawingStatus,
+  ): Promise<void> {
     try {
       const customerDrawing =
         await this.customerDrawingRepository.getCustomerDrawingByIdForUpdateImageUrl(
           customerDrawingId,
         );
 
-      customerDrawing.active = true;
-      customerDrawing.status = CustomerDrawingStatus.APPROVED;
+      if (status === CustomerDrawingStatus.APPROVED) {
+        customerDrawing.active = true;
+      }
+      customerDrawing.status = status;
 
       await this.customerDrawingRepository.saveCustomerDrawing(customerDrawing);
 
@@ -278,9 +286,9 @@ export class CustomerDrawingService {
   ): Promise<boolean> {
     const customer = await this.userRepository.getUserById(userId);
     const contest = await this.contestRepository.getContestById(contestId);
-    let isSubmitted: boolean = false;
-
+    let isSubmitted = false;
     const insertedDate = new Date();
+
     if (
       insertedDate.getDate() >= contest.startedDate.getDate() &&
       insertedDate.getDate() <= contest.expiredDate.getDate()
@@ -309,6 +317,23 @@ export class CustomerDrawingService {
         }
       }
     }
+
     return isSubmitted;
+  }
+
+  async getCustomerDrawingOfCustomerInContest(
+    user: User | Learner,
+    contestId: string,
+  ) {
+    if (user.role === NameRole.Learner)
+      return await this.customerDrawingRepository.checkCustomerDrawingExisted(
+        contestId,
+        (user as Learner).user.id,
+      );
+
+    return await this.customerDrawingRepository.checkCustomerDrawingExisted(
+      contestId,
+      user.id,
+    );
   }
 }
