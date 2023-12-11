@@ -262,7 +262,7 @@ export class ContestService {
     } else {
       try {
         (await this.s3Service.deleteObject(options)).promise();
-        await this.contestRepository.removeContest(contest);
+        // await this.contestRepository.removeContest(contest);
 
         this.logger.log(
           `method=deleteContest, contestId=${contestId} removed successfully`,
