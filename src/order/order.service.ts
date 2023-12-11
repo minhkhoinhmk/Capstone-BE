@@ -147,7 +147,7 @@ export class OrderService {
   }
 
   // @Cron('0 0 * * *')
-  @Cron(CronExpression.EVERY_30_SECONDS)
+  @Cron(CronExpression.EVERY_10_SECONDS)
   async deletePedingOrder() {
     const ordersPending = await this.getOrdersPending();
 
