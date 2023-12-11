@@ -92,4 +92,8 @@ export class ContestRepository {
       relations: { user: true, customerDrawings: true },
     });
   }
+
+  async removeContest(contest: Contest): Promise<void> {
+    await this.contestRepository.remove(contest);
+  }
 }

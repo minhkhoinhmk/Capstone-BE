@@ -8,6 +8,7 @@ import { ContestRepository } from './contest.repository';
 import { S3Module } from 'src/s3/s3.module';
 import { AuthModule } from 'src/auth/auth.module';
 import { ContestMapper } from './mapper/contest.mapper';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 
 @Module({
   imports: [
@@ -15,8 +16,9 @@ import { ContestMapper } from './mapper/contest.mapper';
     UserModule,
     S3Module,
     AuthModule,
+    ConfigModule,
   ],
-  providers: [ContestService, ContestRepository, ContestMapper],
+  providers: [ContestService, ContestRepository, ContestMapper, ConfigService],
   controllers: [ContestController],
   exports: [ContestRepository],
 })
