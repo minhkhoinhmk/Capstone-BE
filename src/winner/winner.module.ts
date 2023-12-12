@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
 import { WinnerService } from './winner.service';
 import { WinnerController } from './winner.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
@@ -17,12 +17,13 @@ import { AuthModule } from 'src/auth/auth.module';
     TypeOrmModule.forFeature([Winner]),
     AuthModule,
     CustomerDrawingModule,
-    ContestModule,
+    forwardRef(() => ContestModule),
     PromotionModule,
     VoteModule,
     UserModule,
   ],
   providers: [WinnerService, WinnerRepository, WinnerMapper],
   controllers: [WinnerController],
+  exports: [WinnerRepository],
 })
 export class WinnerModule {}

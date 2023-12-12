@@ -22,6 +22,7 @@ export class S3Service {
   }
 
   async deleteObject(options: any) {
+    console.log(options);
     const s3 = this.s3Connection();
     return s3.deleteObject(options);
   }

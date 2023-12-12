@@ -16,7 +16,10 @@ import { ContestMapper } from './mapper/contest.mapper';
 import ContestStatus from './enum/contest-status.enum';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { FilterContestRequest } from './dto/request/filter-contest-request.dto';
+import { UpdateContestRequest } from './dto/request/update-contest-request.dto';
+import { ConfigService } from '@nestjs/config';
 import { PromotionRepository } from 'src/promotion/promotion.repository';
+import { WinnerRepository } from 'src/winner/winner.repository';
 
 @Injectable()
 export class ContestService {
@@ -28,6 +31,8 @@ export class ContestService {
     private readonly userRepository: UserRepository,
     private readonly s3Service: S3Service,
     private readonly mapper: ContestMapper,
+    private readonly configService: ConfigService,
+    private readonly winnerRepository: WinnerRepository,
   ) {}
 
   async createContest(
@@ -197,5 +202,83 @@ export class ContestService {
         );
       }
     });
+  }
+
+  async updateContest(
+    request: UpdateContestRequest,
+    contestId: string,
+  ): Promise<void> {
+    let contest = await this.contestRepository.getContestById(contestId);
+
+    if (
+      contest.status === ContestStatus.ACTIVE &&
+      contest.customerDrawings.length > 0
+    ) {
+      if (
+        new Date(request.startedDate).getTime() !==
+        contest.startedDate.getTime()
+      ) {
+        throw new InternalServerErrorException(
+          'Cuộc thi đã có người tham gia, không thể thay đổi ngày bắt đầu',
+        );
+      } else {
+        contest.title = request.title;
+        contest.description = request.description;
+        contest.prize = request.prize;
+        contest.expiredDate = request.expiredDate;
+        contest.isVisible = request.isVisible;
+
+        await this.contestRepository.save(contest);
+      }
+    } else {
+      contest.title = request.title;
+      contest.description = request.description;
+      contest.prize = request.prize;
+      contest.startedDate = request.startedDate;
+      contest.expiredDate = request.expiredDate;
+      contest.isVisible = request.isVisible;
+
+      await this.contestRepository.save(contest);
+    }
+
+    this.logger.log(
+      `method=updateContest, contestId=${contest.id} updated successfully`,
+    );
+  }
+
+  async deleteContest(contestId: string): Promise<void> {
+    let contest = await this.contestRepository.getContestById(contestId);
+
+    const options = {
+      Bucket: this.configService.get('AWS_S3_PUBLIC_BUCKET_NAME'),
+      Key: contest.thumbnailUrl,
+    };
+
+    if (
+      contest.status === ContestStatus.ACTIVE &&
+      contest.customerDrawings.length > 0
+    ) {
+      throw new InternalServerErrorException(
+        'Cuộc thi đã có người tham gia, không thể xóa',
+      );
+    } else {
+      try {
+        (await this.s3Service.deleteObject(options)).promise();
+
+        if (contest.winners.length > 0) {
+          for (const winner of contest.winners) {
+            await this.winnerRepository.removeWinner(winner);
+          }
+        }
+
+        await this.contestRepository.removeContest(contest);
+
+        this.logger.log(
+          `method=deleteContest, contestId=${contestId} removed successfully`,
+        );
+      } catch (error) {
+        this.logger.log(`method=deleteContest, error=${error.message}`);
+      }
+    }
   }
 }

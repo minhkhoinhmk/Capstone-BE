@@ -3,6 +3,8 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { OrderDetail } from './entity/order-detail.entity';
 import { CreateOrderDetailBody } from './types/create-order-detail-body';
+import { NameOrderStatus } from 'src/order/enum/name-order-status.enum';
+import { TransactionStatus } from 'src/transaction/enum/transaction.enum';
 
 @Injectable()
 export class OrderDetailRepository {
@@ -37,7 +39,14 @@ export class OrderDetailRepository {
 
   async getOrderDetailByInstructor(id: string) {
     return this.orderDetailRepository.find({
-      where: { course: { user: { id } }, isPaymentForInstructor: false },
+      where: {
+        course: { user: { id } },
+        isPaymentForInstructor: false,
+        order: {
+          orderStatus: NameOrderStatus.Success,
+          transaction: { status: TransactionStatus.Success },
+        },
+      },
       relations: { course: { user: true }, order: { user: true } },
     });
   }

@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
 import { CustomerDrawingService } from './customer-drawing.service';
 import { CustomerDrawingController } from './customer-drawing.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
@@ -14,7 +14,7 @@ import { CustomerDrawingMapper } from './mapper/customer-drawing.mapper';
   imports: [
     TypeOrmModule.forFeature([CustomerDrawing]),
     UserModule,
-    ContestModule,
+    forwardRef(() => ContestModule),
     S3Module,
     AuthModule,
   ],

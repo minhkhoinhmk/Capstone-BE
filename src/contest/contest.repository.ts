@@ -39,7 +39,7 @@ export class ContestRepository {
   async getContestById(id: string): Promise<Contest> {
     return await this.contestRepository.findOne({
       where: { id: id, active: true },
-      relations: { user: true, customerDrawings: true },
+      relations: { user: true, customerDrawings: true, winners: true },
     });
   }
 
@@ -93,5 +93,9 @@ export class ContestRepository {
       },
       relations: { user: true, customerDrawings: true },
     });
+  }
+
+  async removeContest(contest: Contest): Promise<void> {
+    await this.contestRepository.remove(contest);
   }
 }

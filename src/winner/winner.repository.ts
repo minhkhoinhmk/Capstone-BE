@@ -47,4 +47,8 @@ export class WinnerRepository {
       },
     });
   }
+
+  async removeWinner(winner: Winner): Promise<void> {
+    await this.winnerRepository.remove(winner);
+  }
 }

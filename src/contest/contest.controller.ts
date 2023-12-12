@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   HttpCode,
   Param,
@@ -26,6 +27,7 @@ import { PageDto } from 'src/common/pagination/dto/pageDto';
 import { Contest } from './entity/contest.entity';
 import { FilterContestRequest } from './dto/request/filter-contest-request.dto';
 import { Request } from 'express';
+import { UpdateContestRequest } from './dto/request/update-contest-request.dto';
 
 @Controller('contest')
 @ApiTags('Contest')
@@ -110,5 +112,28 @@ export class ContestController {
   @HasRoles(NameRole.Staff, NameRole.Customer)
   async getContestsById(@Param('id') id: string): Promise<ViewContestResponse> {
     return await this.contestService.getContestById(id);
+  }
+
+  @Put(':id')
+  @UseGuards(AuthGuard(), RolesGuard)
+  @HasRoles(NameRole.Staff)
+  @ApiOkResponse({
+    description: 'Updated Contest Successfully',
+  })
+  updateContest(
+    @Body() updateContestRequest: UpdateContestRequest,
+    @Param('id') contestId: string,
+  ): Promise<void> {
+    return this.contestService.updateContest(updateContestRequest, contestId);
+  }
+
+  @Delete(':id')
+  @UseGuards(AuthGuard(), RolesGuard)
+  @HasRoles(NameRole.Staff)
+  @ApiOkResponse({
+    description: 'Removed Contest Successfully',
+  })
+  removeContest(@Param('id') contestId: string): Promise<void> {
+    return this.contestService.deleteContest(contestId);
   }
 }
