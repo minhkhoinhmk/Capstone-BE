@@ -164,4 +164,8 @@ export class CourseRepository {
       },
     });
   }
+
+  async removeCourse(course: Course): Promise<void> {
+    await this.courseRepository.remove(course);
+  }
 }

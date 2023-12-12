@@ -117,7 +117,7 @@ export class CartService {
     const messageErrors: string[] = [];
 
     customer.cart.cartItems = customer.cart.cartItems.filter((cartItem) => {
-      const { course, promotionCourse, combo } = cartItem;
+      const { course, promotionCourse } = cartItem;
       const isCourseValid = course.active;
 
       if (!isCourseValid) {

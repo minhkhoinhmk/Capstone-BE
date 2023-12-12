@@ -2,7 +2,6 @@ import { Expose } from 'class-transformer';
 import { CartItem } from 'src/cart-item/entity/cart-item.entity';
 import { Category } from 'src/category/entity/category.entity';
 import { ChapterLecture } from 'src/chapter-lecture/entity/chapter-lecture.entity';
-import { Combo } from 'src/combo/entity/combo.entity';
 import { CourseFeedback } from 'src/course-feedback/entity/course-feedbacl.entity';
 import { CourseReport } from 'src/course-report/entity/course-report.entity';
 import { LearnerCourse } from 'src/learner-course/entity/learner-course.entity';
@@ -115,10 +114,6 @@ export class Course {
   @JoinColumn({ name: 'levelId' })
   @Expose()
   level: Level;
-
-  @ManyToMany(() => Combo, (combos) => combos.courses)
-  @Expose()
-  combos: Combo[];
 
   @OneToMany(() => CartItem, (cartItem) => cartItem.course)
   @Expose()

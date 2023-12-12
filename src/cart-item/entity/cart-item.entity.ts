@@ -1,6 +1,5 @@
 import { Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 import { Course } from 'src/course/entity/course.entity';
-import { Combo } from 'src/combo/entity/combo.entity';
 import { Cart } from 'src/cart/entity/cart.entity';
 import { PromotionCourse } from 'src/promotion-course/entity/promotion-course.entity';
 
@@ -16,10 +15,6 @@ export class CartItem {
   @ManyToOne(() => Course, (course) => course.cartItems, { nullable: true })
   @JoinColumn({ name: 'courseId' })
   course: Course;
-
-  @ManyToOne(() => Combo, (combo) => combo.cartItems, { nullable: true })
-  @JoinColumn({ name: 'comboId' })
-  combo: Combo;
 
   @ManyToOne(
     () => PromotionCourse,

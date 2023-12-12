@@ -19,10 +19,6 @@ export class OrderDetail {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  // @ManyToOne(() => Combo, (combo) => combo.cartItems, { nullable: true })
-  // @JoinColumn({ name: 'comboId' })
-  // combo: Combo;
-
   @ApiProperty({ type: Number, description: 'Price of the order detail' })
   @Column()
   price: number;
