@@ -1,6 +1,7 @@
 import {
   BadRequestException,
   Injectable,
+  InternalServerErrorException,
   Logger,
   NotFoundException,
 } from '@nestjs/common';
@@ -20,7 +21,6 @@ import { Course } from 'src/course/entity/course.entity';
 import { CourseRepository } from 'src/course/course.repository';
 import { DeviceRepository } from 'src/device/device.repository';
 import { NameRole } from 'src/role/enum/name-role.enum';
-import { PageOptionsDto } from 'src/common/pagination/dto/pageOptionsDto';
 import { PageDto } from 'src/common/pagination/dto/pageDto';
 import { FilterCourseByInstructorResponse } from 'src/course/dto/reponse/filter-by-instructor.dto';
 import { CourseMapper } from 'src/course/mapper/course.mapper';
@@ -35,6 +35,9 @@ import { InstructorMapper } from './mapper/instructor.mapper';
 import { SetInstructorStatusRequest } from './dto/request/set-instructor-status-request.dto';
 import { UpdateInstructorProfileRequest } from './dto/request/update-profile-request.dto';
 import { GetCourseByInstructorRequest } from './dto/request/get-course-by-instructor.request.dto';
+import { ChapterLectureRepository } from 'src/chapter-lecture/chapter-lecture.repository';
+import { ConfigService } from '@nestjs/config';
+import { ChapterLecture } from 'src/chapter-lecture/entity/chapter-lecture.entity';
 
 @Injectable()
 export class InstructorService {
@@ -49,8 +52,10 @@ export class InstructorService {
     private readonly courseRepository: CourseRepository,
     private readonly deviceRepository: DeviceRepository,
     private readonly courseMapper: CourseMapper,
+    private readonly chapterLecturesRepository: ChapterLectureRepository,
     private mailsService: MailerService,
     private mapper: InstructorMapper,
+    private readonly configService: ConfigService,
   ) {}
 
   async uploadCertification(
@@ -361,5 +366,84 @@ export class InstructorService {
     instructor.accountHolderName = request.accountHolderName;
 
     await this.userRepository.save(instructor);
+  }
+
+  async removeCourse(courseId: string): Promise<void> {
+    const course = await this.courseRepository.getCourseById(courseId);
+
+    if (course) {
+      if (course.status === CourseStatus.CREATED) {
+        if (course.chapterLectures.length > 0) {
+          for (const chapterLecture of course.chapterLectures) {
+            const options = {
+              Bucket: this.configService.get('AWS_S3_PUBLIC_BUCKET_NAME'),
+              Key: chapterLecture.video,
+            };
+
+            await this.s3Service.deleteObject(options);
+
+            this.logger.log(
+              `method=removeCourse, chapter lecture with id= ${chapterLecture.id} removed successfully`,
+            );
+
+            this.chapterLecturesRepository.removeChapterLecture(chapterLecture);
+          }
+
+          const options = {
+            Bucket: this.configService.get('AWS_S3_PUBLIC_BUCKET_NAME'),
+            Key: course.thumbnailUrl,
+          };
+
+          await this.s3Service.deleteObject(options);
+
+          this.logger.log(
+            `method=removeCourse, course with id= ${course.id} removed successfully`,
+          );
+
+          await this.courseRepository.removeCourse(course);
+        } else {
+          const options = {
+            Bucket: this.configService.get('AWS_S3_PUBLIC_BUCKET_NAME'),
+            Key: course.thumbnailUrl,
+          };
+
+          await this.s3Service.deleteObject(options);
+
+          this.logger.log(
+            `method=removeCourse, course with id= ${course.id} removed successfully`,
+          );
+
+          await this.courseRepository.removeCourse(course);
+        }
+      } else {
+        throw new InternalServerErrorException(`Khóa học không được phép xóa`);
+      }
+    }
+  }
+
+  async removeChapterLecture(chapterLectureId: string): Promise<void> {
+    const chapterLecture =
+      await this.chapterLecturesRepository.getChapterLectureById(
+        chapterLectureId,
+      );
+
+    if (chapterLecture) {
+      if (chapterLecture.course.status === CourseStatus.CREATED) {
+        const options = {
+          Bucket: this.configService.get('AWS_S3_PUBLIC_BUCKET_NAME'),
+          Key: chapterLecture.video,
+        };
+
+        await this.s3Service.deleteObject(options);
+
+        this.logger.log(
+          `method=removeChapterLecture, chapter lecture with id= ${chapterLecture.id} removed successfully`,
+        );
+
+        this.chapterLecturesRepository.removeChapterLecture(chapterLecture);
+      } else {
+        throw new InternalServerErrorException(`Bài giảng không được phép xóa`);
+      }
+    }
   }
 }
