@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   Param,
   Patch,
@@ -22,7 +23,6 @@ import { AuthGuard } from '@nestjs/passport';
 import { RolesGuard } from 'src/auth/role.guard';
 import { HasRoles } from 'src/auth/roles.decorator';
 import { NameRole } from 'src/role/enum/name-role.enum';
-import { PageOptionsDto } from 'src/common/pagination/dto/pageOptionsDto';
 import { PageDto } from 'src/common/pagination/dto/pageDto';
 import { FilterCourseByInstructorResponse } from 'src/course/dto/reponse/filter-by-instructor.dto';
 import { Request } from 'express';
@@ -207,5 +207,19 @@ export class InstructorController {
       req['user']['id'],
       request,
     );
+  }
+
+  @Delete('/course/:id')
+  @UseGuards(AuthGuard(), RolesGuard)
+  @HasRoles(NameRole.Instructor)
+  removeCourse(@Param('id') courseId: string): Promise<void> {
+    return this.instructorService.removeCourse(courseId);
+  }
+
+  @Delete('/chapter-lecture/:id')
+  @UseGuards(AuthGuard(), RolesGuard)
+  @HasRoles(NameRole.Instructor)
+  removeChapterLecture(@Param('id') chapterLectureId: string): Promise<void> {
+    return this.instructorService.removeChapterLecture(chapterLectureId);
   }
 }

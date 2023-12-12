@@ -18,7 +18,6 @@ import { Learner } from './learner/entity/learner.entity';
 import { JwtStore } from './user/entity/jwt-store.entity';
 import { CategoryModule } from './category/category.module';
 import { LevelModule } from './level/level.module';
-import { ComboModule } from './combo/combo.module';
 import { CourseModule } from './course/course.module';
 import { PromotionModule } from './promotion/promotion.module';
 import { PromotionCourseModule } from './promotion-course/promotion-course.module';
@@ -133,7 +132,6 @@ import { WinnerModule } from './winner/winner.module';
     LearnerModule,
     CategoryModule,
     LevelModule,
-    ComboModule,
     CourseModule,
     PromotionModule,
     PromotionCourseModule,

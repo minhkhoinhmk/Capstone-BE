@@ -3,7 +3,6 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CartItem } from './entity/cart-item.entity';
 import { Course } from 'src/course/entity/course.entity';
-import { Combo } from 'src/combo/entity/combo.entity';
 import { Cart } from 'src/cart/entity/cart.entity';
 
 @Injectable()
@@ -18,18 +17,15 @@ export class CartItemRepository {
   async createCartItem({
     cart,
     course = null,
-    combo = null,
     promotionCourseId = null,
   }: {
     cart: Cart;
     course?: Course;
-    combo?: Combo;
     promotionCourseId?: string;
   }) {
     return this.cartItemRepository.create({
       cart,
       course,
-      combo,
       promotionCourse: { id: promotionCourseId },
     });
   }

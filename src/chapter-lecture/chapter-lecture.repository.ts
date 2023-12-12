@@ -59,4 +59,8 @@ export class ChapterLectureRepository {
       },
     });
   }
+
+  async removeChapterLecture(chapterLecture: ChapterLecture): Promise<void> {
+    this.chapterLectureRepository.remove(chapterLecture);
+  }
 }

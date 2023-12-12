@@ -11,9 +11,11 @@ import { DeviceModule } from 'src/device/device.module';
 import { AuthModule } from 'src/auth/auth.module';
 import { CourseMapper } from 'src/course/mapper/course.mapper';
 import { InstructorMapper } from './mapper/instructor.mapper';
+import { ChapterLectureModule } from 'src/chapter-lecture/chapter-lecture.module';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 
 @Module({
-  providers: [InstructorService, InstructorMapper],
+  providers: [InstructorService, InstructorMapper, ConfigService],
   controllers: [InstructorController],
   imports: [
     S3Module,
@@ -25,6 +27,8 @@ import { InstructorMapper } from './mapper/instructor.mapper';
     DeviceModule,
     AuthModule,
     CourseMapper,
+    ChapterLectureModule,
+    ConfigModule,
   ],
 })
 export class InstructorModule {}
