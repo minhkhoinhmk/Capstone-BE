@@ -10,6 +10,7 @@ import { AuthModule } from 'src/auth/auth.module';
 import { ContestMapper } from './mapper/contest.mapper';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { PromotionModule } from 'src/promotion/promotion.module';
+import { WinnerModule } from 'src/winner/winner.module';
 
 @Module({
   imports: [
@@ -19,6 +20,7 @@ import { PromotionModule } from 'src/promotion/promotion.module';
     AuthModule,
     ConfigModule,
     PromotionModule,
+    WinnerModule,
   ],
   providers: [ContestService, ContestRepository, ContestMapper, ConfigService],
   controllers: [ContestController],

@@ -19,6 +19,7 @@ import { FilterContestRequest } from './dto/request/filter-contest-request.dto';
 import { UpdateContestRequest } from './dto/request/update-contest-request.dto';
 import { ConfigService } from '@nestjs/config';
 import { PromotionRepository } from 'src/promotion/promotion.repository';
+import { WinnerRepository } from 'src/winner/winner.repository';
 
 @Injectable()
 export class ContestService {
@@ -31,6 +32,7 @@ export class ContestService {
     private readonly s3Service: S3Service,
     private readonly mapper: ContestMapper,
     private readonly configService: ConfigService,
+    private readonly winnerRepository: WinnerRepository,
   ) {}
 
   async createContest(
@@ -262,7 +264,14 @@ export class ContestService {
     } else {
       try {
         (await this.s3Service.deleteObject(options)).promise();
-        // await this.contestRepository.removeContest(contest);
+
+        if (contest.winners.length > 0) {
+          for (const winner of contest.winners) {
+            await this.winnerRepository.removeWinner(winner);
+          }
+        }
+
+        await this.contestRepository.removeContest(contest);
 
         this.logger.log(
           `method=deleteContest, contestId=${contestId} removed successfully`,
