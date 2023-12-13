@@ -49,7 +49,7 @@ export class LevelService {
 
       this.logger.log(`Level with id=${id} removed successfully`);
     } else {
-      throw new NotAcceptableException(`Level with id=${id} has courses`);
+      throw new NotAcceptableException(`Độ khó đã có khóa học`);
     }
   }
 }

@@ -16,6 +16,9 @@ export class Category {
   @Column()
   name: string;
 
+  @Column({ nullable: true })
+  thumbnailUrl: string;
+
   @CreateDateColumn({
     type: 'timestamp',
     nullable: true,

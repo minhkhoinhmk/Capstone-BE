@@ -15,3 +15,5 @@ export const ACHIEVEMENT_PATH = 'users/achievements/';
 export const CONTEST_THUMBNAIL_PATH = 'contests/thumbnails/';
 
 export const CUSTOMER_DRAWING_PATH = 'customerDrawings/images/';
+
+export const CATEGORY_PATH = 'categories/thumbnails/';

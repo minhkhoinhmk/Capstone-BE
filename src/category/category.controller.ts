@@ -8,7 +8,9 @@ import {
   Post,
   Put,
   Query,
+  UploadedFile,
   UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
 import { Category } from './entity/category.entity';
 import { CategoryService } from './category.service';
@@ -24,6 +26,7 @@ import { AuthGuard } from '@nestjs/passport';
 import { RolesGuard } from 'src/auth/role.guard';
 import { HasRoles } from 'src/auth/roles.decorator';
 import { NameRole } from 'src/role/enum/name-role.enum';
+import { FileInterceptor } from '@nestjs/platform-express';
 
 @Controller('category')
 @ApiTags('Category')
@@ -54,7 +57,7 @@ export class CategoryController {
   @ApiBody({ type: CreateCategotyRequest })
   @UseGuards(AuthGuard(), RolesGuard)
   @HasRoles(NameRole.Admin)
-  createCategory(@Body() category: CreateCategotyRequest): Promise<void> {
+  createCategory(@Body() category: CreateCategotyRequest): Promise<Category> {
     return this.categoryService.createCategory(category);
   }
 
@@ -76,5 +79,29 @@ export class CategoryController {
   @HasRoles(NameRole.Admin)
   deleteCategory(@Param('id') id: string): Promise<void> {
     return this.categoryService.removeCategory(id);
+  }
+
+  @Put('/thumbnail')
+  @ApiOkResponse({
+    description: 'Uploaded Thumbnail Successfully',
+  })
+  @UseInterceptors(FileInterceptor('file'))
+  @UseGuards(AuthGuard(), RolesGuard)
+  @HasRoles(NameRole.Admin)
+  async uploadThumbnail(
+    @UploadedFile() file: Express.Multer.File,
+    @Query('categoryId') categoryId: string,
+  ): Promise<void> {
+    const parts = file.originalname.split('.');
+
+    if (parts.length > 1) {
+      const substringAfterDot = parts[parts.length - 1];
+      return await this.categoryService.uploadThumbnail(
+        file.buffer,
+        file.mimetype,
+        substringAfterDot,
+        categoryId,
+      );
+    }
   }
 }
