@@ -11,7 +11,7 @@ import { LearnerModule } from 'src/learner/learner.module';
 import { UserModule } from 'src/user/user.module';
 import { CourseModule } from 'src/course/course.module';
 import { S3Module } from 'src/s3/s3.module';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { VideoModule } from 'src/video/video.module';
 
 @Module({
@@ -30,6 +30,7 @@ import { VideoModule } from 'src/video/video.module';
     ChapterLectureService,
     ChapterLectureRepository,
     ChapterLectureMapper,
+    ConfigService,
   ],
   controllers: [ChapterLectureController],
   exports: [ChapterLectureRepository],

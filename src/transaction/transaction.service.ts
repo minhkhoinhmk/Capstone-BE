@@ -80,13 +80,21 @@ export class TransactionService {
 
       return response;
     } catch (error) {
-      if (error.code === '23505')
+      if (error.code === '23505') {
         this.logger.error(
           `method=createTransaction, Duplicate orderId=${createTransactionDto.orderId}`,
         );
-      throw new ConflictException(
-        `Duplicate orderId: ${createTransactionDto.orderId}`,
-      );
+        throw new ConflictException(
+          `Duplicate orderId: ${createTransactionDto.orderId}`,
+        );
+      } else {
+        this.logger.error(
+          `method=createTransaction, message error=${error.message}`,
+        );
+        throw new ConflictException(
+          `Duplicate orderId: ${createTransactionDto.orderId}`,
+        );
+      }
     }
   }
 

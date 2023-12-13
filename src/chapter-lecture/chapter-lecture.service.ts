@@ -14,6 +14,8 @@ import { ChangeIndexChapterLectureRequest } from './dto/request/change-index-cha
 import { CHAPTER_LECTURE_VIDEO_PATH } from 'src/common/s3/s3.constants';
 import { S3Service } from 'src/s3/s3.service';
 import { VideoService } from 'src/video/video.service';
+import { v4 as uuidv4 } from 'uuid';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class ChapterLectureService {
@@ -28,6 +30,7 @@ export class ChapterLectureService {
     private courseRepository: CourseRepository,
     private readonly s3Service: S3Service,
     private videoService: VideoService,
+    private readonly configService: ConfigService,
   ) {}
 
   async getChapterLectureByCourseId(
@@ -161,6 +164,9 @@ export class ChapterLectureService {
     chapterLecture.active = true;
     chapterLecture.course = course;
 
+    course.totalChapter = course.totalChapter + 1;
+
+    await this.courseRepository.saveCourse(course);
     return await this.chapterLectureRepository.saveChapterLecture(
       chapterLecture,
     );
@@ -182,6 +188,36 @@ export class ChapterLectureService {
       throw new BadRequestException(
         `chapterLectureId=${chapterLectureId} is not found`,
       );
+    }
+
+    if (
+      bodyUpdate.isPreviewed !== undefined &&
+      bodyUpdate.isPreviewed === true
+    ) {
+      const chapterLectures = chapterLecture.course.chapterLectures;
+      let numsOfPreview = 1;
+      for (const chapter of chapterLectures) {
+        if (chapter.isPreviewed) numsOfPreview++;
+      }
+      if (
+        chapterLectures.length >= 1 &&
+        chapterLectures.length <= 10 &&
+        numsOfPreview > 1
+      ) {
+        this.logger.error(
+          `method=updateChapterLectureByInstructor, if nums of chapterLectures is less than 10, can only preview 1 chapterLecture`,
+        );
+        throw new BadRequestException(
+          `Nếu Số lượng bài giảng nhỏ hơn hoặc bằng 10 thì chỉ được xem trước 1 bài giảng`,
+        );
+      } else if (chapterLectures.length > 10 && numsOfPreview > 2) {
+        this.logger.error(
+          `method=updateChapterLectureByInstructor, if nums of chapterLectures is greater than 10, can only preview 1 chapterLecture`,
+        );
+        throw new BadRequestException(
+          `Nếu Số lượng bài giảng lớn hơn 10 thì chỉ được xem trước 2 bài giảng`,
+        );
+      }
     }
 
     chapterLecture = { ...chapterLecture, ...bodyUpdate };
@@ -235,7 +271,16 @@ export class ChapterLectureService {
         );
       }
 
-      const key = `${CHAPTER_LECTURE_VIDEO_PATH}${chapterLectureId}.${substringAfterDot}`;
+      if (chapterLecture.video) {
+        const options = {
+          Bucket: this.configService.get('AWS_S3_PUBLIC_BUCKET_NAME'),
+          Key: chapterLecture.video,
+        };
+
+        (await this.s3Service.deleteObject(options)).promise();
+      }
+
+      const key = `${CHAPTER_LECTURE_VIDEO_PATH}${chapterLectureId}_${uuidv4()}.${substringAfterDot}`;
 
       chapterLecture.video = key;
 

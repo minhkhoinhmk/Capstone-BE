@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Injectable,
   Logger,
   NotAcceptableException,
@@ -12,6 +13,7 @@ import { User } from 'src/user/entity/user.entity';
 import { PromotionRepository } from 'src/promotion/promotion.repository';
 import { CourseRepository } from 'src/course/course.repository';
 import { UpdateIsViewOfStaffRequest } from './request/update-is-view-of-staff.request.dto';
+import { isWithinInterval, parseISO } from 'date-fns';
 
 @Injectable()
 export class PromotionCourseService {
@@ -23,24 +25,31 @@ export class PromotionCourseService {
     private courseRepository: CourseRepository,
   ) {}
 
-  async checkPromotionCourseCanApplyById(promotionCourseId: string) {
-    const promotionCourse =
-      await this.promotionCourseRepository.getPromotionCourseCanApplyById(
-        promotionCourseId,
-      );
-
-    if (promotionCourse.used >= promotionCourse.promotion.amount)
-      return { promotionCourse: null };
-
-    return { promotionCourse };
-  }
-
-  async checkPromotionCourseCanApplyByCode(code: string, courseId: string) {
-    const promotionCourse =
-      await this.promotionCourseRepository.getPromotionCourseCanApplyByCode(
+  async checkPromotionCourseCanApplyByCode(
+    code: string,
+    courseId: string,
+    userId: string,
+  ) {
+    let promotionCourse =
+      await this.promotionCourseRepository.getPromotionCourseCanApplyByCodeInstructor(
         code,
         courseId,
       );
+
+    promotionCourse =
+      promotionCourse === null
+        ? await this.promotionCourseRepository.getPromotionCourseCanApplyByCodeForWinner(
+            code,
+            userId,
+          )
+        : promotionCourse;
+
+    if (!promotionCourse) {
+      this.logger.error(
+        `method=checkPromotionCourseCanApplyByCode, code=${code} is not found`,
+      );
+      throw new BadRequestException(`Mã "${code}" không hợp lệ`);
+    }
 
     if (promotionCourse.used >= promotionCourse.promotion.amount)
       return { promotionCourse: null };
@@ -66,6 +75,35 @@ export class PromotionCourseService {
       );
     }
 
+    if (user.role.name === NameRole.Instructor) {
+      const promotionsOfInstructor =
+        await this.promotionRepository.getAllPromotionsActiveByUserId(user.id);
+
+      for (const currPromotion of promotionsOfInstructor) {
+        if (
+          currPromotion.id !== promotion.id &&
+          currPromotion.discountPercent === promotion.discountPercent &&
+          this.checkOverlapTimes(
+            currPromotion.effectiveDate,
+            currPromotion.expiredDate,
+            promotion.effectiveDate,
+            promotion.expiredDate,
+          )
+        ) {
+          for (const currPromotionCourse of currPromotion.promotionCourses) {
+            if (currPromotionCourse.course.id === course.id) {
+              this.logger.error(
+                `method=createPromotionCourse, promotionId=${body.promotionId} with courseId=${body.courseId} is not valid`,
+              );
+              throw new NotFoundException(
+                `Giảm giá không thể áp dụng cho khóa học ${course.title} vì đang được chọn ở mã giảm giá khác với thời gian bị trùng nhau`,
+              );
+            }
+          }
+        }
+      }
+    }
+
     const promotionCourse = new PromotionCourse();
     promotionCourse.isView = body.isView;
     promotionCourse.isFull = user.role.name === NameRole.Staff ? true : false;
@@ -78,6 +116,25 @@ export class PromotionCourseService {
 
     this.logger.log(
       `method=createPromotionCourse, Promotion Course created successfully`,
+    );
+  }
+
+  checkOverlapTimes(
+    time1StartDate: Date,
+    time1EndDate: Date,
+    time2StartDate: Date,
+    time2EndDate: Date,
+  ) {
+    const time1Start = parseISO(time1StartDate.toISOString());
+    const time1End = parseISO(time1EndDate.toISOString());
+    const time2Start = parseISO(time2StartDate.toISOString());
+    const time2End = parseISO(time2EndDate.toISOString());
+
+    return (
+      isWithinInterval(time2Start, {
+        start: time1Start,
+        end: time1End,
+      }) || isWithinInterval(time2End, { start: time1Start, end: time1End })
     );
   }
 
@@ -102,13 +159,11 @@ export class PromotionCourseService {
 
       this.logger.log(`PromotionCourse with id=${id} removed successfully`);
     } else {
-      // promotionCourse.active = false;
-      // this.promotionCourseRepository.savePromotionCourse(promotionCourse);
-      // this.logger.log(
-      //   `method=removePromotionCourse, PromotionCourse with id=${id} has cartItems and orderDetails => active=false`,
-      // );
+      this.logger.error(
+        `method=removePromotionCourse, PromotionCourse with id=${id} has cartItems and orderDetails`,
+      );
       throw new NotAcceptableException(
-        `PromotionCourse with id=${id} has cartItems and orderDetails`,
+        `Giảm giá dành cho khóa học này đã có trong giỏ hàng hay đã có khách hàng sử dụng`,
       );
     }
   }
@@ -125,15 +180,56 @@ export class PromotionCourseService {
 
   async getPromotionCoursesCanViewByCourseId(
     courseId: string,
+    customer: User,
   ): Promise<PromotionCourse[]> {
-    return (
+    let promotionCoursesViewInstructor =
       await this.promotionCourseRepository.getPromotionCoursesViewByCourseId(
         courseId,
-      )
-    ).filter(
+      );
+
+    promotionCoursesViewInstructor =
+      this.removeUsedExccedAmountPromotionCourses(
+        promotionCoursesViewInstructor,
+      );
+
+    promotionCoursesViewInstructor = this.removeDuplicatePromotionCourses(
+      promotionCoursesViewInstructor,
+    );
+
+    let promotionCoursesWinner =
+      await this.promotionCourseRepository.getPromotionCoursesWinnerByUserId(
+        customer.id,
+      );
+
+    promotionCoursesWinner = this.removeUsedExccedAmountPromotionCourses(
+      promotionCoursesWinner,
+    );
+
+    return [...promotionCoursesViewInstructor, ...promotionCoursesWinner];
+  }
+
+  removeUsedExccedAmountPromotionCourses(
+    promotionCourses: PromotionCourse[],
+  ): PromotionCourse[] {
+    return promotionCourses.filter(
       (promotionCourse) =>
         promotionCourse.used < promotionCourse.promotion.amount,
     );
+  }
+
+  removeDuplicatePromotionCourses(
+    promotionCourses: PromotionCourse[],
+  ): PromotionCourse[] {
+    const discountMap: { [key: number]: boolean } = {};
+
+    return promotionCourses.filter((promotionCourse) => {
+      if (discountMap[promotionCourse.promotion.discountPercent]) {
+        return false; // Đã gặp giá trị discountPercent này trước đó
+      } else {
+        discountMap[promotionCourse.promotion.discountPercent] = true;
+        return true; // Chưa gặp giá trị discountPercent này trước đó
+      }
+    });
   }
 
   async updateIsViewOfInstructor(

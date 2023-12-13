@@ -81,15 +81,23 @@ export class LearnerService {
       throw new NotFoundException(`Learner with id ${id} not found`);
     }
 
+    if (await this.checkUsernameIsExist(body.userName)) {
+      this.logger.error(
+        `method=updateLearner, userName=${body.userName} was existed`,
+      );
+      throw new ConflictException('Tên đăng nhập đã tồn tại');
+    }
+
     learner.firstName = body.firstName;
     learner.lastName = body.lastName;
     learner.middleName = body.middleName;
+    learner.userName = body.userName;
 
     await this.learnerRepository.saveLearner(learner);
   }
 
   async changePasswordLearner(body: ChangePasswordLearnerRequest) {
-    const { currentPassword, newPassword, learnerId } = body;
+    const { newPassword, learnerId } = body;
 
     const learner = await this.learnerRepository.getLeanerById(body.learnerId);
 
@@ -98,13 +106,6 @@ export class LearnerService {
         `method=updateLearner, learner with id ${learnerId} not found`,
       );
       throw new NotFoundException(`Learner with id ${learnerId} not found`);
-    }
-
-    if (!(await bcrypt.compare(currentPassword, learner.password))) {
-      this.logger.error(
-        `method=changePasswordLearner, currentPassword=${currentPassword} not correct`,
-      );
-      throw new BadRequestException('Mật khẩu cũ không đúng');
     }
 
     const hashNewPassword = await hashPassword(newPassword);

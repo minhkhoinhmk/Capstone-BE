@@ -86,36 +86,4 @@ export class QuestionTopicController {
       questionTopicId,
     );
   }
-
-  // @Get('/order/user')
-  // @UseGuards(AuthGuard(), RolesGuard)
-  // @HasRoles(NameRole.Customer)
-  // async getCoursesByUserId(
-  //   @Req() request: Request,
-  // ): Promise<FilterCourseByCustomerResponse[]> {
-  //   return await this.courseService.getCoursesByUserId(request['user']['id']);
-  // }
-
-  // @Get('/order/check-owned/:id')
-  // @UseGuards(AuthGuard(), RolesGuard)
-  // @HasRoles(NameRole.Customer)
-  // async checkCourseIsOwnedByCourseId(
-  //   @Param('id') courseId: string,
-  //   @Req() request: Request,
-  // ): Promise<{ status: boolean }> {
-  //   return await this.courseService.checkCourseIsOwnedByCourseId(
-  //     courseId,
-  //     request['user'] as User,
-  //   );
-  // }
-
-  // @Patch(':id')
-  // @ApiOkResponse({
-  //   description: 'course successfully updated',
-  // })
-  // async updateCourse(
-  //   @Body() searchCourseRequest: SearchCourseRequest,
-  // ): Promise<PageDto<SearchCourseReponse>> {
-  //   return await this.courseService.searchAndFilter(searchCourseRequest);
-  // }
 }

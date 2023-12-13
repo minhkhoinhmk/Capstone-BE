@@ -27,6 +27,7 @@ import { Request } from 'express';
 import { SetStatusRequest } from './dto/request/set-status-request.dto';
 import { Course } from './entity/course.entity';
 import { CourseLearnStatus } from './type/enum/CourseLearnStatus';
+import { CourseStatus } from './type/enum/CourseStatus';
 
 @Controller('course')
 @ApiTags('Courses')
@@ -99,8 +100,10 @@ export class CourseController {
   @Get('/staff/list')
   @UseGuards(AuthGuard(), RolesGuard)
   @HasRoles(NameRole.Staff)
-  async getCoursesForStaff(): Promise<Course[]> {
-    return await this.courseService.getAllCoursesForStaff();
+  async getCoursesForStaff(
+    @Query('status') status?: CourseStatus,
+  ): Promise<Course[]> {
+    return await this.courseService.getAllCoursesForStaff(status);
   }
 
   @Get('/instructor/create/valid/:courseId')

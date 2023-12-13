@@ -38,6 +38,10 @@ import { GetCourseByInstructorRequest } from './dto/request/get-course-by-instru
 import { ChapterLectureRepository } from 'src/chapter-lecture/chapter-lecture.repository';
 import { ConfigService } from '@nestjs/config';
 import { ChapterLecture } from 'src/chapter-lecture/entity/chapter-lecture.entity';
+import { PromotionRepository } from 'src/promotion/promotion.repository';
+import moment from 'moment';
+import { isWithinInterval, parseISO } from 'date-fns';
+import { PromotionCourseService } from 'src/promotion-course/promotion-course.service';
 
 @Injectable()
 export class InstructorService {
@@ -56,6 +60,8 @@ export class InstructorService {
     private mailsService: MailerService,
     private mapper: InstructorMapper,
     private readonly configService: ConfigService,
+    private readonly promotionRepository: PromotionRepository,
+    private readonly promotionCourseService: PromotionCourseService,
   ) {}
 
   async uploadCertification(
@@ -136,6 +142,7 @@ export class InstructorService {
       course.user = instructor;
       course.active = false;
       course.status = CourseStatus.CREATED;
+      course.totalChapter = 0;
 
       this.logger.log(`method=createCourse, created course successfully`);
 
@@ -250,6 +257,73 @@ export class InstructorService {
     this.logger.log(`method=getCoursesByInstructorId, totalItems=${count}`);
 
     return new PageDto(responses, pageMetaDto);
+  }
+
+  async getCoursesCanApplyPromotionByInstructorId(
+    instructorId: string,
+    body: GetCourseByInstructorRequest,
+    promotionId: string,
+  ): Promise<FilterCourseByInstructorResponse[]> {
+    const { entities: courses } =
+      await this.courseRepository.getCoursesByInstructorId(instructorId, body);
+
+    // Handle filter course valid
+    const promotion = await this.promotionRepository.getPromotionById(
+      promotionId,
+    );
+
+    const promotionsOfInstructor =
+      await this.promotionRepository.getAllPromotionsActiveByUserId(
+        instructorId,
+      );
+
+    let coursesValidApply: Course[] = [...courses].filter((course) =>
+      promotion.promotionCourses.every((promotionCourse) => {
+        return promotionCourse.course.id !== course.id;
+      }),
+    );
+
+    for (const currPromotion of promotionsOfInstructor) {
+      if (
+        currPromotion.id !== promotion.id &&
+        currPromotion.discountPercent === promotion.discountPercent
+      ) {
+        console.log(
+          currPromotion.id !== promotion.id &&
+            currPromotion.discountPercent === promotion.discountPercent,
+        );
+        const isValid = !this.promotionCourseService.checkOverlapTimes(
+          currPromotion.effectiveDate,
+          currPromotion.expiredDate,
+          promotion.effectiveDate,
+          promotion.expiredDate,
+        );
+        // ) && currPromotion.discountPercent !== promotion.discountPercent;
+
+        if (!isValid) {
+          coursesValidApply = coursesValidApply.filter((currCourse) =>
+            currPromotion.promotionCourses.every(
+              (promotionCourse) => promotionCourse.course.id !== currCourse.id,
+            ),
+          );
+        }
+      }
+    }
+
+    // Handle Response
+    const responses: FilterCourseByInstructorResponse[] = [];
+
+    for (const course of coursesValidApply) {
+      responses.push(
+        this.courseMapper.filterCourseByInstructorResponseFromCourse(course),
+      );
+    }
+
+    this.logger.log(
+      `method=getCoursesCanApplyPromotionByInstructorId, totalItems=${responses.length}`,
+    );
+
+    return responses;
   }
 
   async updateBankForInstructor(
@@ -375,26 +449,32 @@ export class InstructorService {
       if (course.status === CourseStatus.CREATED) {
         if (course.chapterLectures.length > 0) {
           for (const chapterLecture of course.chapterLectures) {
-            const options = {
-              Bucket: this.configService.get('AWS_S3_PUBLIC_BUCKET_NAME'),
-              Key: chapterLecture.video,
-            };
+            if (chapterLecture.video) {
+              const options = {
+                Bucket: this.configService.get('AWS_S3_PUBLIC_BUCKET_NAME'),
+                Key: chapterLecture.video,
+              };
 
-            await this.s3Service.deleteObject(options);
+              (await this.s3Service.deleteObject(options)).promise();
+            }
+
+            await this.chapterLecturesRepository.removeChapterLecture(
+              chapterLecture,
+            );
 
             this.logger.log(
               `method=removeCourse, chapter lecture with id= ${chapterLecture.id} removed successfully`,
             );
-
-            this.chapterLecturesRepository.removeChapterLecture(chapterLecture);
           }
 
-          const options = {
-            Bucket: this.configService.get('AWS_S3_PUBLIC_BUCKET_NAME'),
-            Key: course.thumbnailUrl,
-          };
+          if (course.thumbnailUrl) {
+            const options = {
+              Bucket: this.configService.get('AWS_S3_PUBLIC_BUCKET_NAME'),
+              Key: course.thumbnailUrl,
+            };
 
-          await this.s3Service.deleteObject(options);
+            (await this.s3Service.deleteObject(options)).promise();
+          }
 
           this.logger.log(
             `method=removeCourse, course with id= ${course.id} removed successfully`,
@@ -402,18 +482,20 @@ export class InstructorService {
 
           await this.courseRepository.removeCourse(course);
         } else {
-          const options = {
-            Bucket: this.configService.get('AWS_S3_PUBLIC_BUCKET_NAME'),
-            Key: course.thumbnailUrl,
-          };
+          if (course.thumbnailUrl) {
+            const options = {
+              Bucket: this.configService.get('AWS_S3_PUBLIC_BUCKET_NAME'),
+              Key: course.thumbnailUrl,
+            };
 
-          await this.s3Service.deleteObject(options);
+            (await this.s3Service.deleteObject(options)).promise();
+          }
+
+          await this.courseRepository.removeCourse(course);
 
           this.logger.log(
             `method=removeCourse, course with id= ${course.id} removed successfully`,
           );
-
-          await this.courseRepository.removeCourse(course);
         }
       } else {
         throw new InternalServerErrorException(`Khóa học không được phép xóa`);
@@ -429,18 +511,40 @@ export class InstructorService {
 
     if (chapterLecture) {
       if (chapterLecture.course.status === CourseStatus.CREATED) {
-        const options = {
-          Bucket: this.configService.get('AWS_S3_PUBLIC_BUCKET_NAME'),
-          Key: chapterLecture.video,
-        };
+        if (chapterLecture.video) {
+          const options = {
+            Bucket: this.configService.get('AWS_S3_PUBLIC_BUCKET_NAME'),
+            Key: chapterLecture.video,
+          };
 
-        await this.s3Service.deleteObject(options);
+          (await this.s3Service.deleteObject(options)).promise();
+        }
 
-        this.logger.log(
-          `method=removeChapterLecture, chapter lecture with id= ${chapterLecture.id} removed successfully`,
+        await this.chapterLecturesRepository.removeChapterLecture(
+          chapterLecture,
         );
 
-        this.chapterLecturesRepository.removeChapterLecture(chapterLecture);
+        const newChapterLectures = chapterLecture.course.chapterLectures
+          .filter(
+            (currChapterLecture) => currChapterLecture.id !== chapterLecture.id,
+          )
+          .sort((a, b) => a.index - b.index);
+
+        for (const [index, chapterLecture] of newChapterLectures.entries()) {
+          chapterLecture.index = index + 1;
+          await this.chapterLecturesRepository.saveChapterLecture(
+            chapterLecture,
+          );
+        }
+
+        chapterLecture.course.totalChapter =
+          chapterLecture.course.totalChapter + 1;
+
+        await this.courseRepository.saveCourse(chapterLecture.course);
+
+        this.logger.log(
+          `method=removeChapterLecture, chapter lecture with id= ${chapterLectureId} removed successfully`,
+        );
       } else {
         throw new InternalServerErrorException(`Bài giảng không được phép xóa`);
       }

@@ -132,7 +132,8 @@ export class AuthService {
     } catch (error) {
       if (error.code === '23505') {
         this.logger.error(`method=signUp, email ${email} already exists`);
-        throw new ConflictException('email already exists');
+        // throw new ConflictException('email already exists');
+        throw new ConflictException('Email đã tồn tại');
       }
     }
 
@@ -167,7 +168,8 @@ export class AuthService {
         await this.userRepository.save(user);
       }
     } else {
-      throw new NotFoundException(`otp ${otp} not found`);
+      // throw new NotFoundException(`otp ${otp} not found`);
+      throw new NotFoundException(`Mã otp ${otp} không đúng`);
     }
   }
 

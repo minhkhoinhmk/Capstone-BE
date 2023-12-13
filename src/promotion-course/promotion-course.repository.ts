@@ -16,6 +16,36 @@ export class PromotionCourseRepository {
     private roleRepository: RoleRepository,
   ) {}
 
+  async getPromotionCoursesWinnerByUserId(userId: string) {
+    const date = dateInVietnam();
+
+    const promotionCourses = await this.promotionCourseRepository.find({
+      where: {
+        active: true,
+        isFull: true,
+        promotion: {
+          effectiveDate: LessThanOrEqual(date),
+          expiredDate: MoreThanOrEqual(date),
+          active: true,
+          winners: {
+            customerDrawing: {
+              user: { id: userId },
+            },
+          },
+        },
+      },
+      relations: {
+        promotion: {
+          user: true,
+        },
+        orderDetails: true,
+        cartItems: true,
+      },
+    });
+
+    return promotionCourses;
+  }
+
   async getPromotionCoursesViewByCourseId(courseId: string) {
     const date = dateInVietnam();
 
@@ -44,39 +74,18 @@ export class PromotionCourseRepository {
     return promotionCourses;
   }
 
-  async getPromotionCourseCanApplyById(id: string) {
-    const date = dateInVietnam();
-
-    const promotionCourse = await this.promotionCourseRepository.findOne({
-      where: {
-        id,
-        active: true,
-        isView: true,
-        promotion: {
-          effectiveDate: LessThanOrEqual(date),
-          expiredDate: MoreThanOrEqual(date),
-          active: true,
-        },
-      },
-      relations: {
-        promotion: {
-          user: true,
-        },
-        orderDetails: true,
-        cartItems: true,
-      },
-    });
-    return promotionCourse;
-  }
-
-  async getPromotionCourseCanApplyByCode(code: string, courseId: string) {
+  async getPromotionCourseCanApplyByCodeInstructor(
+    code: string,
+    courseId: string,
+  ) {
     const date = dateInVietnam();
 
     const promotionCourse = await this.promotionCourseRepository.findOne({
       where: {
         course: { id: courseId },
         active: true,
-        isView: false,
+        // isView: false,
+        isFull: false,
         promotion: {
           code,
           effectiveDate: LessThanOrEqual(date),
@@ -92,14 +101,31 @@ export class PromotionCourseRepository {
         cartItems: true,
       },
     });
+
     return promotionCourse;
   }
 
-  async getPromotionCourseActiveById(id: string) {
+  async getPromotionCourseCanApplyByCodeForWinner(
+    code: string,
+    userId: string,
+  ) {
+    const date = dateInVietnam();
+
     const promotionCourse = await this.promotionCourseRepository.findOne({
       where: {
-        id,
         active: true,
+        isFull: true,
+        promotion: {
+          code,
+          effectiveDate: LessThanOrEqual(date),
+          expiredDate: MoreThanOrEqual(date),
+          active: true,
+          winners: {
+            customerDrawing: {
+              user: { id: userId },
+            },
+          },
+        },
       },
       relations: {
         promotion: {
@@ -109,6 +135,7 @@ export class PromotionCourseRepository {
         cartItems: true,
       },
     });
+
     return promotionCourse;
   }
 

@@ -154,6 +154,21 @@ export class InstructorController {
     );
   }
 
+  @Post('/course/own/promotion/can-apply/:promotionId')
+  @UseGuards(AuthGuard(), RolesGuard)
+  @HasRoles(NameRole.Instructor)
+  getCoursesCanApplyPromotionByInstructor(
+    @Body() body: GetCourseByInstructorRequest,
+    @Req() request: Request,
+    @Param('promotionId') promotionId: string,
+  ): Promise<FilterCourseByInstructorResponse[]> {
+    return this.instructorService.getCoursesCanApplyPromotionByInstructorId(
+      request['user']['id'],
+      body,
+      promotionId,
+    );
+  }
+
   @Put('/bank/update')
   updateBankForInstructor(
     @Body() request: UpdateBankRequest,

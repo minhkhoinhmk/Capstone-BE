@@ -1,5 +1,11 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsDate, IsNotEmpty, IsNumber, IsString } from 'class-validator';
+import {
+  IsDate,
+  IsNotEmpty,
+  IsNumber,
+  IsOptional,
+  IsString,
+} from 'class-validator';
 
 export class UpdatePromotionRequest {
   @IsString()
@@ -14,6 +20,7 @@ export class UpdatePromotionRequest {
 
   @IsString()
   @IsNotEmpty()
+  @IsOptional()
   @ApiProperty({ type: String, description: 'Note of promotion' })
   note: string;
 

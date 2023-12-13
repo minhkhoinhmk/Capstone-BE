@@ -2,6 +2,7 @@ import {
   Body,
   Controller,
   Get,
+  Param,
   Post,
   Put,
   Query,
@@ -102,6 +103,22 @@ export class LearnerController {
     return this.learnerService.getCoursesForLearner(
       search,
       request['user']['id'],
+      pageOption,
+    );
+  }
+
+  @Post('/course/user/:learnerId')
+  @UseGuards(AuthGuard(), RolesGuard)
+  @HasRoles(NameRole.Customer)
+  @ApiPaginatedResponse(FilterCourseByLearnerResponse)
+  getCourseForLearnersByLearnerId(
+    @Query('search') search: string,
+    @Param('learnerId') learnerId: string,
+    @Body() pageOption: PageOptionsDto,
+  ): Promise<PageDto<FilterCourseByLearnerResponse>> {
+    return this.learnerService.getCoursesForLearner(
+      search,
+      learnerId,
       pageOption,
     );
   }

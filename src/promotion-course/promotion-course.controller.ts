@@ -27,23 +27,18 @@ import { PromotionCourse } from './entity/promotion-course.entity';
 export class PromotionCourseController {
   constructor(private promotionCourseService: PromotionCourseService) {}
 
-  @Post('/apply/view')
-  checkPromotionCourseCanApplyById(
-    @Query('promotionCourseId') promotionCourseId: string,
-  ) {
-    return this.promotionCourseService.checkPromotionCourseCanApplyById(
-      promotionCourseId,
-    );
-  }
-
-  @Post('/apply/not-view')
+  @Post('/apply/code')
+  @UseGuards(AuthGuard(), RolesGuard)
+  @HasRoles(NameRole.Customer)
   checkPromotionCourseCanApplyByCode(
     @Query('courseId') courseId: string,
     @Query('code') code: string,
+    @Req() request: Request,
   ) {
     return this.promotionCourseService.checkPromotionCourseCanApplyByCode(
       code,
       courseId,
+      request['user']['id'],
     );
   }
 
@@ -92,11 +87,15 @@ export class PromotionCourseController {
   }
 
   @Get('/view/:courseId')
+  @UseGuards(AuthGuard(), RolesGuard)
+  @HasRoles(NameRole.Customer)
   findPromotionCoursesCanViewByCourseId(
     @Param('courseId') courseId: string,
+    @Req() request: Request,
   ): Promise<PromotionCourse[]> {
     return this.promotionCourseService.getPromotionCoursesCanViewByCourseId(
       courseId,
+      request['user'] as User,
     );
   }
 }
