@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  ConflictException,
   Injectable,
   Logger,
   NotAcceptableException,
@@ -34,7 +35,7 @@ export class PromotionService {
     body: CreatePromotionRequest,
     user: User,
   ): Promise<void> {
-    this.checkPromotionBodyValid(body, 'createPromotion');
+    await this.checkPromotionBodyValid(body, 'createPromotion');
 
     let promotion = new Promotion();
     const { effectiveDate, expiredDate, ...restBody } = body;
@@ -93,7 +94,7 @@ export class PromotionService {
       throw new NotFoundException(`promotionId=${promotionId} is not found`);
     }
 
-    this.checkPromotionBodyValid(body, 'updatePromotion');
+    await this.checkPromotionBodyValid(body, 'updatePromotion');
 
     promotion = {
       ...promotion,
@@ -127,25 +128,33 @@ export class PromotionService {
       )
     ) {
       this.logger.error(
-        `method=${methodName}, effectiveDate=${body.effectiveDate} and expiredDate=${body.expiredDate} is not valid`,
+        `method=${methodName}, effectiveDate=${body.effectiveDate}(${new Date(
+          body.effectiveDate,
+        ).getTime()}) and expiredDate=${body.expiredDate}(${new Date(
+          body.effectiveDate,
+        ).getTime()}) is not valid`,
       );
+      // throw new BadRequestException(
+      //   `effectiveDate=${body.effectiveDate} and expiredDate=${body.expiredDate} is not valid`,
+      // );
       throw new BadRequestException(
-        `effectiveDate=${body.effectiveDate} and expiredDate=${body.expiredDate} is not valid`,
+        `Thời gian bắt đầu ${body.effectiveDate} nên nhỏ hơn ${body.expiredDate} thời gian kết thúc`,
       );
     }
 
-    if (!this.promotionRepository.getPromotionByCode(body.code)) {
+    if (await this.promotionRepository.getPromotionByCode(body.code)) {
       this.logger.error(
         `method=${methodName}, code=${body.code} is already exists`,
       );
-      throw new BadRequestException(`code=${body.code} is already exists`);
+      // throw new ConflictException(`code=${body.code} is already exists`);
+      throw new ConflictException(`code=${body.code} đã tồn tại`);
     }
 
     if (!this.checkAmountValid(body.amount)) {
       this.logger.error(
         `method=${methodName}, amount=${body.amount} is not valid`,
       );
-      throw new BadRequestException(`amount=${body.amount} is already exists`);
+      throw new BadRequestException(`amount=${body.amount} is not valid`);
     }
   }
 
@@ -154,7 +163,7 @@ export class PromotionService {
   }
 
   checkEffectiveAndExpireDateValid(effectiveDate: Date, expiredDate: Date) {
-    return effectiveDate < expiredDate;
+    return effectiveDate.getTime() < expiredDate.getTime();
   }
 
   checkAmountValid(amount: number) {
@@ -168,20 +177,32 @@ export class PromotionService {
       this.logger.error(
         `method=removePromotion, promotionId=${id} is not found`,
       );
+
       throw new NotFoundException(`promotionId=${id} is not found`);
     }
 
-    if (promotion.promotionCourses.length <= 0) {
-      await this.promotionRepository.removePromotion(promotion);
+    for (const promotionCourse of promotion.promotionCourses) {
+      if (
+        promotionCourse.cartItems.length > 0 ||
+        promotionCourse.orderDetails.length > 0
+      ) {
+        this.logger.error(
+          `method=removePromotion, PromotionCourse with id=${promotionCourse.id} has cartItems and orderDetails`,
+        );
+        throw new NotAcceptableException(
+          `Trong số các khóa học được giảm giá đã có trong giỏ hàng hay đã có khách hàng sử dụng`,
+        );
+      }
+    }
 
-      this.logger.log(`Promotion with id=${id} removed successfully`);
-    } else {
-      this.logger.error(
-        `method=removePromotion, Promotion with id=${id} has promotionCourses`,
-      );
-      throw new NotAcceptableException(
-        `Promotion with id=${id} has promotionCourses`,
+    for (const promotionCourse of promotion.promotionCourses) {
+      await this.promotionCourseRepository.removePromotionCourse(
+        promotionCourse,
       );
     }
+
+    await this.promotionRepository.removePromotion(promotion);
+
+    this.logger.log(`Promotion with id=${id} removed successfully`);
   }
 }

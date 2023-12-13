@@ -5,6 +5,7 @@ import { FindOptionsOrder, FindOptionsWhere, ILike, Repository } from 'typeorm';
 import { PageOptionsDto } from 'src/common/pagination/dto/pageOptionsDto';
 import SortField from './type/enum/SortField';
 import { GetCourseByInstructorRequest } from 'src/instructor/dto/request/get-course-by-instructor.request.dto';
+import { CourseStatus } from './type/enum/CourseStatus';
 
 @Injectable()
 export class CourseRepository {
@@ -157,6 +158,19 @@ export class CourseRepository {
 
   async getAllCourse() {
     return this.courseRepository.find({
+      relations: {
+        level: true,
+        category: true,
+        user: true,
+      },
+    });
+  }
+
+  async getAllCourseByStaff(status?: CourseStatus) {
+    return this.courseRepository.find({
+      where: {
+        status: status,
+      },
       relations: {
         level: true,
         category: true,

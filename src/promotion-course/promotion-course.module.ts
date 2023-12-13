@@ -8,6 +8,7 @@ import { PromotionCourseService } from './promotion-course.service';
 import { PromotionModule } from 'src/promotion/promotion.module';
 import { CourseModule } from 'src/course/course.module';
 import { AuthModule } from 'src/auth/auth.module';
+import { WinnerModule } from 'src/winner/winner.module';
 
 @Module({
   imports: [
@@ -19,6 +20,6 @@ import { AuthModule } from 'src/auth/auth.module';
   ],
   controllers: [PromotionCourseController],
   providers: [PromotionCourseRepository, PromotionCourseService],
-  exports: [PromotionCourseRepository],
+  exports: [PromotionCourseRepository, PromotionCourseService],
 })
 export class PromotionCourseModule {}

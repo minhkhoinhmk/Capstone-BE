@@ -23,7 +23,7 @@ export class PromotionRepository {
         active: true,
       },
       relations: {
-        promotionCourses: true,
+        promotionCourses: { course: true },
       },
     });
   }
@@ -53,7 +53,10 @@ export class PromotionRepository {
   async getPromotionById(id: string) {
     return this.promotionRepository.findOne({
       where: { id },
-      relations: { promotionCourses: true, user: true },
+      relations: {
+        promotionCourses: { cartItems: true, orderDetails: true, course: true },
+        user: true,
+      },
     });
   }
 
@@ -71,4 +74,6 @@ export class PromotionRepository {
   async removePromotion(promotion: Promotion): Promise<void> {
     await this.promotionRepository.remove(promotion);
   }
+
+  // getPromotio;
 }

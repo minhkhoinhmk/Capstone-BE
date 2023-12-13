@@ -14,6 +14,7 @@ import { CartItem } from 'src/cart-item/entity/cart-item.entity';
 import { Cart } from './entity/cart.entity';
 import { CourseService } from 'src/course/course.service';
 import { dateInVietnam } from 'src/utils/date-vietnam.util';
+import { CourseStatus } from 'src/course/type/enum/CourseStatus';
 
 @Injectable()
 export class CartService {
@@ -39,8 +40,8 @@ export class CartService {
 
     const course = await this.courseRepository.getCourseById(courseId);
 
-    if (!course || !course.active)
-      throw new BadRequestException('Course is not existing');
+    if (!course || !course.active || course.status !== CourseStatus.APPROVED)
+      throw new BadRequestException('Khóa học không tồn tại');
 
     if (this.isCourseExistCartItem(courseId, customer.cart.cartItems)) {
       this.logger.error(
@@ -118,7 +119,8 @@ export class CartService {
 
     customer.cart.cartItems = customer.cart.cartItems.filter((cartItem) => {
       const { course, promotionCourse } = cartItem;
-      const isCourseValid = course.active;
+      const isCourseValid =
+        course.active && course.status === CourseStatus.APPROVED;
 
       if (!isCourseValid) {
         messageErrors.push(`Khóa học ${course.title} không còn hiệu lực`);

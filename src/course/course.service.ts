@@ -305,8 +305,8 @@ export class CourseService {
     return { status, isRefund };
   }
 
-  async getAllCoursesForStaff(): Promise<Course[]> {
-    return await this.courseRepository.getAllCourse();
+  async getAllCoursesForStaff(status?: CourseStatus): Promise<Course[]> {
+    return await this.courseRepository.getAllCourseByStaff(status);
   }
 
   async setStatusForCourse(request: SetStatusRequest): Promise<void> {
@@ -434,11 +434,11 @@ export class CourseService {
         numsOfPreview > 1
       )
         msgErrors.push(
-          `Nếu Số lượng bài giảng nhỏ hơn 10 thì chỉ được xem trước 1 bài giảng`,
+          `Nếu Số lượng bài giảng nhỏ hơn hoặc bằng 10 thì chỉ được xem trước 1 bài giảng`,
         );
       else if (chapterLectures.length > 10 && numsOfPreview > 2)
         msgErrors.push(
-          `Nếu Số lượng bài giảng nhỏ hơn 10 thì chỉ được xem trước 2 bài giảng`,
+          `Nếu Số lượng bài giảng lớn hơn 10 thì chỉ được xem trước 2 bài giảng`,
         );
     }
 

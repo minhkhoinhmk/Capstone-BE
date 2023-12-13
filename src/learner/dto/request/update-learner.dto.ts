@@ -4,6 +4,11 @@ import { IsNotEmpty, IsString, MaxLength, MinLength } from 'class-validator';
 export class UpdateLearnerRequest {
   @IsString()
   @IsNotEmpty()
+  @ApiProperty({ type: String, description: 'userName' })
+  userName: string;
+
+  @IsString()
+  @IsNotEmpty()
   @ApiProperty({ type: String, description: 'First Name' })
   firstName: string;
 

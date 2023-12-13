@@ -78,17 +78,19 @@ export class RefundService {
           orderDetail.order.user.id,
         );
 
-      countLectureCompleted = await this.countCompletedLectureForLearner(
-        course,
-        learnerCourse.learner.id,
-      );
+      if (learnerCourse) {
+        countLectureCompleted = await this.countCompletedLectureForLearner(
+          course,
+          learnerCourse.learner.id,
+        );
 
-      if (
-        Math.floor(
-          (countLectureCompleted / course.chapterLectures.length) * 100,
-        ) > 20
-      )
-        isAvailableRefund = false;
+        if (
+          Math.floor(
+            (countLectureCompleted / course.chapterLectures.length) * 100,
+          ) > 20
+        )
+          isAvailableRefund = false;
+      }
     }
 
     if (!isAvailableRefund) {
@@ -250,22 +252,26 @@ export class RefundService {
         refund.orderDetail.order.user.id,
       );
 
-    const userLecturesOfLearner =
-      await this.userLectureRepository.getUserLectureByCourseAndLearner(
-        refund.orderDetail.course.id,
-        learnerCourse.learner.id,
-      );
+    let userLecturesOfLearner, courseFeedbackOfLearner;
+
+    if (learnerCourse) {
+      userLecturesOfLearner =
+        await this.userLectureRepository.getUserLectureByCourseAndLearner(
+          refund.orderDetail.course.id,
+          learnerCourse.learner.id,
+        );
+
+      courseFeedbackOfLearner =
+        await this.courseFeedbackRepository.checkCourseFeedbackExistedByLearner(
+          refund.orderDetail.course.id,
+          learnerCourse.learner.id,
+        );
+    }
 
     const courseFeedbackOfUser =
       await this.courseFeedbackRepository.checkCourseFeedbackExistedByUser(
         refund.orderDetail.course.id,
         refund.orderDetail.order.user.id,
-      );
-
-    const courseFeedbackOfLearner =
-      await this.courseFeedbackRepository.checkCourseFeedbackExistedByLearner(
-        refund.orderDetail.course.id,
-        learnerCourse.learner.id,
       );
 
     if (userLecturesOfLearner) {
@@ -341,17 +347,19 @@ export class RefundService {
               orderDetail.order.user.id,
             );
 
-          countLectureCompleted = await this.countCompletedLectureForLearner(
-            course,
-            learnerCourse.learner.id,
-          );
+          if (learnerCourse) {
+            countLectureCompleted = await this.countCompletedLectureForLearner(
+              course,
+              learnerCourse.learner.id,
+            );
 
-          if (
-            Math.floor(
-              (countLectureCompleted / course.chapterLectures.length) * 100,
-            ) > 20
-          )
-            isRefund = false;
+            if (
+              Math.floor(
+                (countLectureCompleted / course.chapterLectures.length) * 100,
+              ) > 20
+            )
+              isRefund = false;
+          }
         }
       }
     }

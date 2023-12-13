@@ -13,6 +13,8 @@ import { CourseMapper } from 'src/course/mapper/course.mapper';
 import { InstructorMapper } from './mapper/instructor.mapper';
 import { ChapterLectureModule } from 'src/chapter-lecture/chapter-lecture.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { PromotionModule } from 'src/promotion/promotion.module';
+import { PromotionCourseModule } from 'src/promotion-course/promotion-course.module';
 
 @Module({
   providers: [InstructorService, InstructorMapper, ConfigService],
@@ -29,6 +31,8 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
     CourseMapper,
     ChapterLectureModule,
     ConfigModule,
+    PromotionModule,
+    PromotionCourseModule,
   ],
 })
 export class InstructorModule {}
