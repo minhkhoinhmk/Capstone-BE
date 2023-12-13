@@ -40,8 +40,8 @@ export class CategoryRepository {
     });
   }
 
-  async saveCategory(category: Category): Promise<void> {
-    await this.categoryRepository.save(category);
+  async saveCategory(category: Category): Promise<Category> {
+    return await this.categoryRepository.save(category);
   }
 
   async removeCategory(category: Category): Promise<void> {

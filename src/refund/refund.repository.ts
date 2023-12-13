@@ -98,4 +98,11 @@ export class RefundRepository {
 
     return { count: count, entities: entities };
   }
+
+  async getRefundByOrderDetail(orderDetailId: string): Promise<Refund> {
+    return await this.refundRepository.findOne({
+      where: { orderDetail: { id: orderDetailId } },
+      relations: { orderDetail: true },
+    });
+  }
 }

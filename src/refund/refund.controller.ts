@@ -89,4 +89,12 @@ export class RefundController {
   approveRefund(@Param('id') id: string): Promise<void> {
     return this.refundService.approveRefund(id);
   }
+
+  @ApiOkResponse({ description: 'Check refund' })
+  @UseGuards(AuthGuard(), RolesGuard)
+  @HasRoles(NameRole.Customer)
+  @Get('/isRefund/:id')
+  isRefund(@Param('id') orderDetailId: string): Promise<boolean> {
+    return this.refundService.checkIsRefund(orderDetailId);
+  }
 }

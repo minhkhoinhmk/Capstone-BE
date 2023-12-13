@@ -262,4 +262,59 @@ export class RefundService {
       },
     });
   }
+
+  async checkIsRefund(orderDetailId: string): Promise<boolean> {
+    const refund = await this.refundRepository.getRefundByOrderDetail(
+      orderDetailId,
+    );
+    let isRefund = true;
+
+    if (refund) {
+      isRefund = false;
+    } else {
+      const orderDetail = await this.orderDetailRepository.getOrderDetailById(
+        orderDetailId,
+      );
+      const course = await this.courseRepository.getCourseById(
+        orderDetail.course.id,
+      );
+      let countLectureCompleted = await this.countCompletedLectureForCustomer(
+        course,
+        orderDetail.order.user.id,
+      );
+
+      if (this.isOverThirtyDaysAgo(orderDetail.order.insertedDate)) {
+        isRefund = false;
+      } else {
+        if (
+          Math.floor(
+            (countLectureCompleted / course.chapterLectures.length) * 100,
+          ) > 20
+        ) {
+          isRefund = false;
+        }
+
+        if (isRefund) {
+          const learnerCourse =
+            await this.learnerCourseRepository.getLearnerCourseByCourseAndCustomer(
+              course.id,
+              orderDetail.order.user.id,
+            );
+
+          countLectureCompleted = await this.countCompletedLectureForLearner(
+            course,
+            learnerCourse.learner.id,
+          );
+
+          if (
+            Math.floor(
+              (countLectureCompleted / course.chapterLectures.length) * 100,
+            ) > 20
+          )
+            isRefund = false;
+        }
+      }
+    }
+    return isRefund;
+  }
 }
