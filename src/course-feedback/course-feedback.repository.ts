@@ -88,4 +88,8 @@ export class CourseFeedbackRepository {
   async save(courseFeedback: CourseFeedback): Promise<void> {
     await this.courseFeedbackRepository.save(courseFeedback);
   }
+
+  async remove(courseFeedback: CourseFeedback): Promise<void> {
+    await this.courseFeedbackRepository.remove(courseFeedback);
+  }
 }

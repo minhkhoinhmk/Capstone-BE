@@ -105,4 +105,8 @@ export class UserLectureRepository {
       },
     });
   }
+
+  async remove(userLecture: UserLecture): Promise<void> {
+    await this.userLectureRepository.remove(userLecture);
+  }
 }

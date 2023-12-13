@@ -19,6 +19,7 @@ import { RefundResponse } from './dto/response/refund-response.dto';
 import { MailerService } from '@nestjs-modules/mailer';
 import { LearnerCourseRepository } from 'src/learner-course/learner-course.repository';
 import { dateInVietnam } from 'src/utils/date-vietnam.util';
+import { CourseFeedbackRepository } from 'src/course-feedback/course-feedback.repository';
 
 @Injectable()
 export class RefundService {
@@ -34,6 +35,7 @@ export class RefundService {
     private readonly refundMapper: RefundMapper,
     private mailsService: MailerService,
     private readonly learnerCourseRepository: LearnerCourseRepository,
+    private readonly courseFeedbackRepository: CourseFeedbackRepository,
   ) {}
 
   async createRefund(
@@ -236,21 +238,59 @@ export class RefundService {
 
     this.refundRepository.saveRefund(refund);
 
+    const userLecturesOfUser =
+      await this.userLectureRepository.getUserLectureByCourseAndCustomer(
+        refund.orderDetail.course.id,
+        refund.orderDetail.order.user.id,
+      );
+
     const learnerCourse =
       await this.learnerCourseRepository.getLearnerCourseByCourseAndCustomer(
         refund.orderDetail.course.id,
         refund.orderDetail.order.user.id,
       );
 
-    const orderDetail = await this.orderDetailRepository.getOrderDetailById(
-      refund.orderDetail.id,
-    );
+    const userLecturesOfLearner =
+      await this.userLectureRepository.getUserLectureByCourseAndLearner(
+        refund.orderDetail.course.id,
+        learnerCourse.learner.id,
+      );
 
-    learnerCourse.active = false;
-    orderDetail.active = false;
+    const courseFeedbackOfUser =
+      await this.courseFeedbackRepository.checkCourseFeedbackExistedByUser(
+        refund.orderDetail.course.id,
+        refund.orderDetail.order.user.id,
+      );
 
-    await this.learnerCourseRepository.saveLearnerCourse(learnerCourse);
-    await this.orderDetailRepository.saveOrderDetail(orderDetail);
+    const courseFeedbackOfLearner =
+      await this.courseFeedbackRepository.checkCourseFeedbackExistedByLearner(
+        refund.orderDetail.course.id,
+        learnerCourse.learner.id,
+      );
+
+    if (userLecturesOfLearner) {
+      for (const userLectureOfLearner of userLecturesOfLearner) {
+        await this.userLectureRepository.remove(userLectureOfLearner);
+      }
+    }
+
+    if (userLecturesOfUser) {
+      for (const userLectureOfUser of userLecturesOfUser) {
+        await this.userLectureRepository.remove(userLectureOfUser);
+      }
+    }
+
+    if (courseFeedbackOfUser) {
+      await this.courseFeedbackRepository.remove(courseFeedbackOfUser);
+    }
+
+    if (courseFeedbackOfLearner) {
+      await this.courseFeedbackRepository.remove(courseFeedbackOfLearner);
+    }
+
+    if (learnerCourse) {
+      await this.learnerCourseRepository.removeLearnerCourse(learnerCourse);
+    }
 
     await this.mailsService.sendMail({
       to: refund.orderDetail.order.user.email,

@@ -25,5 +25,6 @@ import { AuthModule } from 'src/auth/auth.module';
   ],
   controllers: [CourseFeedbackController],
   providers: [CourseFeedbackService, CourseFeedbackRepository],
+  exports: [CourseFeedbackRepository],
 })
 export class CourseFeedbackModule {}
