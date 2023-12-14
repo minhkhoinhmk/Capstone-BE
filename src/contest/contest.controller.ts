@@ -80,7 +80,7 @@ export class ContestController {
   })
   @ApiPaginatedResponse(ViewContestResponse)
   @UseGuards(AuthGuard(), RolesGuard)
-  @HasRoles(NameRole.Customer)
+  @HasRoles(NameRole.Customer, NameRole.Learner)
   @HttpCode(200)
   async getContests(
     @Body() request: FilterContestRequest,
@@ -109,7 +109,7 @@ export class ContestController {
     description: 'Get Contests By Id Successfully',
   })
   @UseGuards(AuthGuard(), RolesGuard)
-  @HasRoles(NameRole.Staff, NameRole.Customer)
+  @HasRoles(NameRole.Staff, NameRole.Customer, NameRole.Learner)
   async getContestsById(@Param('id') id: string): Promise<ViewContestResponse> {
     return await this.contestService.getContestById(id);
   }
