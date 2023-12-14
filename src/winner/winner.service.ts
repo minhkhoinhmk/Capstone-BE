@@ -10,6 +10,7 @@ import { PromotionService } from 'src/promotion/promotion.service';
 import { User } from 'src/user/entity/user.entity';
 import { VoteService } from 'src/vote/vote.service';
 import { UserRepository } from 'src/user/user.repository';
+import { MailerService } from '@nestjs-modules/mailer';
 
 @Injectable()
 export class WinnerService {
@@ -23,6 +24,7 @@ export class WinnerService {
     private readonly mapper: WinnerMapper,
     private readonly voteService: VoteService,
     private readonly userRepository: UserRepository,
+    private mailsService: MailerService,
   ) {}
 
   @Cron(CronExpression.EVERY_SECOND)
@@ -56,6 +58,18 @@ export class WinnerService {
           winner.active = true;
 
           await this.winnerRepository.saveWinner(winner);
+
+          await this.mailsService.sendMail({
+            to: customerDrawing.user.email,
+            subject: 'Kết quả cuộc thi',
+            template: './winner',
+            context: {
+              CONTEST: customerDrawing.contest.title,
+              POSITION: winner.position,
+              PERCENT: winner.promotion.discountPercent,
+              PROMOTION: winner.promotion.code,
+            },
+          });
         }
       }
 

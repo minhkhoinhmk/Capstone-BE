@@ -31,6 +31,7 @@ export class WinnerRepository {
   async getWinnerByPostionAndContest(contestId: string, position: number) {
     return this.winnerRepository.findOne({
       where: { position, contest: { id: contestId } },
+      relations: { promotion: true },
     });
   }
 
@@ -40,7 +41,7 @@ export class WinnerRepository {
 
   async getWinnerByContestId(contestId: string): Promise<Winner[]> {
     return await this.winnerRepository.find({
-      where: { customerDrawing: { contest: { id: contestId } }, active: true },
+      where: { customerDrawing: { contest: { id: contestId } } },
       relations: {
         customerDrawing: { contest: true, user: true },
         promotion: true,

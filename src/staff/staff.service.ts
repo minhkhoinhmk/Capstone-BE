@@ -71,4 +71,14 @@ export class StaffService {
 
     await this.userRepository.save(staff);
   }
+
+  async reactivateStaff(staffId: string): Promise<void> {
+    const staff = await this.userRepository.getUserById(staffId);
+
+    if (staff.active === false) {
+      staff.active = true;
+
+      await this.userRepository.save(staff);
+    }
+  }
 }

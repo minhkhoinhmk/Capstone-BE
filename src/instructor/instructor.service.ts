@@ -37,10 +37,7 @@ import { UpdateInstructorProfileRequest } from './dto/request/update-profile-req
 import { GetCourseByInstructorRequest } from './dto/request/get-course-by-instructor.request.dto';
 import { ChapterLectureRepository } from 'src/chapter-lecture/chapter-lecture.repository';
 import { ConfigService } from '@nestjs/config';
-import { ChapterLecture } from 'src/chapter-lecture/entity/chapter-lecture.entity';
 import { PromotionRepository } from 'src/promotion/promotion.repository';
-import moment from 'moment';
-import { isWithinInterval, parseISO } from 'date-fns';
 import { PromotionCourseService } from 'src/promotion-course/promotion-course.service';
 
 @Injectable()
@@ -107,8 +104,6 @@ export class InstructorService {
           CONTENT: 'Thông tin đang chờ xét duyệt',
         },
       });
-
-      console.log('alo 21356');
 
       this.logger.log(
         `method=uploadCertification, uploadCertification succeed`,

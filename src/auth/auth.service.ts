@@ -168,7 +168,6 @@ export class AuthService {
         await this.userRepository.save(user);
       }
     } else {
-      // throw new NotFoundException(`otp ${otp} not found`);
       throw new NotFoundException(`Mã otp ${otp} không đúng`);
     }
   }
