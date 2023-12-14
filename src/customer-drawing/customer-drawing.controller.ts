@@ -58,7 +58,7 @@ export class CustomerDrawingController {
 
   @Get('/submit/:id')
   @UseGuards(AuthGuard(), RolesGuard)
-  @HasRoles(NameRole.Customer)
+  @HasRoles(NameRole.Customer, NameRole.Learner)
   @ApiOkResponse({
     description: 'Check Customer Drawing Submitted Successfully',
   })
@@ -111,7 +111,7 @@ export class CustomerDrawingController {
   })
   @ApiPaginatedResponse(ViewCustomerDrawingResponse)
   @UseGuards(AuthGuard(), RolesGuard)
-  @HasRoles(NameRole.Customer, NameRole.Staff)
+  @HasRoles(NameRole.Customer, NameRole.Staff, NameRole.Learner)
   @HttpCode(200)
   async getCustomerDrawingsByContest(
     @Req() req: Request,
@@ -160,7 +160,7 @@ export class CustomerDrawingController {
   })
   @ApiPaginatedResponse(ViewCustomerDrawingResponse)
   @UseGuards(AuthGuard(), RolesGuard)
-  @HasRoles(NameRole.Customer)
+  @HasRoles(NameRole.Customer, NameRole.Learner)
   @HttpCode(200)
   async getCustomerDrawings(
     @Body() request: FilterCustomerDrawingRequest,
