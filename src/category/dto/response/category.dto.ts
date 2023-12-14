@@ -18,4 +18,7 @@ export class CategoryDto {
 
   @ApiProperty({ type: Date, description: 'updated date' })
   updatedDate: Date;
+
+  @ApiProperty({ type: String, description: 'thumbnailURL' })
+  thumbnailUrl: string;
 }

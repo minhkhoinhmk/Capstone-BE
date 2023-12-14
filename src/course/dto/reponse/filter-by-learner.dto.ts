@@ -57,4 +57,11 @@ export class FilterCourseByLearnerResponse {
   @ApiProperty()
   @Expose()
   isCertified: boolean;
+
+  @Expose()
+  ratedStar: number | null;
+
+  @ApiProperty()
+  @Expose()
+  feedbackDescription: string | null;
 }

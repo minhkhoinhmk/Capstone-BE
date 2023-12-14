@@ -156,6 +156,25 @@ export class CourseRepository {
     return { count: count, entities: entities };
   }
 
+  async getCourseByInstructorIdAndCourseId(
+    instructorId: string,
+    courseId: string,
+  ): Promise<Course> {
+    const course = await this.courseRepository.findOne({
+      where: {
+        id: courseId,
+        user: {
+          id: instructorId,
+        },
+      },
+      relations: {
+        user: true,
+      },
+    });
+
+    return course;
+  }
+
   async getAllCourse() {
     return this.courseRepository.find({
       relations: {

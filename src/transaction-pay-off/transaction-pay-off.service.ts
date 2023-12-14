@@ -46,8 +46,6 @@ export class TransactionPayOffService {
 
     const user = await this.userRepository.getUserById(instructorId);
 
-    console.log(user);
-
     if (!user) {
       throw new NotFoundException(
         `Instructor with ID ${instructorId} not found`,

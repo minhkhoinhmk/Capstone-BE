@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { CourseFeedback } from './entity/course-feedbacl.entity';
 import { CourseFeedbackController } from './course-feedback.controller';
@@ -14,14 +14,14 @@ import { AuthModule } from 'src/auth/auth.module';
 
 @Module({
   imports: [
+    forwardRef(() => AuthModule),
     TypeOrmModule.forFeature([CourseFeedback]),
     RoleModule,
     LearnerCourseModule,
     OrderModule,
-    LearnerModule,
     UserModule,
-    CourseModule,
-    AuthModule,
+    forwardRef(() => CourseModule),
+    forwardRef(() => LearnerModule),
   ],
   controllers: [CourseFeedbackController],
   providers: [CourseFeedbackService, CourseFeedbackRepository],

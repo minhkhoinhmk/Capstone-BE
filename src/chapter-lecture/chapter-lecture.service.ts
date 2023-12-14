@@ -1,4 +1,9 @@
-import { BadRequestException, Injectable, Logger } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  Logger,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { ChapterLectureRepository } from './chapter-lecture.repository';
 import { ChapterLecture } from './entity/chapter-lecture.entity';
 import { LearnerChapterResponse } from './dto/response/learner-chapter-reponse.dto';
@@ -16,6 +21,7 @@ import { S3Service } from 'src/s3/s3.service';
 import { VideoService } from 'src/video/video.service';
 import { v4 as uuidv4 } from 'uuid';
 import { ConfigService } from '@nestjs/config';
+import { InstructorChapterResponse } from './dto/response/instructor-chapter-reponse.dto';
 
 @Injectable()
 export class ChapterLectureService {
@@ -103,6 +109,31 @@ export class ChapterLectureService {
     }
 
     return learnerChapterResponse;
+  }
+
+  async getChapterLectureByInstructor(
+    userId: string,
+    courseId: string,
+  ): Promise<ChapterLecture[]> {
+    if (
+      !(await this.courseRepository.getCourseByInstructorIdAndCourseId(
+        userId,
+        courseId,
+      ))
+    ) {
+      this.logger.error(
+        `method=getChapterLectureByInstructor, courseId=${courseId} and userId=${userId} not found`,
+      );
+      throw new UnauthorizedException(`Khóa học này không phải của bạn`);
+    }
+
+    const chapterLectures =
+      await this.chapterLectureRepository.getChapterLectureByInstructorIdAndCourseId(
+        courseId,
+        userId,
+      );
+
+    return chapterLectures;
   }
 
   async checkChapterIsCompletedForLearner(

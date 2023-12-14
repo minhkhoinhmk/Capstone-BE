@@ -162,4 +162,15 @@ export class PostService {
       this.logger.log(`method=uploadThumbnail, error: ${error.message}`);
     }
   }
+
+  async deletePost(postId: string): Promise<void> {
+    const post = await this.postRepository.getPostById(postId);
+
+    if (!post) {
+      this.logger.error(`method=updatePost, postId=${postId} is not found`);
+      throw new BadRequestException(`postId=${postId} is not found`);
+    }
+
+    await this.postRepository.deletePost(post);
+  }
 }

@@ -65,6 +65,19 @@ export class ChapterLectureController {
     );
   }
 
+  @Get('/courses/instructor/study')
+  @UseGuards(AuthGuard(), RolesGuard)
+  @HasRoles(NameRole.Instructor)
+  async getChapterLectureByInstructor(
+    @Req() request: Request,
+    @Query('courseId') courseId: string,
+  ): Promise<ChapterLecture[]> {
+    return await this.chapterLectureService.getChapterLectureByInstructor(
+      request['user']['id'],
+      courseId,
+    );
+  }
+
   @Post()
   @UseGuards(AuthGuard(), RolesGuard)
   @HasRoles(NameRole.Instructor)

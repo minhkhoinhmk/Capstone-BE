@@ -24,6 +24,20 @@ export class ChapterLectureRepository {
     return chapterLectures;
   }
 
+  async getChapterLectureByInstructorIdAndCourseId(
+    courseId: string,
+    instructorId: string,
+  ): Promise<ChapterLecture[]> {
+    const chapterLectures = await this.chapterLectureRepository.find({
+      where: {
+        course: { id: courseId, user: { id: instructorId } },
+        active: true,
+      },
+    });
+
+    return chapterLectures;
+  }
+
   async getChapterLectureByVideo(video: string): Promise<ChapterLecture> {
     const chapterLecture = await this.chapterLectureRepository.findOne({
       where: { video },

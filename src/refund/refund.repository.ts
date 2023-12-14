@@ -33,8 +33,13 @@ export class RefundRepository {
     return this.refundRepository.save(refund);
   }
 
-  async getRefunds(): Promise<{ count: number; entities: Refund[] }> {
+  async getRefunds(
+    isApproved: boolean | undefined,
+  ): Promise<{ count: number; entities: Refund[] }> {
     const entities = await this.refundRepository.find({
+      where: {
+        isApproved,
+      },
       relations: {
         orderDetail: {
           course: true,

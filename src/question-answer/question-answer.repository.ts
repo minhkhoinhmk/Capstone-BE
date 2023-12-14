@@ -49,7 +49,7 @@ export class QuestionAnswerRepository {
       order: findOptionsOrders,
       relations: {
         questionTopic: true,
-        user: true,
+        user: { role: true },
         learner: true,
       },
     };
@@ -83,7 +83,7 @@ export class QuestionAnswerRepository {
   async getQuestionAnswerById(questionAnswerId: string) {
     return this.questionAnswerRepository.findOne({
       where: { id: questionAnswerId },
-      relations: { questionTopic: true, user: true, learner: true },
+      relations: { questionTopic: true, user: { role: true }, learner: true },
     });
   }
 }

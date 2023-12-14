@@ -10,6 +10,7 @@ import { UserModule } from 'src/user/user.module';
 import { CourseModule } from 'src/course/course.module';
 import { LearnerCourseModule } from 'src/learner-course/learner-course.module';
 import { UserLectureModule } from 'src/user-lecture/user-lecture.module';
+import { CourseFeedbackModule } from 'src/course-feedback/course-feedback.module';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { UserLectureModule } from 'src/user-lecture/user-lecture.module';
     CourseModule,
     LearnerCourseModule,
     UserLectureModule,
+    CourseFeedbackModule,
   ],
   providers: [LearnerService, LearnerRepository],
   controllers: [LearnerController],

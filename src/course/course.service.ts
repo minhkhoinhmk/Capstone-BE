@@ -26,6 +26,7 @@ import { LearnerRepository } from 'src/learner/learner.repository';
 import { UserRepository } from 'src/user/user.repository';
 import { LearnerCourseRepository } from 'src/learner-course/learner-course.repository';
 import { CourseLearnStatus } from './type/enum/CourseLearnStatus';
+import { CourseFeedbackRepository } from 'src/course-feedback/course-feedback.repository';
 
 @Injectable()
 export class CourseService {
@@ -38,6 +39,7 @@ export class CourseService {
     private mailsService: MailerService,
     private userLectureRepository: UserLectureRepository,
     private learnerCourseRepository: LearnerCourseRepository,
+    private courseFeedbackRepository: CourseFeedbackRepository,
   ) {}
 
   async searchAndFilter(
@@ -221,6 +223,14 @@ export class CourseService {
       for (const courseId of courseIds) {
         const course = await this.courseRepository.getCourseById(courseId);
         let isCertified = false;
+        let isFeedback = false;
+
+        const courseFeedback =
+          await this.courseFeedbackRepository.checkCourseFeedbackExistedByUser(
+            courseId,
+            userId,
+          );
+        if (courseFeedback) isFeedback = true;
 
         for (const achievement of course.achievements) {
           if (achievement.user.id === userId) {
@@ -248,6 +258,8 @@ export class CourseService {
                   (completedCount / course.chapterLectures.length) * 100,
                 ),
             isCertified,
+            isFeedback ? courseFeedback.ratedStar : null,
+            isFeedback ? courseFeedback.description : null,
           ),
         );
 
@@ -271,7 +283,6 @@ export class CourseService {
       );
     if (status === CourseLearnStatus.NOT_LEARNING)
       return response.filter((courseLearn) => {
-        console.log(courseLearn.completedPercent);
         return courseLearn.completedPercent === 0;
       });
     return response;
@@ -290,7 +301,6 @@ export class CourseService {
 
   async checkCourseIsOwnedByCourseId(courseId: string, user: User) {
     let status = false;
-    // let isRefund = false;
     const orders = await this.orderRepository.getCoursesByUserId(user.id);
 
     for (const order of orders)
@@ -456,23 +466,34 @@ export class CourseService {
   }
 
   async checkCourseAndUserIsValid(
-    userId: string,
+    user: User,
     courseId: string,
   ): Promise<{ status: boolean }> {
+    if (user.role?.name === NameRole.Instructor) {
+      const course =
+        await this.courseRepository.getCourseByInstructorIdAndCourseId(
+          user.id,
+          courseId,
+        );
+
+      if (course) return { status: true };
+      return { status: false };
+    }
+
     const order = await this.orderRepository.checkOrderExistedByUserAndCourse(
       courseId,
-      userId,
+      user.id,
     );
-    const leanerCourse =
-      await this.learnerCourseRepository.getLearnerCourseByCourseAndLearner(
-        courseId,
-        userId,
-      );
 
     if (order) {
       return { status: true };
     } else {
-      if (leanerCourse) {
+      if (
+        await this.learnerCourseRepository.getLearnerCourseByCourseAndLearner(
+          courseId,
+          user.id,
+        )
+      ) {
         return { status: true };
       } else {
         return { status: false };

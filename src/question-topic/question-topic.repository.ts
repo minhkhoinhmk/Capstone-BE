@@ -57,7 +57,7 @@ export class QuestionTopicRepository {
       order: findOptionsOrders,
       relations: {
         chapterLecture: true,
-        user: true,
+        user: { role: true },
         learner: true,
         questionAnswers: true,
       },
@@ -93,7 +93,7 @@ export class QuestionTopicRepository {
   async getQuestionTopicById(questionTopicId: string) {
     return this.questionTopicRepository.findOne({
       where: { id: questionTopicId },
-      relations: { chapterLecture: true, user: true, learner: true },
+      relations: { chapterLecture: true, user: { role: true }, learner: true },
     });
   }
 }

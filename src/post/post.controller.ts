@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   Param,
   Patch,
@@ -103,5 +104,15 @@ export class PostController {
         postId,
       );
     }
+  }
+
+  @Delete(':id')
+  @UseGuards(AuthGuard(), RolesGuard)
+  @HasRoles(NameRole.Staff)
+  async deletePost(
+    @Param('id') id: string,
+    @Req() request: Request,
+  ): Promise<void> {
+    return await this.postService.deletePost(id);
   }
 }

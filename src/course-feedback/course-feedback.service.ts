@@ -18,8 +18,10 @@ import { LearnerCourseRepository } from 'src/learner-course/learner-course.repos
 import { User } from 'src/user/entity/user.entity';
 import { LearnerRepository } from 'src/learner/learner.repository';
 import { UserRepository } from 'src/user/user.repository';
-import { CreateCourseFeedbackRequest } from './dto/request/create-course-feedback-request.dto';
+import { UpdateCourseFeedbackRequest } from './dto/request/update-course-feedback-request.dto';
 import { CourseRepository } from 'src/course/course.repository';
+import { Learner } from 'src/learner/entity/learner.entity';
+import { CreateCourseFeedbackRequest } from './dto/request/create-course-feedback-request.dto';
 
 @Injectable()
 export class CourseFeedbackService {
@@ -162,5 +164,36 @@ export class CourseFeedbackService {
         }
       }
     }
+  }
+
+  async updateCourseFeedback(
+    courseId: string,
+    user: User | Learner,
+    body: UpdateCourseFeedbackRequest,
+  ): Promise<void> {
+    const feedback =
+      user.role === NameRole.Learner
+        ? await this.courseFeedbackRepository.checkCourseFeedbackExistedByLearner(
+            courseId,
+            user.id,
+          )
+        : await this.courseFeedbackRepository.checkCourseFeedbackExistedByUser(
+            courseId,
+            user.id,
+          );
+
+    if (feedback === null) {
+      this.logger.error(
+        `method=updateCourseFeedback, Course feedback with courseId ${courseId} and userId ${user.id} not found `,
+      );
+      throw new NotFoundException(
+        `Bạn chưa đánh giá khóa học này nên không thể cập nhật đánh giá được`,
+      );
+    }
+
+    feedback.description = body.description;
+    feedback.ratedStar = body.ratedStar;
+
+    await this.courseFeedbackRepository.save(feedback);
   }
 }
