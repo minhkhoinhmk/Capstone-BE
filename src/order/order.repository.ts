@@ -8,6 +8,7 @@ import { OrderDetailRepository } from 'src/order-detail/order-detail.repository'
 import { TransactionRepository } from 'src/transaction/transaction.repository';
 import { NameOrderStatus } from './enum/name-order-status.enum';
 import { GetOrderByUserRequest } from './dto/request/get-order-by-user.request.dto';
+import { TransactionStatus } from 'src/transaction/enum/transaction.enum';
 
 @Injectable()
 export class OrderRepository {
@@ -79,6 +80,9 @@ export class OrderRepository {
         user: { id: userId },
         active: true,
         orderStatus: NameOrderStatus.Success,
+        transaction: {
+          status: TransactionStatus.Success,
+        },
       },
       relations: { orderDetails: { course: true, refund: true } },
     });

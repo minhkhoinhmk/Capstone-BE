@@ -290,19 +290,21 @@ export class CourseService {
 
   async checkCourseIsOwnedByCourseId(courseId: string, user: User) {
     let status = false;
-    let isRefund = false;
+    // let isRefund = false;
     const orders = await this.orderRepository.getCoursesByUserId(user.id);
 
     for (const order of orders)
       order.orderDetails.forEach((orderDetail) => {
-        if (orderDetail.course.id === courseId) {
+        if (
+          orderDetail.course.id === courseId &&
+          (orderDetail.refund === null ||
+            orderDetail.refund.isApproved === false)
+        ) {
           status = true;
-          if (orderDetail.refund && orderDetail.refund.isApproved)
-            isRefund = true;
         }
       });
 
-    return { status, isRefund };
+    return { status };
   }
 
   async getAllCoursesForStaff(status?: CourseStatus): Promise<Course[]> {
