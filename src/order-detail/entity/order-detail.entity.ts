@@ -38,13 +38,6 @@ export class OrderDetail {
   @Column({ nullable: true })
   note: string | null;
 
-  @ApiProperty({
-    type: String,
-    description: 'Refund reason of the order detail',
-  })
-  @Column({ nullable: true })
-  refundReason: string | null;
-
   @ApiProperty({ type: Boolean, description: 'Active of the order detail' })
   @Column()
   active: boolean;
