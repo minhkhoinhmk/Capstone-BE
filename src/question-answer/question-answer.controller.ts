@@ -44,7 +44,7 @@ export class QuestionAnswerController {
 
   @Post()
   @UseGuards(AuthGuard(), RolesGuard)
-  @HasRoles(NameRole.Customer, NameRole.Learner)
+  @HasRoles(NameRole.Customer, NameRole.Learner, NameRole.Instructor)
   @ApiCreatedResponse({
     description: 'Created question answer Successfully',
   })

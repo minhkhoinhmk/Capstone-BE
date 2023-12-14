@@ -79,6 +79,7 @@ export class AuthService {
         email: valid ? emailOrUsername : '',
         role:
           user.role === NameRole.Learner ? NameRole.Learner : user.role.name,
+        fullName: `${user.lastName} ${user.middleName} ${user.firstName}`,
       };
 
       const accessToken = this.jwtService.sign(payload);

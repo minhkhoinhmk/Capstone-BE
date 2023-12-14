@@ -121,14 +121,32 @@ export class OrderRepository {
     courseId: string,
     userId: string,
   ): Promise<Order> {
-    return this.orderRepository.findOne({
-      where: {
-        orderDetails: { course: { id: courseId }, active: true },
-        user: { id: userId },
-      },
+    const orders = await this.orderRepository.find({
+      where: [
+        {
+          orderDetails: { course: { id: courseId } },
+          user: { id: userId },
+          orderStatus: NameOrderStatus.Success,
+          transaction: {
+            status: TransactionStatus.Success,
+          },
+        },
+      ],
       relations: {
-        orderDetails: true,
+        orderDetails: { refund: true },
       },
     });
+
+    for (const order of orders) {
+      for (const orderDetail of order.orderDetails) {
+        if (
+          orderDetail.refund === null ||
+          orderDetail.refund.isApproved === false
+        )
+          return order;
+      }
+    }
+
+    return null;
   }
 }

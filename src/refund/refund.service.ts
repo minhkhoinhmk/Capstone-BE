@@ -191,8 +191,10 @@ export class RefundService {
     return count;
   }
 
-  async getRefunds(): Promise<RefundResponse[]> {
-    const { count, entities } = await this.refundRepository.getRefunds();
+  async getRefunds(isApproved: boolean | undefined): Promise<RefundResponse[]> {
+    const { count, entities } = await this.refundRepository.getRefunds(
+      isApproved,
+    );
 
     const responses: RefundResponse[] = [];
 
@@ -239,6 +241,12 @@ export class RefundService {
     refund.isApproved = true;
 
     this.refundRepository.saveRefund(refund);
+
+    // const orderDetail = await this.orderDetailRepository.getOrderDetailById(
+    //   refund.orderDetail.id,
+    // );
+    // orderDetail.active = false;
+    // await this.orderDetailRepository.saveOrderDetail(orderDetail);
 
     const userLecturesOfUser =
       await this.userLectureRepository.getUserLectureByCourseAndCustomer(

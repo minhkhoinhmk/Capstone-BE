@@ -50,7 +50,6 @@ export class PostRepository {
         user: true,
       },
     };
-    console.log(findManyOptions, pageOptions);
 
     return {
       count: await this.postRepository.count(findManyOptions),
@@ -67,5 +66,9 @@ export class PostRepository {
       where: { id: postId },
       relations: { user: true },
     });
+  }
+
+  async deletePost(post: Post): Promise<Post> {
+    return this.postRepository.remove(post);
   }
 }

@@ -45,7 +45,7 @@ export class QuestionTopicController {
 
   @Patch('/rating/:questionTopicId')
   @UseGuards(AuthGuard(), RolesGuard)
-  @HasRoles(NameRole.Customer, NameRole.Learner)
+  @HasRoles(NameRole.Customer, NameRole.Learner, NameRole.Instructor)
   @ApiCreatedResponse({
     description: 'Rating question topic Successfully',
   })
@@ -57,7 +57,7 @@ export class QuestionTopicController {
 
   @Post(':chapterLectureId')
   @UseGuards(AuthGuard(), RolesGuard)
-  @HasRoles(NameRole.Customer, NameRole.Learner)
+  @HasRoles(NameRole.Customer, NameRole.Learner, NameRole.Instructor)
   @ApiCreatedResponse({
     description: 'Created question topic Successfully',
   })

@@ -10,6 +10,7 @@ import { OrderModule } from 'src/order/order.module';
 import { CourseMapper } from './mapper/course.mapper';
 import { UserLectureModule } from 'src/user-lecture/user-lecture.module';
 import { LearnerCourseModule } from 'src/learner-course/learner-course.module';
+import { CourseFeedbackModule } from 'src/course-feedback/course-feedback.module';
 
 @Module({
   imports: [
@@ -19,6 +20,8 @@ import { LearnerCourseModule } from 'src/learner-course/learner-course.module';
     forwardRef(() => OrderModule),
     forwardRef(() => UserLectureModule),
     forwardRef(() => LearnerCourseModule),
+    // forwardRef(() => CourseFeedbackModule),
+    CourseFeedbackModule,
   ],
   providers: [CourseService, CourseRepository, CourseMapper],
   controllers: [CourseController],

@@ -283,10 +283,6 @@ export class InstructorService {
         currPromotion.id !== promotion.id &&
         currPromotion.discountPercent === promotion.discountPercent
       ) {
-        console.log(
-          currPromotion.id !== promotion.id &&
-            currPromotion.discountPercent === promotion.discountPercent,
-        );
         const isValid = !this.promotionCourseService.checkOverlapTimes(
           currPromotion.effectiveDate,
           currPromotion.expiredDate,

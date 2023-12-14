@@ -23,8 +23,6 @@ import { HasRoles } from 'src/auth/roles.decorator';
 import { NameRole } from 'src/role/enum/name-role.enum';
 import { CreateRefundRequest } from './dto/request/create-refund-request.dto';
 import { RefundResponse } from './dto/response/refund-response.dto';
-import { PageDto } from 'src/common/pagination/dto/pageDto';
-import { PageOptionsDto } from 'src/common/pagination/dto/pageOptionsDto';
 import { ApiPaginatedResponse } from 'src/common/decorator/api-pagination-response';
 
 @Controller('refund')
@@ -58,8 +56,11 @@ export class RefundController {
   @UseGuards(AuthGuard(), RolesGuard)
   @HasRoles(NameRole.Admin)
   @ApiPaginatedResponse(RefundResponse)
-  getRefunds(): Promise<RefundResponse[]> {
-    return this.refundService.getRefunds();
+  getRefunds(
+    @Query('status') status: 'approved' | 'not-approved' | undefined,
+  ): Promise<RefundResponse[]> {
+    const isApproved = status === undefined ? undefined : status === 'approved';
+    return this.refundService.getRefunds(isApproved);
   }
 
   @ApiOkResponse({

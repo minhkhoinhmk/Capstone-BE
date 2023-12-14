@@ -70,7 +70,6 @@ export class CourseController {
     @Req() request: Request,
     @Query('status') status: CourseLearnStatus,
   ): Promise<FilterCourseByCustomerResponse[]> {
-    console.log(status);
     return await this.courseService.getCoursesByUserId(
       request['user']['id'],
       status,
@@ -115,13 +114,13 @@ export class CourseController {
 
   @Get('/user/valid')
   @UseGuards(AuthGuard(), RolesGuard)
-  @HasRoles(NameRole.Customer, NameRole.Learner)
+  @HasRoles(NameRole.Customer, NameRole.Learner, NameRole.Instructor)
   checkCourseAndUserValid(
     @Query('courseId') courseId: string,
     @Req() request: Request,
   ): Promise<{ status: boolean }> {
     return this.courseService.checkCourseAndUserIsValid(
-      request['user']['id'],
+      request['user'] as User,
       courseId,
     );
   }

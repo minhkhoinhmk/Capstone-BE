@@ -81,7 +81,7 @@ export class User {
   @Expose()
   email: string;
 
-  @Exclude()
+  // @Exclude()
   @Column()
   @Expose()
   active: boolean;

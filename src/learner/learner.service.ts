@@ -23,6 +23,7 @@ import { UpdateLearnerRequest } from './dto/request/update-learner.dto';
 import { ChangePasswordLearnerRequest } from './dto/request/change-password-learner.request.dto';
 import * as bcrypt from 'bcrypt';
 import { hashPassword } from 'src/utils/hash-password.util';
+import { CourseFeedbackRepository } from 'src/course-feedback/course-feedback.repository';
 
 @Injectable()
 export class LearnerService {
@@ -36,6 +37,7 @@ export class LearnerService {
     private courserMapper: CourseMapper,
     private courseRepository: CourseRepository,
     private userLectureRepository: UserLectureRepository,
+    private courseFeedbackRepository: CourseFeedbackRepository,
   ) {}
 
   async createLearner(
@@ -157,6 +159,14 @@ export class LearnerService {
         leanerCourse.course.id,
       );
       let isCertified = false;
+      let isFeedback = false;
+
+      const courseFeedback =
+        await this.courseFeedbackRepository.checkCourseFeedbackExistedByLearner(
+          leanerCourse.course.id,
+          userId,
+        );
+      if (courseFeedback) isFeedback = true;
 
       for (const achievement of course.achievements) {
         if (achievement.user.id === userId) {
@@ -180,6 +190,8 @@ export class LearnerService {
           course,
           Math.floor((completedCount / course.chapterLectures.length) * 100),
           isCertified,
+          isFeedback ? courseFeedback.ratedStar : null,
+          isFeedback ? courseFeedback.description : null,
         ),
       );
 

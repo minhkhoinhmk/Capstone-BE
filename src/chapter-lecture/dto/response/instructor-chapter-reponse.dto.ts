@@ -1,10 +1,14 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Expose } from 'class-transformer';
 
-export class FilterCourseByCustomerResponse {
+export class InstructorChapterResponse {
   @ApiProperty()
   @Expose()
   id: string;
+
+  @ApiProperty()
+  @Expose()
+  index: number;
 
   @ApiProperty()
   @Expose()
@@ -16,15 +20,11 @@ export class FilterCourseByCustomerResponse {
 
   @ApiProperty()
   @Expose()
-  price: number;
+  insertedDate: Date;
 
   @ApiProperty()
   @Expose()
-  shortDescription: string;
-
-  @ApiProperty()
-  @Expose()
-  prepareMaterial: string;
+  updatedDate: Date;
 
   @ApiProperty()
   @Expose()
@@ -32,37 +32,21 @@ export class FilterCourseByCustomerResponse {
 
   @ApiProperty()
   @Expose()
-  totalChapter: number;
+  resource: string;
 
   @ApiProperty()
   @Expose()
-  publishedDate: Date;
+  video: string;
 
   @ApiProperty()
   @Expose()
-  totalBought: number;
+  totalContentLength: number;
 
   @ApiProperty()
   @Expose()
-  thumbnailUrl: string;
+  isPreviewed: boolean;
 
   @ApiProperty()
   @Expose()
   active: boolean;
-
-  @ApiProperty()
-  @Expose()
-  completedPercent: number | null;
-
-  @ApiProperty()
-  @Expose()
-  isCertified: boolean;
-
-  @ApiProperty()
-  @Expose()
-  ratedStar: number | null;
-
-  @ApiProperty()
-  @Expose()
-  feedbackDescription: string | null;
 }

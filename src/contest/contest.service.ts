@@ -42,8 +42,8 @@ export class ContestService {
     const staff = await this.userRepository.getUserById(staffId);
 
     if (
-      new Date(request.startedDate).getDate() >=
-      new Date(request.expiredDate).getDate()
+      new Date(request.startedDate).getTime() >=
+      new Date(request.expiredDate).getTime()
     ) {
       throw new InternalServerErrorException(
         'Ngày bắt đầu phải bé hơn ngày hết hạn',
@@ -52,7 +52,7 @@ export class ContestService {
 
     let contest: Contest;
 
-    if (new Date(request.startedDate).getDate() > new Date().getDate()) {
+    if (new Date(request.startedDate).getTime() > new Date().getTime()) {
       contest = await this.contestRepository.createContest(
         request,
         ContestStatus.PENDING,
@@ -208,7 +208,7 @@ export class ContestService {
     request: UpdateContestRequest,
     contestId: string,
   ): Promise<void> {
-    let contest = await this.contestRepository.getContestById(contestId);
+    const contest = await this.contestRepository.getContestById(contestId);
 
     if (
       contest.status === ContestStatus.ACTIVE &&
@@ -247,7 +247,7 @@ export class ContestService {
   }
 
   async deleteContest(contestId: string): Promise<void> {
-    let contest = await this.contestRepository.getContestById(contestId);
+    const contest = await this.contestRepository.getContestById(contestId);
 
     const options = {
       Bucket: this.configService.get('AWS_S3_PUBLIC_BUCKET_NAME'),

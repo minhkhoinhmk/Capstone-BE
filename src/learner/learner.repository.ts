@@ -48,8 +48,6 @@ export class LearnerRepository {
       where: { user: customer },
     });
 
-    console.log(count);
-
     return count;
   }
 
