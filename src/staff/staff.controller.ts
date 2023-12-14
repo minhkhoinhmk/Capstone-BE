@@ -100,4 +100,14 @@ export class StaffController {
   async deleteStaff(@Param('id') id: string): Promise<void> {
     return await this.staffService.removeStaff(id);
   }
+
+  @Put('/:id')
+  @ApiOkResponse({
+    description: 'Re-active staff',
+  })
+  @UseGuards(AuthGuard(), RolesGuard)
+  @HasRoles(NameRole.Admin)
+  async reactiveStaff(@Param('id') id: string): Promise<void> {
+    return await this.staffService.reactivateStaff(id);
+  }
 }

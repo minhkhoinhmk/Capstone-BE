@@ -31,6 +31,7 @@ export class WinnerRepository {
   async getWinnerByPostionAndContest(contestId: string, position: number) {
     return this.winnerRepository.findOne({
       where: { position, contest: { id: contestId } },
+      relations: { promotion: true },
     });
   }
 
