@@ -32,7 +32,9 @@ export class TransactionOrderDetailService {
       response.push({
         refundId: null,
         paymentAmount: orderDetailByInstructor.priceAfterPromotion * 0.8,
+        systemPaymentAmount: orderDetailByInstructor.priceAfterPromotion * 0.2,
         refundAmount: null,
+        systemRefundAmount: null,
         insertedDate: dateInVietnam(),
         active: true,
         courseName: orderDetailByInstructor.course.title,
@@ -46,8 +48,11 @@ export class TransactionOrderDetailService {
         response.push({
           refundId: refundInOrderDetailByInstructor.refund.id,
           paymentAmount: null,
+          systemPaymentAmount: null,
           refundAmount:
             refundInOrderDetailByInstructor.refund.refundPrice * 0.8,
+          systemRefundAmount:
+            refundInOrderDetailByInstructor.refund.refundPrice * 0.2,
           insertedDate: dateInVietnam(),
           active: true,
           courseName: refundInOrderDetailByInstructor.course.title,
@@ -78,7 +83,13 @@ export class TransactionOrderDetailService {
       response.push({
         refundId: transactionOrderDetail.refundId,
         paymentAmount: transactionOrderDetail.paymentAmount,
+        systemPaymentAmount: transactionOrderDetail.paymentAmount
+          ? transactionOrderDetail.orderDetail.priceAfterPromotion * 0.2
+          : null,
         refundAmount: transactionOrderDetail.refundAmount,
+        systemRefundAmount: transactionOrderDetail.refundAmount
+          ? transactionOrderDetail.refundAmount * 0.2
+          : null,
         insertedDate: transactionOrderDetail.insertedDate,
         active: transactionOrderDetail.active,
         courseName: transactionOrderDetail.orderDetail.course.title,

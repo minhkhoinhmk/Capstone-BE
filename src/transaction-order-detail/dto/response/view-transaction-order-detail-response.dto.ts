@@ -5,10 +5,16 @@ export class ViewTransactionOrderDetailResponse {
   refundId: string;
 
   @ApiProperty()
+  systemPaymentAmount: number;
+
+  @ApiProperty()
   paymentAmount: number;
 
   @ApiProperty()
   refundAmount: number;
+
+  @ApiProperty()
+  systemRefundAmount: number;
 
   @ApiProperty()
   insertedDate: Date;

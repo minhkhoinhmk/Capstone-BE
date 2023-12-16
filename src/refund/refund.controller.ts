@@ -98,4 +98,15 @@ export class RefundController {
   isRefund(@Param('id') orderDetailId: string): Promise<boolean> {
     return this.refundService.checkIsRefund(orderDetailId);
   }
+
+  @ApiOkResponse({ description: 'Question refund' })
+  @UseGuards(AuthGuard(), RolesGuard)
+  @HasRoles(NameRole.Admin)
+  @Get('/ask/question')
+  askRefund(
+    @Query('id') refundId: string,
+    @Query('question') question: string,
+  ): Promise<void> {
+    return this.refundService.questionRefund(refundId, question);
+  }
 }
