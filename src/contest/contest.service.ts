@@ -182,7 +182,7 @@ export class ContestService {
     contests.forEach(async (contest) => {
       if (
         contest.status === ContestStatus.PENDING &&
-        contest.startedDate.getTime() === new Date().getTime()
+        contest.startedDate.getTime() >= new Date().getTime()
       ) {
         contest.status = ContestStatus.ACTIVE;
         await this.contestRepository.save(contest);
