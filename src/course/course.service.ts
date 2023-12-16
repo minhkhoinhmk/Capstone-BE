@@ -275,12 +275,14 @@ export class CourseService {
       return response.filter(
         (courseLearn) => courseLearn.completedPercent === 100,
       );
+
     if (status === CourseLearnStatus.LEARNING)
       return response.filter(
         (courseLearn) =>
           courseLearn.completedPercent < 100 &&
           courseLearn.completedPercent > 0,
       );
+
     if (status === CourseLearnStatus.NOT_LEARNING)
       return response.filter((courseLearn) => {
         return courseLearn.completedPercent === 0;

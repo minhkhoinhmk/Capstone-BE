@@ -38,8 +38,8 @@ export class PromotionRepository {
   ) {
     return this.promotionRepository.create({
       discountPercent,
-      effectiveDate,
-      expiredDate,
+      effectiveDate: new Date(effectiveDate),
+      expiredDate: new Date(expiredDate),
       active: true,
       user: staff,
       title,

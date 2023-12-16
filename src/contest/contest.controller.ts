@@ -28,6 +28,7 @@ import { Contest } from './entity/contest.entity';
 import { FilterContestRequest } from './dto/request/filter-contest-request.dto';
 import { Request } from 'express';
 import { UpdateContestRequest } from './dto/request/update-contest-request.dto';
+import ContestStatus from './enum/contest-status.enum';
 
 @Controller('contest')
 @ApiTags('Contest')
@@ -96,7 +97,7 @@ export class ContestController {
   @HasRoles(NameRole.Staff)
   async getContestsByStaff(
     @Req() request: Request,
-    @Query('status') status: string,
+    @Query('status') status?: ContestStatus,
   ): Promise<ViewContestResponse[]> {
     return await this.contestService.getContestByStaffId(
       request['user']['id'],
