@@ -101,7 +101,7 @@ export class StaffController {
     return await this.staffService.removeStaff(id);
   }
 
-  @Put('/:id')
+  @Put('/reactive/:id')
   @ApiOkResponse({
     description: 'Re-active staff',
   })

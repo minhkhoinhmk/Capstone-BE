@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Injectable,
   InternalServerErrorException,
   Logger,
@@ -210,40 +211,97 @@ export class ContestService {
   ): Promise<void> {
     const contest = await this.contestRepository.getContestById(contestId);
 
-    if (
-      contest.status === ContestStatus.ACTIVE &&
-      contest.customerDrawings.length > 0
-    ) {
+    if (contest.customerDrawings.length > 0) {
       if (
-        new Date(request.startedDate).getTime() !==
-        contest.startedDate.getTime()
+        contest.status === ContestStatus.EXPIRED &&
+        (new Date(request.startedDate).getTime() !==
+          contest.startedDate.getTime() ||
+          new Date(request.expiredDate).getTime() !==
+            contest.expiredDate.getTime())
       ) {
-        throw new InternalServerErrorException(
-          'Cuộc thi đã có người tham gia, không thể thay đổi ngày bắt đầu',
+        throw new BadRequestException(
+          `Không được phép chỉnh thời gian bắt đầu hoặc kết thúc cuộc thi khi cuộc thi đã kết thúc`,
         );
-      } else {
-        contest.title = request.title;
-        contest.description = request.description;
-        contest.prize = request.prize;
-        contest.expiredDate = request.expiredDate;
-        contest.isVisible = request.isVisible;
-
-        await this.contestRepository.save(contest);
       }
-    } else {
+
+      if (
+        contest.status === ContestStatus.ACTIVE &&
+        new Date(request.expiredDate).getTime() !==
+          contest.expiredDate.getTime() &&
+        new Date(request.expiredDate).getTime() <= new Date().getTime()
+      ) {
+        throw new BadRequestException(
+          `Thời gian kết thúc cuộc thi không được phép nhỏ hơn hoặc giờ hiện tại`,
+        );
+      }
+
       contest.title = request.title;
       contest.description = request.description;
       contest.prize = request.prize;
-      contest.startedDate = request.startedDate;
-      contest.expiredDate = request.expiredDate;
+      contest.startedDate = new Date(request.startedDate);
+      contest.expiredDate = new Date(request.expiredDate);
       contest.isVisible = request.isVisible;
-
       await this.contestRepository.save(contest);
-    }
+      this.logger.log(
+        `method=updateContest, contestId=${contest.id} updated successfully`,
+      );
+    } else {
+      if (
+        contest.status === ContestStatus.EXPIRED &&
+        (new Date(request.startedDate).getTime() !==
+          contest.startedDate.getTime() ||
+          new Date(request.expiredDate).getTime() !==
+            contest.expiredDate.getTime())
+      ) {
+        throw new BadRequestException(
+          `Không được phép chỉnh thời gian bắt đầu hoặc kết thúc cuộc thi khi cuộc thi đã kết thúc`,
+        );
+      }
 
-    this.logger.log(
-      `method=updateContest, contestId=${contest.id} updated successfully`,
-    );
+      if (
+        contest.status === ContestStatus.ACTIVE &&
+        new Date(request.expiredDate).getTime() !==
+          contest.expiredDate.getTime() &&
+        new Date(request.expiredDate).getTime() < new Date().getTime()
+      ) {
+        throw new BadRequestException(
+          `Thời gian kết thúc cuộc thi không được phép nhỏ hơn giờ hiện tại`,
+        );
+      }
+
+      if (contest.status === ContestStatus.PENDING) {
+        if (
+          new Date(request.startedDate).getTime() !==
+            contest.startedDate.getTime() &&
+          new Date(request.startedDate).getTime() < new Date().getTime()
+        ) {
+          throw new BadRequestException(
+            `Thời gian bắt đầu cuộc thi không được phép nhỏ hơn giờ hiện tại`,
+          );
+        }
+
+        if (
+          new Date(request.expiredDate).getTime() !==
+            contest.expiredDate.getTime() &&
+          new Date(request.expiredDate).getTime() < new Date().getTime()
+        ) {
+          throw new BadRequestException(
+            `Thời gian kết thúc cuộc thi không được phép nhỏ hơn giờ hiện tại`,
+          );
+        }
+      }
+
+      contest.title = request.title;
+      contest.description = request.description;
+      contest.prize = request.prize;
+      contest.startedDate = new Date(request.startedDate);
+      contest.expiredDate = new Date(request.expiredDate);
+      contest.isVisible = request.isVisible;
+      await this.contestRepository.save(contest);
+      this.logger.log(
+        `method=updateContest, contestId=${contest.id} updated successfully`,
+      );
+    }
   }
 
   async deleteContest(contestId: string): Promise<void> {

@@ -29,6 +29,7 @@ import { PageDto } from 'src/common/pagination/dto/pageDto';
 import { FilterCourseByLearnerResponse } from 'src/course/dto/reponse/filter-by-learner.dto';
 import { UpdateLearnerRequest } from './dto/request/update-learner.dto';
 import { ChangePasswordLearnerRequest } from './dto/request/change-password-learner.request.dto';
+import { CourseLearnStatus } from 'src/course/type/enum/CourseLearnStatus';
 
 @Controller('learner')
 @ApiTags('Learner')
@@ -97,11 +98,13 @@ export class LearnerController {
   @ApiPaginatedResponse(FilterCourseByLearnerResponse)
   getCourseForLearnersByUserId(
     @Query('search') search: string,
+    @Query('status') status: CourseLearnStatus,
     @Req() request: Request,
     @Body() pageOption: PageOptionsDto,
   ): Promise<PageDto<FilterCourseByLearnerResponse>> {
     return this.learnerService.getCoursesForLearner(
       search,
+      status,
       request['user']['id'],
       pageOption,
     );
@@ -116,7 +119,7 @@ export class LearnerController {
     @Param('learnerId') learnerId: string,
     @Body() pageOption: PageOptionsDto,
   ): Promise<PageDto<FilterCourseByLearnerResponse>> {
-    return this.learnerService.getCoursesForLearner(
+    return this.learnerService.getCoursesForLearnerByLearnerId(
       search,
       learnerId,
       pageOption,

@@ -44,6 +44,10 @@ export class ViewContestResponse {
 
   @ApiProperty()
   @Expose()
+  isVisible: boolean;
+
+  @ApiProperty()
+  @Expose()
   status: string;
 
   @ApiProperty()

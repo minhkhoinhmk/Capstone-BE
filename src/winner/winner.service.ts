@@ -27,7 +27,7 @@ export class WinnerService {
     private mailsService: MailerService,
   ) {}
 
-  @Cron(CronExpression.EVERY_SECOND)
+  @Cron(CronExpression.EVERY_10_SECONDS)
   async defineWinner(): Promise<void> {
     const contests = await this.contestRepository.getContestsToDefineWinner(
       new Date(),

@@ -24,6 +24,7 @@ import { ChangePasswordLearnerRequest } from './dto/request/change-password-lear
 import * as bcrypt from 'bcrypt';
 import { hashPassword } from 'src/utils/hash-password.util';
 import { CourseFeedbackRepository } from 'src/course-feedback/course-feedback.repository';
+import { CourseLearnStatus } from 'src/course/type/enum/CourseLearnStatus';
 
 @Injectable()
 export class LearnerService {
@@ -141,6 +142,93 @@ export class LearnerService {
   }
 
   async getCoursesForLearner(
+    search: string,
+    status: CourseLearnStatus,
+    userId: string,
+    pageOption: PageOptionsDto,
+  ): Promise<PageDto<FilterCourseByLearnerResponse>> {
+    const { count, entites } =
+      await this.learnerCourseRepository.getCourseByLearnerId(
+        search,
+        userId,
+        pageOption,
+      );
+    let responses: FilterCourseByLearnerResponse[] = [];
+    let completedCount = 0;
+
+    for (const leanerCourse of entites) {
+      const course = await this.courseRepository.getCourseById(
+        leanerCourse.course.id,
+      );
+      let isCertified = false;
+      let isFeedback = false;
+
+      const courseFeedback =
+        await this.courseFeedbackRepository.checkCourseFeedbackExistedByLearner(
+          leanerCourse.course.id,
+          userId,
+        );
+      if (courseFeedback) isFeedback = true;
+
+      for (const achievement of course.achievements) {
+        if (achievement.user.id === userId) {
+          isCertified = true;
+        }
+      }
+
+      for (const chapter of course.chapterLectures) {
+        if (
+          await this.userLectureRepository.checkChapterLectureIsCompletedForLearner(
+            chapter.id,
+            userId,
+          )
+        ) {
+          completedCount++;
+        }
+      }
+
+      responses.push(
+        this.courserMapper.filterCourseByLearnerResponseFromCourse(
+          course,
+          Math.floor((completedCount / course.chapterLectures.length) * 100),
+          isCertified,
+          isFeedback ? courseFeedback.ratedStar : null,
+          isFeedback ? courseFeedback.description : null,
+        ),
+      );
+
+      completedCount = 0;
+    }
+
+    if (status === CourseLearnStatus.COMPLETED)
+      responses = responses.filter(
+        (courseLearn) => courseLearn.completedPercent === 100,
+      );
+    else if (status === CourseLearnStatus.LEARNING)
+      responses = responses.filter(
+        (courseLearn) =>
+          courseLearn.completedPercent < 100 &&
+          courseLearn.completedPercent > 0,
+      );
+    else if (status === CourseLearnStatus.NOT_LEARNING)
+      responses = responses.filter((courseLearn) => {
+        return courseLearn.completedPercent === 0;
+      });
+
+    // const itemCount = count;
+    const itemCount = responses.length;
+
+    const pageMetaDto = new PageMetaDto({
+      itemCount,
+      pageOptionsDto: pageOption,
+    });
+
+    this.logger.log(`method=getCoursesForLearner, totalItems=${itemCount}`);
+
+    return new PageDto(responses, pageMetaDto);
+  }
+
+  async getCoursesForLearnerByLearnerId(
     search: string,
     userId: string,
     pageOption: PageOptionsDto,
