@@ -20,6 +20,7 @@ import { MailerService } from '@nestjs-modules/mailer';
 import { LearnerCourseRepository } from 'src/learner-course/learner-course.repository';
 import { dateInVietnam } from 'src/utils/date-vietnam.util';
 import { CourseFeedbackRepository } from 'src/course-feedback/course-feedback.repository';
+import { format } from 'date-fns';
 
 @Injectable()
 export class RefundService {
@@ -309,7 +310,7 @@ export class RefundService {
     await this.mailsService.sendMail({
       to: refund.orderDetail.order.user.email,
       subject: 'Đồng ý xét duyệt',
-      template: './approve',
+      template: './approveRefund',
       context: {
         SUBJECT: 'hoàn tiền khóa học',
         CONTENT: 'Đã được chấp thuận',
@@ -372,5 +373,22 @@ export class RefundService {
       }
     }
     return isRefund;
+  }
+
+  async questionRefund(refundId: string, question: string): Promise<void> {
+    const refund = await this.refundRepository.getRefundById(refundId);
+
+    if (refund) {
+      await this.mailsService.sendMail({
+        to: refund.orderDetail.order.user.email,
+        subject: 'Vấn đề hoàn tiền',
+        template: './questionRefund',
+        context: {
+          COURSE: `${refund.orderDetail.course.title}`,
+          DATE: `${format(refund.insertedDate, 'dd-MM-yyyy')}`,
+          PROBLEM: `${question}`,
+        },
+      });
+    }
   }
 }
