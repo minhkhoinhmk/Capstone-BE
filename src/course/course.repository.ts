@@ -111,7 +111,7 @@ export class CourseRepository {
         level: true,
         category: true,
         user: true,
-        achievements: { user: true },
+        achievements: { user: true, learner: true },
       },
     });
   }
