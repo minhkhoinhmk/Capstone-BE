@@ -233,11 +233,7 @@ export class CourseService {
         if (courseFeedback) isFeedback = true;
 
         for (const achievement of course.achievements) {
-          if (
-            achievement &&
-            achievement.user &&
-            achievement.user.id === userId
-          ) {
+          if (achievement?.user?.id === userId) {
             isCertified = true;
           }
         }
