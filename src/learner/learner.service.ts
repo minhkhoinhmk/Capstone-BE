@@ -171,7 +171,7 @@ export class LearnerService {
       if (courseFeedback) isFeedback = true;
 
       for (const achievement of course.achievements) {
-        if (achievement.user.id === userId) {
+        if (achievement?.learner?.id === userId) {
           isCertified = true;
         }
       }
@@ -257,7 +257,7 @@ export class LearnerService {
       if (courseFeedback) isFeedback = true;
 
       for (const achievement of course.achievements) {
-        if (achievement.user.id === userId) {
+        if (achievement?.learner?.id === userId) {
           isCertified = true;
         }
       }
