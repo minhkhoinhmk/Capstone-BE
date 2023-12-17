@@ -122,6 +122,7 @@ export class RefundService {
             body: `Bạn nhận được một yêu cầu hoàn tiền từ ${orderDetail.order.user.firstName} cho khóa học ${orderDetail.course.title}`,
             data: {
               refundId: result.id,
+              type: 'ADMIN-REFUND',
             },
             userId: token.user.id,
           };
@@ -315,6 +316,25 @@ export class RefundService {
         SUBJECT: 'hoàn tiền khóa học',
         CONTENT: 'Đã được chấp thuận',
       },
+    });
+
+    const tokens = await this.deviceRepository.getDeviceByUserId(
+      refund.orderDetail.order.user.id,
+    );
+
+    tokens.forEach((token) => {
+      const payload = {
+        token: token.deviceTokenId,
+        title: 'Yêu cầu hoàn tiền',
+        body: `Yêu cầu hoàn tiền khóa học ${refund.orderDetail.course.title} của bạn đã được chấp nhận`,
+        data: {
+          refundId: refund.id,
+          type: 'CUSTOMER-REFUND',
+        },
+        userId: token.user.id,
+      };
+
+      this.noftificationService.sendingNotification(payload);
     });
   }
 

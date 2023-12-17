@@ -1,7 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import * as admin from 'firebase-admin';
 import { NotificationPayload } from './dto/request/notification-payload.dto';
-import { ConfigService } from '@nestjs/config';
 import {
   CLIENT_EMAIL,
   PRIVATE_KEY,

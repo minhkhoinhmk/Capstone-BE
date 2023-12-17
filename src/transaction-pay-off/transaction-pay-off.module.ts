@@ -10,6 +10,8 @@ import { UserModule } from 'src/user/user.module';
 import { AuthModule } from 'src/auth/auth.module';
 import { RefundModule } from 'src/refund/refund.module';
 import { TransactionPayOffMapper } from './mapper/transaction-pay-off.mapper';
+import { DeviceModule } from 'src/device/device.module';
+import { NotificationModule } from 'src/notification/notification.module';
 
 @Module({
   imports: [
@@ -19,6 +21,8 @@ import { TransactionPayOffMapper } from './mapper/transaction-pay-off.mapper';
     UserModule,
     AuthModule,
     RefundModule,
+    DeviceModule,
+    NotificationModule,
   ],
   providers: [
     TransactionPayOffService,
