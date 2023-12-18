@@ -9,6 +9,9 @@ import { ContestModule } from 'src/contest/contest.module';
 import { S3Module } from 'src/s3/s3.module';
 import { AuthModule } from 'src/auth/auth.module';
 import { CustomerDrawingMapper } from './mapper/customer-drawing.mapper';
+import { DynamodbModule } from 'src/dynamodb/dynamodb.module';
+import { NotificationModule } from 'src/notification/notification.module';
+import { DeviceModule } from 'src/device/device.module';
 
 @Module({
   imports: [
@@ -17,6 +20,9 @@ import { CustomerDrawingMapper } from './mapper/customer-drawing.mapper';
     forwardRef(() => ContestModule),
     S3Module,
     AuthModule,
+    DynamodbModule,
+    NotificationModule,
+    DeviceModule,
   ],
   providers: [
     CustomerDrawingService,

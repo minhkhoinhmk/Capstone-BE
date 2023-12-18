@@ -21,6 +21,9 @@ import CustomerDrawingStatus from './enum/customer-drawing-status.enum';
 import { User } from 'src/user/entity/user.entity';
 import { Learner } from 'src/learner/entity/learner.entity';
 import { NameRole } from 'src/role/enum/name-role.enum';
+import { DeviceRepository } from 'src/device/device.repository';
+import { DynamodbService } from 'src/dynamodb/dynamodb.service';
+import { NotificationService } from 'src/notification/notification.service';
 
 @Injectable()
 export class CustomerDrawingService {
@@ -33,6 +36,9 @@ export class CustomerDrawingService {
     private readonly s3Service: S3Service,
     private readonly mailService: MailerService,
     private readonly mapper: CustomerDrawingMapper,
+    private readonly deviceRepository: DeviceRepository,
+    private readonly dynamodbService: DynamodbService,
+    private readonly notificationService: NotificationService,
   ) {}
 
   async createCustomerDrawing(
@@ -135,6 +141,34 @@ export class CustomerDrawingService {
         },
       });
 
+      const tokens = await this.deviceRepository.getDeviceByRole(
+        NameRole.Staff,
+      );
+
+      const createNotificationDto = {
+        title: 'Xét duyệt bài thi',
+        body: `Một người tham dự vừa đăng bài thi tại cuộc thi ${customerDrawing.contest.title}. Hãy xét duyệt!`,
+        data: {
+          imageUrl: key,
+          type: 'STAFF-CUSTOMER_DRAWING',
+        },
+        userId: tokens[0].user.id,
+      };
+
+      await this.dynamodbService.saveNotification(createNotificationDto);
+
+      tokens.forEach((token) => {
+        const payload = {
+          token: token.deviceTokenId,
+          title: createNotificationDto.title,
+          body: createNotificationDto.body,
+          data: createNotificationDto.data,
+          userId: token.user.id,
+        };
+
+        this.notificationService.sendingNotification(payload);
+      });
+
       this.logger.log(`method=uploadImageUrl, uploaded thumbnail successfully`);
     } catch (error) {
       this.logger.error(`method=uploadImageUrl, error:${error.message}`);
@@ -166,6 +200,34 @@ export class CustomerDrawingService {
           SUBJECT: `Bài dự thi cuộc thi ${customerDrawing.contest.title}`,
           CONTENT: `Đã Được Xét Duyệt`,
         },
+      });
+
+      const tokens = await this.deviceRepository.getDeviceByUserId(
+        customerDrawing.user.id,
+      );
+
+      const createNotificationDto = {
+        title: 'Xét duyệt bài thi',
+        body: `Bài dự thi cuộc thi ${customerDrawing.contest.title} của bạn đã được xét duyệt thành công`,
+        data: {
+          customerDrawingId: customerDrawingId,
+          type: 'CUSTOMER-CUSTOMER_DRAWING',
+        },
+        userId: tokens[0].user.id,
+      };
+
+      await this.dynamodbService.saveNotification(createNotificationDto);
+
+      tokens.forEach((token) => {
+        const payload = {
+          token: token.deviceTokenId,
+          title: createNotificationDto.title,
+          body: createNotificationDto.body,
+          data: createNotificationDto.data,
+          userId: token.user.id,
+        };
+
+        this.notificationService.sendingNotification(payload);
       });
 
       this.logger.log(
