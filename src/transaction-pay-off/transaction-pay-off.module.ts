@@ -12,6 +12,7 @@ import { RefundModule } from 'src/refund/refund.module';
 import { TransactionPayOffMapper } from './mapper/transaction-pay-off.mapper';
 import { DeviceModule } from 'src/device/device.module';
 import { NotificationModule } from 'src/notification/notification.module';
+import { DynamodbModule } from 'src/dynamodb/dynamodb.module';
 
 @Module({
   imports: [
@@ -23,6 +24,7 @@ import { NotificationModule } from 'src/notification/notification.module';
     RefundModule,
     DeviceModule,
     NotificationModule,
+    DynamodbModule,
   ],
   providers: [
     TransactionPayOffService,

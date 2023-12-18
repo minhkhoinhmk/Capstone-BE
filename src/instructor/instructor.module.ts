@@ -15,6 +15,7 @@ import { ChapterLectureModule } from 'src/chapter-lecture/chapter-lecture.module
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { PromotionModule } from 'src/promotion/promotion.module';
 import { PromotionCourseModule } from 'src/promotion-course/promotion-course.module';
+import { DynamodbModule } from 'src/dynamodb/dynamodb.module';
 
 @Module({
   providers: [InstructorService, InstructorMapper, ConfigService],
@@ -33,6 +34,7 @@ import { PromotionCourseModule } from 'src/promotion-course/promotion-course.mod
     ConfigModule,
     PromotionModule,
     PromotionCourseModule,
+    DynamodbModule,
   ],
 })
 export class InstructorModule {}

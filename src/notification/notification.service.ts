@@ -37,14 +37,14 @@ export class NotificationService {
       .messaging()
       .send(payload)
       .then((res) => {
-        const createNotificationDto = {
-          title: notification.title,
-          body: notification.body,
-          data: notification.data,
-          userId: notification.userId,
-        };
+        // const createNotificationDto = {
+        //   title: notification.title,
+        //   body: notification.body,
+        //   data: notification.data,
+        //   userId: notification.userId,
+        // };
 
-        this.dynamoDBService.saveNotification(createNotificationDto);
+        // this.dynamoDBService.saveNotification(createNotificationDto);
 
         this.logger.log(`method=sendingNotification, sent successfully`);
         return {
