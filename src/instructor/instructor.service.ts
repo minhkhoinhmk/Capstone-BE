@@ -89,6 +89,7 @@ export class InstructorService {
           body: 'Một giáo viên vừa cập nhật bằng cấp. Hãy xét duyệtt!',
           data: {
             certificationUrl: key,
+            type: 'INSTRUCTOR-REGISTER',
           },
           userId: token.user.id,
         };

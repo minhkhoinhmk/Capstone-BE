@@ -1,5 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Expose } from 'class-transformer';
+import { Winner } from 'src/winner/entity/winner.entity';
 
 export class ViewContestResponse {
   @ApiProperty()
@@ -57,4 +58,8 @@ export class ViewContestResponse {
   @ApiProperty()
   @Expose()
   totalCustomerDrawing: number;
+
+  @ApiProperty()
+  @Expose()
+  winners: Winner[];
 }

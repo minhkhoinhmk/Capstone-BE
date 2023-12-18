@@ -79,7 +79,14 @@ export class ContestRepository {
   ): Promise<Contest[]> {
     return this.contestRepository.find({
       where: { user: { id: staffId }, active: true, status: status },
-      relations: { user: true, customerDrawings: true },
+      relations: {
+        user: true,
+        customerDrawings: true,
+        winners: {
+          customerDrawing: true,
+          promotion: true,
+        },
+      },
     });
   }
 

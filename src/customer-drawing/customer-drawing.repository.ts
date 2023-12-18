@@ -206,12 +206,38 @@ export class CustomerDrawingRepository {
     });
   }
 
-  async getListCustomerDrawingByCustomerId(customerId: string) {
+  async getListCustomerDrawingContestByCustomerId(
+    customerId: string,
+    contestId: string,
+  ) {
     return this.customerDrawingRepository.find({
       where: {
         user: {
           id: customerId,
         },
+        contest: {
+          id: contestId,
+        },
+      },
+      relations: {
+        contest: true,
+      },
+    });
+  }
+
+  async getCustomerDrawingApprovedContestByCustomerId(
+    customerId: string,
+    contestId: string,
+  ) {
+    return this.customerDrawingRepository.findOne({
+      where: {
+        user: {
+          id: customerId,
+        },
+        contest: {
+          id: contestId,
+        },
+        status: CustomerDrawingStatus.APPROVED,
       },
       relations: {
         contest: true,

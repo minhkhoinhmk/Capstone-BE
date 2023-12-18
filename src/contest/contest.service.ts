@@ -312,12 +312,13 @@ export class ContestService {
       Key: contest.thumbnailUrl,
     };
 
-    if (
-      contest.status === ContestStatus.ACTIVE &&
-      contest.customerDrawings.length > 0
-    ) {
-      throw new InternalServerErrorException(
+    if (contest.customerDrawings.length > 0) {
+      throw new BadRequestException(
         'Cuộc thi đã có người tham gia, không thể xóa',
+      );
+    } else if (contest.isVisible) {
+      throw new BadRequestException(
+        'Cuộc thi vẫn hiện trên giao diện trang chủ, nên không thể xóa',
       );
     } else {
       try {

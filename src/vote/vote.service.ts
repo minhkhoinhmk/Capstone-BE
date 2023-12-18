@@ -29,9 +29,24 @@ export class VoteService {
       user.role !== NameRole.Learner ? (user as User) : (user as Learner).user;
 
     if (
+      !(await this.customerDrawingRepository.getCustomerDrawingApprovedContestByCustomerId(
+        currCustomer.id,
+        customerDrawing.contest.id,
+      ))
+    ) {
+      this.logger.error(
+        `method=voteCustomerDrawing, customer with id ${currCustomer.id} has not customerDrawing with status approved in contest ${customerDrawing.contest.id}`,
+      );
+      throw new NotAcceptableException(
+        `Chỉ khi bạn đã đăng tải bài thi và bài thi được thông qua thì bạn mới được bình chọn tác phẩm khác`,
+      );
+    }
+
+    if (
       !(
-        await this.customerDrawingRepository.getListCustomerDrawingByCustomerId(
+        await this.customerDrawingRepository.getListCustomerDrawingContestByCustomerId(
           currCustomer.id,
+          customerDrawing.contest.id,
         )
       ).every((customerDrawing) => customerDrawing.id !== customerDrawingId)
     ) {

@@ -79,11 +79,13 @@ export class DynamodbRepository {
   }
 
   async updateIsSeen(createdDate: string, userId: string): Promise<void> {
+    const createDateTime = String(new Date(createdDate).getTime());
+    console.log(createDateTime);
     const command = new UpdateItemCommand({
       TableName: this.tableName,
       Key: {
         userId: { S: userId },
-        createdDate: { N: createdDate },
+        createdDate: { N: createDateTime },
       },
       UpdateExpression: 'SET isSeen = :isSeen',
       ExpressionAttributeValues: {
