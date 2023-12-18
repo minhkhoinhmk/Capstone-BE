@@ -211,6 +211,7 @@ export class CustomerDrawingService {
         body: `Bài dự thi cuộc thi ${customerDrawing.contest.title} của bạn đã được xét duyệt thành công`,
         data: {
           customerDrawingId: customerDrawingId,
+          contestId: customerDrawing.contest.id,
           type: 'CUSTOMER-CUSTOMER_DRAWING',
         },
         userId: tokens[0].user.id,
