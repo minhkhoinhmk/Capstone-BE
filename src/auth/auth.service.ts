@@ -21,6 +21,7 @@ import * as validator from 'validator';
 import { JwtStorerRepository } from 'src/user/jwt-store.repository';
 import { UserRepository } from 'src/user/user.repository';
 import { LearnerRepository } from 'src/learner/learner.repository';
+import { DeviceRepository } from 'src/device/device.repository';
 
 @Injectable()
 export class AuthService {
@@ -33,6 +34,7 @@ export class AuthService {
     private jwtStoreRepository: JwtStorerRepository,
     private userRepository: UserRepository,
     private learnerRepository: LearnerRepository,
+    private readonly devicesRepository: DeviceRepository,
   ) {}
 
   async loginForGuest(guestLoginRequest: GuestLoginRequest): Promise<Token> {
@@ -210,9 +212,11 @@ export class AuthService {
     }
   }
 
-  async logout(code: string): Promise<void> {
+  async logout(code: string, deviceToken: string): Promise<void> {
     this.logger.log('method=logout, logout successfully');
+    const decoded = this.jwtService.verify(code);
     this.jwtStoreRepository.removeJwtStoreByCode(code);
+    await this.devicesRepository.removeDevice(decoded.id, deviceToken);
   }
 
   async resendOtp(email: string): Promise<void> {

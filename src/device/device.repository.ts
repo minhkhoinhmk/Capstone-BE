@@ -70,8 +70,9 @@ export class DeviceRepository {
   async getDeviceByUserId(userId: string): Promise<Device[]> {
     const queryBuilder = this.deviceRepository.createQueryBuilder('d');
 
-    queryBuilder.where('(d.user.id = :userId)', {
+    queryBuilder.where('(d.user.id = :userId OR d.learner.id = :learnerId)', {
       userId: userId,
+      learnerId: userId,
     });
 
     queryBuilder.leftJoinAndSelect('d.user', 'user');
@@ -79,5 +80,13 @@ export class DeviceRepository {
     const devices = await queryBuilder.getMany();
 
     return devices;
+  }
+
+  async removeDevice(userId: string, deviceToken: string): Promise<void> {
+    const device = await this.getDeviceByTokenAndUserId(userId, deviceToken);
+
+    if (device) {
+      await this.deviceRepository.remove(device);
+    }
   }
 }
