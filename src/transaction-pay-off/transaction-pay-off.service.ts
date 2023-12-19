@@ -108,7 +108,7 @@ export class TransactionPayOffService {
           data: {
             type: 'INSTRUCTOR-PAYMENT',
           },
-          userId: tokens[0].user.id,
+          userId: user.id,
         };
 
         await this.dynamodbService.saveNotification(createNotificationDto);
@@ -239,7 +239,7 @@ export class TransactionPayOffService {
   async getTransactionPayOffBySender(
     senderId: string,
   ): Promise<ViewTransactionPayOffResponse[]> {
-    let response: ViewTransactionPayOffResponse[] = [];
+    const response: ViewTransactionPayOffResponse[] = [];
 
     const transactionPayOffs =
       await this.transactionPayOfflRepository.getTransactionPayOffBySender(

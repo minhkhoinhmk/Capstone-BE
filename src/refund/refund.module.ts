@@ -14,6 +14,7 @@ import { RefundMapper } from './mapper/refund.mapper';
 import { LearnerCourseModule } from 'src/learner-course/learner-course.module';
 import { CourseFeedbackModule } from 'src/course-feedback/course-feedback.module';
 import { DynamodbModule } from 'src/dynamodb/dynamodb.module';
+import { UserModule } from 'src/user/user.module';
 
 @Module({
   imports: [
@@ -27,6 +28,7 @@ import { DynamodbModule } from 'src/dynamodb/dynamodb.module';
     LearnerCourseModule,
     CourseFeedbackModule,
     DynamodbModule,
+    UserModule,
   ],
   providers: [RefundService, RefundRepository, RefundMapper],
   controllers: [RefundController],

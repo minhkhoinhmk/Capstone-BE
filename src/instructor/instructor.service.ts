@@ -84,24 +84,33 @@ export class InstructorService {
         NameRole.Admin,
       );
 
-      const createNotificationDto = {
-        title: 'Cập nhật bằng cấp',
-        body: `Một giáo viên vừa cập nhật bằng cấp. Hãy xét duyệtt!`,
-        data: {
-          certificationUrl: key,
-          type: 'INSTRUCTOR-REGISTER',
-        },
-        userId: tokens[0].user.id,
-      };
+      const usersAdmin = await this.userRepository.getUserByRole(
+        NameRole.Admin,
+      );
 
-      await this.dynamodbService.saveNotification(createNotificationDto);
+      for (const admin of usersAdmin) {
+        const createNotificationDto = {
+          title: 'Cập nhật bằng cấp',
+          body: `Một giáo viên vừa cập nhật bằng cấp. Hãy xét duyệtt!`,
+          data: {
+            certificationUrl: key,
+            type: 'INSTRUCTOR-REGISTER',
+          },
+          userId: admin.id,
+        };
+
+        await this.dynamodbService.saveNotification(createNotificationDto);
+      }
 
       tokens.forEach((token) => {
         const payload = {
           token: token.deviceTokenId,
-          title: createNotificationDto.title,
-          body: createNotificationDto.body,
-          data: createNotificationDto.data,
+          title: 'Cập nhật bằng cấp',
+          body: `Một giáo viên vừa cập nhật bằng cấp. Hãy xét duyệtt!`,
+          data: {
+            certificationUrl: key,
+            type: 'INSTRUCTOR-REGISTER',
+          },
           userId: token.user.id,
         };
 

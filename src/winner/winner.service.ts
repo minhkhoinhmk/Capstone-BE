@@ -96,7 +96,7 @@ export class WinnerService {
               type: 'WINNER-PRIZE',
               contestId: customerDrawing.contest.id,
             },
-            userId: tokens[0].user.id,
+            userId: customerDrawing.user.id,
           };
 
           await this.dynamodbService.saveNotification(createNotificationDto);

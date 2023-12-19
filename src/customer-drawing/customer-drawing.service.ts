@@ -145,24 +145,33 @@ export class CustomerDrawingService {
         NameRole.Staff,
       );
 
-      const createNotificationDto = {
-        title: 'Xét duyệt bài thi',
-        body: `Một người tham dự vừa đăng bài thi tại cuộc thi ${customerDrawing.contest.title}. Hãy xét duyệt!`,
-        data: {
-          imageUrl: key,
-          type: 'STAFF-CUSTOMER_DRAWING',
-        },
-        userId: tokens[0].user.id,
-      };
+      const usersStaff = await this.userRepository.getUserByRole(
+        NameRole.Staff,
+      );
 
-      await this.dynamodbService.saveNotification(createNotificationDto);
+      for (const staff of usersStaff) {
+        const createNotificationDto = {
+          title: 'Xét duyệt bài thi',
+          body: `Một người tham dự vừa đăng bài thi tại cuộc thi ${customerDrawing.contest.title}. Hãy xét duyệt!`,
+          data: {
+            imageUrl: key,
+            type: 'STAFF-CUSTOMER_DRAWING',
+          },
+          userId: staff.id,
+        };
+
+        await this.dynamodbService.saveNotification(createNotificationDto);
+      }
 
       tokens.forEach((token) => {
         const payload = {
           token: token.deviceTokenId,
-          title: createNotificationDto.title,
-          body: createNotificationDto.body,
-          data: createNotificationDto.data,
+          title: 'Xét duyệt bài thi',
+          body: `Một người tham dự vừa đăng bài thi tại cuộc thi ${customerDrawing.contest.title}. Hãy xét duyệt!`,
+          data: {
+            imageUrl: key,
+            type: 'STAFF-CUSTOMER_DRAWING',
+          },
           userId: token.user.id,
         };
 
@@ -214,7 +223,7 @@ export class CustomerDrawingService {
           contestId: customerDrawing.contest.id,
           type: 'CUSTOMER-CUSTOMER_DRAWING',
         },
-        userId: tokens[0].user.id,
+        userId: customerDrawing.user.id,
       };
 
       await this.dynamodbService.saveNotification(createNotificationDto);
