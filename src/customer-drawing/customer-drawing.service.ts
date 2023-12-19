@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   ConflictException,
   Injectable,
   InternalServerErrorException,
@@ -24,6 +25,7 @@ import { NameRole } from 'src/role/enum/name-role.enum';
 import { DeviceRepository } from 'src/device/device.repository';
 import { DynamodbService } from 'src/dynamodb/dynamodb.service';
 import { NotificationService } from 'src/notification/notification.service';
+import ContestStatus from 'src/contest/enum/contest-status.enum';
 
 @Injectable()
 export class CustomerDrawingService {
@@ -193,6 +195,12 @@ export class CustomerDrawingService {
         await this.customerDrawingRepository.getCustomerDrawingByIdForUpdateImageUrl(
           customerDrawingId,
         );
+
+      if (customerDrawing.contest.status !== ContestStatus.ACTIVE) {
+        throw new BadRequestException(
+          `Cuộc thi đang không diễn ra nên không thể duyệt bài vẽ`,
+        );
+      }
 
       if (status === CustomerDrawingStatus.APPROVED) {
         customerDrawing.active = true;
