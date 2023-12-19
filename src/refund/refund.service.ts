@@ -306,13 +306,13 @@ export class RefundService {
         refund.orderDetail.order.user.id,
       );
 
-    if (userLecturesOfLearner.length > 0) {
+    if (userLecturesOfLearner) {
       for (const userLectureOfLearner of userLecturesOfLearner) {
         await this.userLectureRepository.remove(userLectureOfLearner);
       }
     }
 
-    if (userLecturesOfUser.length > 0) {
+    if (userLecturesOfUser) {
       for (const userLectureOfUser of userLecturesOfUser) {
         await this.userLectureRepository.remove(userLectureOfUser);
       }
