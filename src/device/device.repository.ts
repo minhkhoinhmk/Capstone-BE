@@ -70,9 +70,8 @@ export class DeviceRepository {
   async getDeviceByUserId(userId: string): Promise<Device[]> {
     const queryBuilder = this.deviceRepository.createQueryBuilder('d');
 
-    queryBuilder.where('(d.user.id = :userId OR d.learner.id = :learnerId)', {
+    queryBuilder.where('(d.user.id = :userId)', {
       userId: userId,
-      learnerId: userId,
     });
 
     queryBuilder.leftJoinAndSelect('d.user', 'user');
