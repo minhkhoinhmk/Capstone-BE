@@ -68,7 +68,7 @@ export class AuthController {
   @Get('/signout')
   signout(
     @Query('code') code: string,
-    @Query('deviceToken') deviceToken: string,
+    @Query('deviceToken') deviceToken?: string,
   ): Promise<void> {
     return this.authService.logout(code, deviceToken);
   }

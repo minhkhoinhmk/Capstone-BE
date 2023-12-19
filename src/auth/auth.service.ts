@@ -212,10 +212,10 @@ export class AuthService {
     }
   }
 
-  async logout(code: string, deviceToken: string): Promise<void> {
+  async logout(code: string, deviceToken?: string): Promise<void> {
     this.logger.log('method=logout, logout successfully');
     const decoded = this.jwtService.verify(code);
-    this.jwtStoreRepository.removeJwtStoreByCode(code);
+    await this.jwtStoreRepository.removeJwtStoreByCode(code);
     await this.devicesRepository.removeDevice(decoded.id, deviceToken);
   }
 
