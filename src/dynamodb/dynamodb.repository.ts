@@ -56,7 +56,7 @@ export class DynamodbRepository {
     return notification;
   }
 
-  async findByUserId(userId: string): Promise<Notification[]> {
+  async findByUserId(userId: string, size: number): Promise<Notification[]> {
     const results: Notification[] = [];
 
     const command = new QueryCommand({
@@ -66,7 +66,7 @@ export class DynamodbRepository {
         ':userId': { S: userId },
       },
       ScanIndexForward: false,
-      Limit: 20,
+      Limit: size,
     });
 
     const queryResponse = await this.client.send(command);

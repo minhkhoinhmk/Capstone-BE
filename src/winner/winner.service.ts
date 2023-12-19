@@ -11,6 +11,9 @@ import { User } from 'src/user/entity/user.entity';
 import { VoteService } from 'src/vote/vote.service';
 import { UserRepository } from 'src/user/user.repository';
 import { MailerService } from '@nestjs-modules/mailer';
+import { DeviceRepository } from 'src/device/device.repository';
+import { DynamodbService } from 'src/dynamodb/dynamodb.service';
+import { NotificationService } from 'src/notification/notification.service';
 
 @Injectable()
 export class WinnerService {
@@ -25,6 +28,9 @@ export class WinnerService {
     private readonly voteService: VoteService,
     private readonly userRepository: UserRepository,
     private mailsService: MailerService,
+    private readonly deviceRepository: DeviceRepository,
+    private readonly dynamodbService: DynamodbService,
+    private readonly notificationService: NotificationService,
   ) {}
 
   @Cron(CronExpression.EVERY_10_SECONDS)
@@ -69,6 +75,34 @@ export class WinnerService {
               PERCENT: winner.promotion.discountPercent,
               PROMOTION: winner.promotion.code,
             },
+          });
+
+          const tokens = await this.deviceRepository.getDeviceByUserId(
+            customerDrawing.user.id,
+          );
+
+          const createNotificationDto = {
+            title: `Cuộc thi ${customerDrawing.contest.title}`,
+            body: `Xin chúc mừng, bạn đã giành vị trí thứ ${winner.position} tại cuộc thi ${customerDrawing.contest.title}`,
+            data: {
+              type: 'WINNER-PRIZE',
+              contestId: customerDrawing.contest.id,
+            },
+            userId: tokens[0].user.id,
+          };
+
+          await this.dynamodbService.saveNotification(createNotificationDto);
+
+          tokens.forEach((token) => {
+            const payload = {
+              token: token.deviceTokenId,
+              title: createNotificationDto.title,
+              body: createNotificationDto.body,
+              data: createNotificationDto.data,
+              userId: token.user.id,
+            };
+
+            this.notificationService.sendingNotification(payload);
           });
         }
       }
