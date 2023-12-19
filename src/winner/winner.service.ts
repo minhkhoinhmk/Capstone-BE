@@ -14,6 +14,8 @@ import { MailerService } from '@nestjs-modules/mailer';
 import { DeviceRepository } from 'src/device/device.repository';
 import { DynamodbService } from 'src/dynamodb/dynamodb.service';
 import { NotificationService } from 'src/notification/notification.service';
+import { getDateWithPlus1Year } from 'src/utils/date-vietnam.util';
+import { PromotionRepository } from 'src/promotion/promotion.repository';
 
 @Injectable()
 export class WinnerService {
@@ -31,6 +33,7 @@ export class WinnerService {
     private readonly deviceRepository: DeviceRepository,
     private readonly dynamodbService: DynamodbService,
     private readonly notificationService: NotificationService,
+    private readonly promotionRepository: PromotionRepository,
   ) {}
 
   @Cron(CronExpression.EVERY_10_SECONDS)
@@ -62,7 +65,12 @@ export class WinnerService {
 
           winner.customerDrawing = customerDrawing;
           winner.active = true;
+          winner.promotion.effectiveDate = new Date(contest.expiredDate);
+          winner.promotion.expiredDate = getDateWithPlus1Year(
+            new Date(contest.expiredDate),
+          );
 
+          await this.promotionRepository.savePromotion(winner.promotion);
           await this.winnerRepository.saveWinner(winner);
 
           await this.mailsService.sendMail({

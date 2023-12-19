@@ -39,7 +39,13 @@ export class ContestRepository {
   async getContestById(id: string): Promise<Contest> {
     return await this.contestRepository.findOne({
       where: { id: id, active: true },
-      relations: { user: true, customerDrawings: true, winners: true },
+      relations: {
+        user: true,
+        customerDrawings: true,
+        winners: {
+          promotion: true,
+        },
+      },
     });
   }
 

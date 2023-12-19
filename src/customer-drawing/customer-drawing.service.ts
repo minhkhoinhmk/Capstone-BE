@@ -298,10 +298,12 @@ export class CustomerDrawingService {
 
   async getCustomerDrawingByContestId(
     contestId: string,
+    status?: CustomerDrawingStatus,
   ): Promise<CustomerDrawing[]> {
     const customerDrawings =
       await this.customerDrawingRepository.getCustomerDrawingByContestId(
         contestId,
+        status,
       );
 
     return customerDrawings;

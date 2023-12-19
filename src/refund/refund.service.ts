@@ -261,6 +261,10 @@ export class RefundService {
     // orderDetail.active = false;
     // await this.orderDetailRepository.saveOrderDetail(orderDetail);
 
+    console.log('method=approveRefund 1', refund.orderDetail);
+    console.log('method=approveRefund 2', refund.orderDetail.order);
+    console.log('method=approveRefund 3', refund.orderDetail.order.user);
+
     const userLecturesOfUser =
       await this.userLectureRepository.getUserLectureByCourseAndCustomer(
         refund.orderDetail.course.id,

@@ -1,5 +1,12 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsBoolean, IsNotEmpty, IsString } from 'class-validator';
+import {
+  IsBoolean,
+  IsNotEmpty,
+  IsNumber,
+  IsString,
+  Max,
+  Min,
+} from 'class-validator';
 
 export class UpdateContestRequest {
   @ApiProperty()
@@ -31,4 +38,25 @@ export class UpdateContestRequest {
   @ApiProperty()
   @IsNotEmpty()
   isVisible: boolean;
+
+  @ApiProperty()
+  @IsNumber()
+  @IsNotEmpty()
+  @Min(1)
+  @Max(100)
+  discountPercentFirst: number;
+
+  @ApiProperty()
+  @IsNumber()
+  @IsNotEmpty()
+  @Min(1)
+  @Max(100)
+  discountPercentSecond: number;
+
+  @ApiProperty()
+  @IsNumber()
+  @IsNotEmpty()
+  @Min(1)
+  @Max(100)
+  discountPercentThird: number;
 }

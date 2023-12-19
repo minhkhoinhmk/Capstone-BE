@@ -92,11 +92,15 @@ export class CustomerDrawingRepository {
     return { count, entites };
   }
 
-  async getCustomerDrawingByContestId(contestId: string) {
+  async getCustomerDrawingByContestId(
+    contestId: string,
+    status?: CustomerDrawingStatus,
+  ) {
     return this.customerDrawingRepository.find({
       where: {
         contest: {
           id: contestId,
+          status,
         },
       },
       relations: {

@@ -134,9 +134,11 @@ export class CustomerDrawingController {
   @HttpCode(200)
   async getCustomerDrawingsByStaff(
     @Query('contestId') contestId: string,
+    @Query('status') status?: CustomerDrawingStatus,
   ): Promise<CustomerDrawing[]> {
     return await this.customerDrawingService.getCustomerDrawingByContestId(
       contestId,
+      status,
     );
   }
 
