@@ -98,9 +98,9 @@ export class CustomerDrawingRepository {
   ) {
     return this.customerDrawingRepository.find({
       where: {
+        status,
         contest: {
           id: contestId,
-          status,
         },
       },
       relations: {

@@ -315,7 +315,6 @@ export class CustomerDrawingService {
         status,
       );
 
-    console.log(customerDrawings);
     return customerDrawings;
   }
 
