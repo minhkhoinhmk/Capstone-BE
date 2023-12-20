@@ -121,7 +121,7 @@ export class CustomerDrawingController {
     return await this.customerDrawingService.getCustomerDrawingByContest(
       contestId,
       request,
-      req['user']['id'],
+      req['user'] as User | Learner,
     );
   }
 

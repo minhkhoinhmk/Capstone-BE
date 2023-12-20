@@ -263,7 +263,7 @@ export class CustomerDrawingService {
   async getCustomerDrawingByContest(
     contestId: string,
     request: FilterCustomerDrawingRequest,
-    userId: string,
+    user: User | Learner,
   ): Promise<PageDto<ViewCustomerDrawingResponse>> {
     let customerDrawings: CustomerDrawing[] = [];
     const responses: ViewCustomerDrawingResponse[] = [];
@@ -289,27 +289,33 @@ export class CustomerDrawingService {
       let isVoted = false;
       let isOwned = false;
 
-      if (customerDrawing.user.id === userId) {
+      // ----------------------------------------------------------------
+      if (customerDrawing.user.id === user.id) {
         isOwned = true;
       }
 
-      const learners = await this.learnerRepository.getLearnerByUserId(userId);
-
       for (const vote of customerDrawing.votes) {
-        if (vote.user.id === userId || vote.learner.id === userId) {
+        if (vote.user.id === user.id || vote.learner.id === user.id) {
           isVoted = true;
         }
       }
 
-      if (learners) {
-        for (const vote of customerDrawing.votes) {
-          for (const learner of learners) {
-            if (vote.learner.id === learner.id) {
-              isVoted = true;
+      if ((user as User)?.role?.name === NameRole.Customer) {
+        const learners = await this.learnerRepository.getLearnerByUserId(
+          user.id,
+        );
+
+        if (learners.length > 0) {
+          for (const vote of customerDrawing.votes) {
+            for (const learner of learners) {
+              if (vote.learner.id === learner.id) {
+                isVoted = true;
+              }
             }
           }
         }
       }
+      // ----------------------------------------------------------------
 
       responses.push(
         this.mapper.filterViewCustomerDrawingResponseFromCustomerDrawingV2(
