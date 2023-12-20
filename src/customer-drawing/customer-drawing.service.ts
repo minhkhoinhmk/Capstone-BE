@@ -26,6 +26,7 @@ import { DeviceRepository } from 'src/device/device.repository';
 import { DynamodbService } from 'src/dynamodb/dynamodb.service';
 import { NotificationService } from 'src/notification/notification.service';
 import ContestStatus from 'src/contest/enum/contest-status.enum';
+import { LearnerRepository } from 'src/learner/learner.repository';
 
 @Injectable()
 export class CustomerDrawingService {
@@ -41,6 +42,7 @@ export class CustomerDrawingService {
     private readonly deviceRepository: DeviceRepository,
     private readonly dynamodbService: DynamodbService,
     private readonly notificationService: NotificationService,
+    private readonly learnerRepository: LearnerRepository,
   ) {}
 
   async createCustomerDrawing(
@@ -291,9 +293,21 @@ export class CustomerDrawingService {
         isOwned = true;
       }
 
+      const learners = await this.learnerRepository.getLearnerByUserId(userId);
+
       for (const vote of customerDrawing.votes) {
         if (vote.user.id === userId || vote.learner.id === userId) {
           isVoted = true;
+        }
+      }
+
+      if (learners) {
+        for (const vote of customerDrawing.votes) {
+          for (const learner of learners) {
+            if (vote.learner.id === learner.id) {
+              isVoted = true;
+            }
+          }
         }
       }
 

@@ -12,6 +12,7 @@ import { CustomerDrawingMapper } from './mapper/customer-drawing.mapper';
 import { DynamodbModule } from 'src/dynamodb/dynamodb.module';
 import { NotificationModule } from 'src/notification/notification.module';
 import { DeviceModule } from 'src/device/device.module';
+import { LearnerModule } from 'src/learner/learner.module';
 
 @Module({
   imports: [
@@ -23,6 +24,7 @@ import { DeviceModule } from 'src/device/device.module';
     DynamodbModule,
     NotificationModule,
     DeviceModule,
+    LearnerModule,
   ],
   providers: [
     CustomerDrawingService,
