@@ -177,8 +177,8 @@ export class CustomerDrawingController {
     description: 'Get Customer Drawings Successfully',
   })
   @ApiPaginatedResponse(ViewCustomerDrawingResponse)
-  @UseGuards(AuthGuard(), RolesGuard)
-  @HasRoles(NameRole.Customer, NameRole.Learner)
+  // @UseGuards(AuthGuard(), RolesGuard)
+  // @HasRoles(NameRole.Customer, NameRole.Learner)
   @HttpCode(200)
   async getCustomerDrawings(
     @Body() request: FilterCustomerDrawingRequest,
