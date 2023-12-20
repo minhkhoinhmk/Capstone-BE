@@ -295,7 +295,7 @@ export class CustomerDrawingService {
       }
 
       for (const vote of customerDrawing.votes) {
-        if (vote.user.id === user.id || vote.learner.id === user.id) {
+        if (vote?.user?.id === user.id || vote?.learner?.id === user.id) {
           isVoted = true;
         }
       }
@@ -308,7 +308,7 @@ export class CustomerDrawingService {
         if (learners.length > 0) {
           for (const vote of customerDrawing.votes) {
             for (const learner of learners) {
-              if (vote.learner.id === learner.id) {
+              if (vote?.learner?.id === learner.id) {
                 isVoted = true;
               }
             }
