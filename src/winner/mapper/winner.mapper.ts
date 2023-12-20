@@ -10,10 +10,12 @@ export class WinnerMapper {
     { target: 'imageUrl', source: 'winner.customerDrawing.imageUrl' },
     { target: 'title', source: 'winner.customerDrawing.title' },
     { target: 'description', source: 'winner.customerDrawing.description' },
+    { target: 'totalVotes', source: 'totalVotes' },
   )
   filterViewWinnerResponseFromWinner(
     winner: Winner,
     fullName: string,
+    totalVotes: number,
   ): ViewWinnerReponse {
     return new ViewWinnerReponse();
   }

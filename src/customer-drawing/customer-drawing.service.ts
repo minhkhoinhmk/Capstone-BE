@@ -313,6 +313,50 @@ export class CustomerDrawingService {
     return new PageDto(responses, pageMetaDto);
   }
 
+  async getCustomerDrawingByContestForGuest(
+    contestId: string,
+    request: FilterCustomerDrawingRequest,
+  ): Promise<PageDto<ViewCustomerDrawingResponse>> {
+    let customerDrawings: CustomerDrawing[] = [];
+    const responses: ViewCustomerDrawingResponse[] = [];
+
+    const { count, entites } =
+      await this.customerDrawingRepository.getCustomerDrawingByContest(
+        contestId,
+        request,
+      );
+
+    customerDrawings = entites;
+
+    const itemCount = count;
+
+    const pageMetaDto = new PageMetaDto({
+      itemCount,
+      pageOptionsDto: request.pageOptions,
+    });
+
+    for (const customerDrawing of customerDrawings) {
+      const cusomerName = `${customerDrawing.user.lastName} ${customerDrawing.user.middleName} ${customerDrawing.user.firstName}`;
+      const totalVotes = customerDrawing.votes.length;
+      const isVoted = false;
+      const isOwned = false;
+
+      responses.push(
+        this.mapper.filterViewCustomerDrawingResponseFromCustomerDrawingV2(
+          customerDrawing,
+          cusomerName,
+          totalVotes,
+          isVoted,
+          isOwned,
+        ),
+      );
+    }
+
+    this.logger.log(`method=getCustomerDrawingByContest, total = ${itemCount}`);
+
+    return new PageDto(responses, pageMetaDto);
+  }
+
   async getCustomerDrawingByContestId(
     contestId: string,
     status?: CustomerDrawingStatus,

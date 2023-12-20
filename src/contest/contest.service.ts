@@ -136,14 +136,11 @@ export class ContestService {
     return new PageDto(responses, pageMetaDto);
   }
 
-  async getContestByStaffId(
+  async getContestByStaff(
     staffId: string,
     status: string,
   ): Promise<ViewContestResponse[]> {
-    const contests = await this.contestRepository.getContestByStaffId(
-      staffId,
-      status,
-    );
+    const contests = await this.contestRepository.getContestByStaff(status);
     const responses: ViewContestResponse[] = [];
 
     for (const contest of contests) {
@@ -348,11 +345,6 @@ export class ContestService {
   async deleteContest(contestId: string): Promise<void> {
     const contest = await this.contestRepository.getContestById(contestId);
 
-    const options = {
-      Bucket: this.configService.get('AWS_S3_PUBLIC_BUCKET_NAME'),
-      Key: contest.thumbnailUrl,
-    };
-
     if (contest.customerDrawings.length > 0) {
       throw new BadRequestException(
         'Cuộc thi đã có người tham gia, không thể xóa',
@@ -361,24 +353,31 @@ export class ContestService {
       throw new BadRequestException(
         'Cuộc thi vẫn hiện trên giao diện trang chủ, nên không thể xóa',
       );
-    } else {
-      try {
+    }
+
+    try {
+      if (contest.thumbnailUrl) {
+        const options = {
+          Bucket: this.configService.get('AWS_S3_PUBLIC_BUCKET_NAME'),
+          Key: contest.thumbnailUrl,
+        };
+
         (await this.s3Service.deleteObject(options)).promise();
-
-        if (contest.winners.length > 0) {
-          for (const winner of contest.winners) {
-            await this.winnerRepository.removeWinner(winner);
-          }
-        }
-
-        await this.contestRepository.removeContest(contest);
-
-        this.logger.log(
-          `method=deleteContest, contestId=${contestId} removed successfully`,
-        );
-      } catch (error) {
-        this.logger.log(`method=deleteContest, error=${error.message}`);
       }
+
+      if (contest.winners.length > 0) {
+        for (const winner of contest.winners) {
+          await this.winnerRepository.removeWinner(winner);
+        }
+      }
+
+      await this.contestRepository.removeContest(contest);
+
+      this.logger.log(
+        `method=deleteContest, contestId=${contestId} removed successfully`,
+      );
+    } catch (error) {
+      this.logger.log(`method=deleteContest, error=${error.message}`);
     }
   }
 }

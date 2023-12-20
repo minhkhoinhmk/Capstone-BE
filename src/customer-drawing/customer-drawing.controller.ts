@@ -125,6 +125,22 @@ export class CustomerDrawingController {
     );
   }
 
+  @Post('/contest/guest')
+  @ApiOkResponse({
+    description: 'Get Customer Drawings By Contest Successfully',
+  })
+  @ApiPaginatedResponse(ViewCustomerDrawingResponse)
+  @HttpCode(200)
+  async getCustomerDrawingsByContestForGuest(
+    @Body() request: FilterCustomerDrawingRequest,
+    @Query('contestId') contestId: string,
+  ): Promise<PageDto<ViewCustomerDrawingResponse>> {
+    return await this.customerDrawingService.getCustomerDrawingByContestForGuest(
+      contestId,
+      request,
+    );
+  }
+
   @Get('/contest/staff')
   @ApiOkResponse({
     description: 'Get Customer Drawings By Contest Successfully',

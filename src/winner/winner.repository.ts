@@ -43,7 +43,7 @@ export class WinnerRepository {
     return await this.winnerRepository.find({
       where: { customerDrawing: { contest: { id: contestId } }, active: true },
       relations: {
-        customerDrawing: { contest: true, user: true },
+        customerDrawing: { contest: true, user: true, votes: true },
         promotion: true,
       },
     });

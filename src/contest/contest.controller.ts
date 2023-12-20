@@ -80,8 +80,8 @@ export class ContestController {
     description: 'Get Contests Successfully',
   })
   @ApiPaginatedResponse(ViewContestResponse)
-  @UseGuards(AuthGuard(), RolesGuard)
-  @HasRoles(NameRole.Customer, NameRole.Learner)
+  // @UseGuards(AuthGuard(), RolesGuard)
+  // @HasRoles(NameRole.Customer, NameRole.Learner)
   @HttpCode(200)
   async getContests(
     @Body() request: FilterContestRequest,
@@ -99,7 +99,7 @@ export class ContestController {
     @Req() request: Request,
     @Query('status') status?: ContestStatus,
   ): Promise<ViewContestResponse[]> {
-    return await this.contestService.getContestByStaffId(
+    return await this.contestService.getContestByStaff(
       request['user']['id'],
       status,
     );
@@ -109,8 +109,8 @@ export class ContestController {
   @ApiOkResponse({
     description: 'Get Contests By Id Successfully',
   })
-  @UseGuards(AuthGuard(), RolesGuard)
-  @HasRoles(NameRole.Staff, NameRole.Customer, NameRole.Learner)
+  // @UseGuards(AuthGuard(), RolesGuard)
+  // @HasRoles(NameRole.Staff, NameRole.Customer, NameRole.Learner)
   async getContestsById(@Param('id') id: string): Promise<ViewContestResponse> {
     return await this.contestService.getContestById(id);
   }

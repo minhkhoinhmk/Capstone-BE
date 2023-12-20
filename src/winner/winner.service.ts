@@ -127,9 +127,14 @@ export class WinnerService {
     const response: ViewWinnerReponse[] = [];
 
     for (const winner of winners) {
+      const totalVotes = winner.customerDrawing.votes.length;
       const fullName = `${winner.customerDrawing.user.firstName} ${winner.customerDrawing.user.middleName} ${winner.customerDrawing.user.lastName}`;
       response.push(
-        this.mapper.filterViewWinnerResponseFromWinner(winner, fullName),
+        this.mapper.filterViewWinnerResponseFromWinner(
+          winner,
+          fullName,
+          totalVotes,
+        ),
       );
     }
 
