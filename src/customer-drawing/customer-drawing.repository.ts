@@ -68,6 +68,7 @@ export class CustomerDrawingRepository {
     queryBuilder.leftJoinAndSelect('c.contest', 'contest');
     queryBuilder.leftJoinAndSelect('c.votes', 'votes');
     queryBuilder.leftJoinAndSelect('votes.user', 'votesUser');
+    queryBuilder.leftJoinAndSelect('votes.learner', 'voteslearner');
 
     queryBuilder
       .skip((pageOptionsDto.page - 1) * pageOptionsDto.take)
@@ -86,6 +87,13 @@ export class CustomerDrawingRepository {
             else return a.total_likes - b.total_likes;
           }),
       );
+      count = await queryBuilder.getCount();
+    } else {
+      queryBuilder.orderBy(
+        `c.${request.customerDrawingSortField}`,
+        pageOptionsDto.order,
+      );
+      entites = await queryBuilder.getMany();
       count = await queryBuilder.getCount();
     }
 

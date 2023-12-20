@@ -292,7 +292,7 @@ export class CustomerDrawingService {
       }
 
       for (const vote of customerDrawing.votes) {
-        if (vote.user.id === userId) {
+        if (vote.user.id === userId || vote.learner.id === userId) {
           isVoted = true;
         }
       }
