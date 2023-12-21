@@ -5,6 +5,7 @@ import { LessThan, Repository } from 'typeorm';
 import { CreateContestRequest } from './dto/request/create-contest-request.dto';
 import ContestStatus from './enum/contest-status.enum';
 import { FilterContestRequest } from './dto/request/filter-contest-request.dto';
+import { NameRole } from 'src/role/enum/name-role.enum';
 
 @Injectable()
 export class ContestRepository {
@@ -39,7 +40,13 @@ export class ContestRepository {
   async getContestById(id: string): Promise<Contest> {
     return await this.contestRepository.findOne({
       where: { id: id, active: true },
-      relations: { user: true, customerDrawings: true, winners: true },
+      relations: {
+        user: true,
+        customerDrawings: true,
+        winners: {
+          promotion: true,
+        },
+      },
     });
   }
 
@@ -79,7 +86,36 @@ export class ContestRepository {
   ): Promise<Contest[]> {
     return this.contestRepository.find({
       where: { user: { id: staffId }, active: true, status: status },
-      relations: { user: true, customerDrawings: true },
+      relations: {
+        user: true,
+        customerDrawings: true,
+        winners: {
+          customerDrawing: true,
+          promotion: true,
+        },
+      },
+    });
+  }
+
+  async getContestByStaff(status: string): Promise<Contest[]> {
+    return this.contestRepository.find({
+      where: {
+        user: {
+          role: {
+            name: NameRole.Staff,
+          },
+        },
+        active: true,
+        status: status,
+      },
+      relations: {
+        user: true,
+        customerDrawings: true,
+        winners: {
+          customerDrawing: true,
+          promotion: true,
+        },
+      },
     });
   }
 

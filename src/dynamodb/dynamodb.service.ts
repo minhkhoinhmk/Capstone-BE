@@ -22,9 +22,15 @@ export class DynamodbService {
     }
   }
 
-  async getNotificationByUserId(userId: string): Promise<Notification[]> {
+  async getNotificationByUserId(
+    userId: string,
+    size: number,
+  ): Promise<Notification[]> {
     try {
-      const responses = await this.dynamodbRepository.findByUserId(userId);
+      const responses = await this.dynamodbRepository.findByUserId(
+        userId,
+        size,
+      );
       this.logger.log(
         `method=getNotificationByUserId, total: ${responses.length}`,
       );

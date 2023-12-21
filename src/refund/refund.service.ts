@@ -21,6 +21,8 @@ import { LearnerCourseRepository } from 'src/learner-course/learner-course.repos
 import { dateInVietnam } from 'src/utils/date-vietnam.util';
 import { CourseFeedbackRepository } from 'src/course-feedback/course-feedback.repository';
 import { format } from 'date-fns';
+import { DynamodbService } from 'src/dynamodb/dynamodb.service';
+import { UserRepository } from 'src/user/user.repository';
 
 @Injectable()
 export class RefundService {
@@ -37,6 +39,8 @@ export class RefundService {
     private mailsService: MailerService,
     private readonly learnerCourseRepository: LearnerCourseRepository,
     private readonly courseFeedbackRepository: CourseFeedbackRepository,
+    private readonly dynamodbService: DynamodbService,
+    private readonly userRepository: UserRepository,
   ) {}
 
   async createRefund(
@@ -115,6 +119,24 @@ export class RefundService {
           NameRole.Admin,
         );
 
+        const usersAdmin = await this.userRepository.getUserByRole(
+          NameRole.Admin,
+        );
+
+        for (const admin of usersAdmin) {
+          const createNotificationDto = {
+            title: 'Yêu cầu hoàn tiền',
+            body: `Bạn nhận được một yêu cầu hoàn tiền từ ${orderDetail.order.user.firstName} cho khóa học ${orderDetail.course.title}`,
+            data: {
+              refundId: result.id,
+              type: 'ADMIN-REFUND',
+            },
+            userId: admin.id,
+          };
+
+          await this.dynamodbService.saveNotification(createNotificationDto);
+        }
+
         tokens.forEach((token) => {
           const payload = {
             token: token.deviceTokenId,
@@ -122,6 +144,7 @@ export class RefundService {
             body: `Bạn nhận được một yêu cầu hoàn tiền từ ${orderDetail.order.user.firstName} cho khóa học ${orderDetail.course.title}`,
             data: {
               refundId: result.id,
+              type: 'ADMIN-REFUND',
             },
             userId: token.user.id,
           };
@@ -315,6 +338,34 @@ export class RefundService {
         SUBJECT: 'hoàn tiền khóa học',
         CONTENT: 'Đã được chấp thuận',
       },
+    });
+
+    const tokens = await this.deviceRepository.getDeviceByUserId(
+      refund.orderDetail.order.user.id,
+    );
+
+    const createNotificationDto = {
+      title: 'Yêu cầu hoàn tiền',
+      body: `Yêu cầu hoàn tiền khóa học ${refund.orderDetail.course.title} của bạn đã được chấp nhận`,
+      data: {
+        refundId: refund.id,
+        type: 'CUSTOMER-REFUND',
+      },
+      userId: refund.orderDetail.order.user.id,
+    };
+
+    await this.dynamodbService.saveNotification(createNotificationDto);
+
+    tokens.forEach((token) => {
+      const payload = {
+        token: token.deviceTokenId,
+        title: createNotificationDto.title,
+        body: createNotificationDto.body,
+        data: createNotificationDto.data,
+        userId: token.user.id,
+      };
+
+      this.noftificationService.sendingNotification(payload);
     });
   }
 

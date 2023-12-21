@@ -68,6 +68,7 @@ export class CustomerDrawingRepository {
     queryBuilder.leftJoinAndSelect('c.contest', 'contest');
     queryBuilder.leftJoinAndSelect('c.votes', 'votes');
     queryBuilder.leftJoinAndSelect('votes.user', 'votesUser');
+    queryBuilder.leftJoinAndSelect('votes.learner', 'voteslearner');
 
     queryBuilder
       .skip((pageOptionsDto.page - 1) * pageOptionsDto.take)
@@ -87,14 +88,25 @@ export class CustomerDrawingRepository {
           }),
       );
       count = await queryBuilder.getCount();
+    } else {
+      queryBuilder.orderBy(
+        `c.${request.customerDrawingSortField}`,
+        pageOptionsDto.order,
+      );
+      entites = await queryBuilder.getMany();
+      count = await queryBuilder.getCount();
     }
 
     return { count, entites };
   }
 
-  async getCustomerDrawingByContestId(contestId: string) {
+  async getCustomerDrawingByContestId(
+    contestId: string,
+    status?: CustomerDrawingStatus,
+  ) {
     return this.customerDrawingRepository.find({
       where: {
+        status,
         contest: {
           id: contestId,
         },
@@ -206,12 +218,38 @@ export class CustomerDrawingRepository {
     });
   }
 
-  async getListCustomerDrawingByCustomerId(customerId: string) {
+  async getListCustomerDrawingContestByCustomerId(
+    customerId: string,
+    contestId: string,
+  ) {
     return this.customerDrawingRepository.find({
       where: {
         user: {
           id: customerId,
         },
+        contest: {
+          id: contestId,
+        },
+      },
+      relations: {
+        contest: true,
+      },
+    });
+  }
+
+  async getCustomerDrawingApprovedContestByCustomerId(
+    customerId: string,
+    contestId: string,
+  ) {
+    return this.customerDrawingRepository.findOne({
+      where: {
+        user: {
+          id: customerId,
+        },
+        contest: {
+          id: contestId,
+        },
+        status: CustomerDrawingStatus.APPROVED,
       },
       relations: {
         contest: true,

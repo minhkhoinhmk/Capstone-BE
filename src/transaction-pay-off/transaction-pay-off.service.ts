@@ -15,6 +15,9 @@ import { RefundRepository } from 'src/refund/refund.repository';
 import { MailerService } from '@nestjs-modules/mailer';
 import { ViewTransactionPayOffResponse } from './dto/response/view-transaction-pay-off-response.dto';
 import { TransactionPayOffMapper } from './mapper/transaction-pay-off.mapper';
+import { DeviceRepository } from 'src/device/device.repository';
+import { NotificationService } from 'src/notification/notification.service';
+import { DynamodbService } from 'src/dynamodb/dynamodb.service';
 
 @Injectable()
 export class TransactionPayOffService {
@@ -30,6 +33,9 @@ export class TransactionPayOffService {
     private readonly refundRepository: RefundRepository,
     private mailsService: MailerService,
     private readonly mapper: TransactionPayOffMapper,
+    private readonly deviceRepository: DeviceRepository,
+    private readonly notificationService: NotificationService,
+    private readonly dynamodbService: DynamodbService,
   ) {}
 
   async createTransactionPayOff(
@@ -84,6 +90,40 @@ export class TransactionPayOffService {
         );
 
         await this.sendEmailForPaymentSuccess(user.email, totalPaymentAmount);
+
+        const tokens = await this.deviceRepository.getDeviceByUserId(user.id);
+
+        const formatter = new Intl.NumberFormat('vi-VN', {
+          style: 'currency',
+          currency: 'VND',
+          minimumFractionDigits: 0, // Set the number of decimal places
+          maximumFractionDigits: 0,
+        });
+
+        const createNotificationDto = {
+          title: 'Trả lương giáo viên',
+          body: `Bạn đã nhận được ${formatter.format(
+            totalPaymentAmount,
+          )} từ tiền thanh toán các khóa học của chúng tôi`,
+          data: {
+            type: 'INSTRUCTOR-PAYMENT',
+          },
+          userId: user.id,
+        };
+
+        await this.dynamodbService.saveNotification(createNotificationDto);
+
+        tokens.forEach((token) => {
+          const payload = {
+            token: token.deviceTokenId,
+            title: createNotificationDto.title,
+            body: createNotificationDto.body,
+            data: createNotificationDto.data,
+            userId: token.user.id,
+          };
+
+          this.notificationService.sendingNotification(payload);
+        });
 
         this.logger.log(
           `method=createTransactionPayOff, created transaction pay off successfully, totalPayment = ${totalPaymentAmount}`,
@@ -199,7 +239,7 @@ export class TransactionPayOffService {
   async getTransactionPayOffBySender(
     senderId: string,
   ): Promise<ViewTransactionPayOffResponse[]> {
-    let response: ViewTransactionPayOffResponse[] = [];
+    const response: ViewTransactionPayOffResponse[] = [];
 
     const transactionPayOffs =
       await this.transactionPayOfflRepository.getTransactionPayOffBySender(

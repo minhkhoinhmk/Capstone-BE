@@ -21,8 +21,11 @@ export class DynamodbController {
     NameRole.Customer,
     NameRole.Learner,
   )
-  getNotifications(@Req() request: Request) {
-    return this.dynamoService.getNotificationByUserId(request['user']['id']);
+  getNotifications(@Req() request: Request, @Query('size') size: number) {
+    return this.dynamoService.getNotificationByUserId(
+      request['user']['id'],
+      size,
+    );
   }
 
   @Put('/notification/seen')

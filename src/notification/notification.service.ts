@@ -1,7 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import * as admin from 'firebase-admin';
 import { NotificationPayload } from './dto/request/notification-payload.dto';
-import { ConfigService } from '@nestjs/config';
 import {
   CLIENT_EMAIL,
   PRIVATE_KEY,
@@ -38,14 +37,14 @@ export class NotificationService {
       .messaging()
       .send(payload)
       .then((res) => {
-        const createNotificationDto = {
-          title: notification.title,
-          body: notification.body,
-          data: notification.data,
-          userId: notification.userId,
-        };
+        // const createNotificationDto = {
+        //   title: notification.title,
+        //   body: notification.body,
+        //   data: notification.data,
+        //   userId: notification.userId,
+        // };
 
-        this.dynamoDBService.saveNotification(createNotificationDto);
+        // this.dynamoDBService.saveNotification(createNotificationDto);
 
         this.logger.log(`method=sendingNotification, sent successfully`);
         return {

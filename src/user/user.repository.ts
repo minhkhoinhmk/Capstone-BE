@@ -29,6 +29,16 @@ export class UserRepository {
     return user;
   }
 
+  async getUserByRole(roleName: NameRole): Promise<User[]> {
+    const user = await this.userRepository.find({
+      where: { role: { name: roleName }, active: true },
+      relations: {
+        role: true,
+      },
+    });
+    return user;
+  }
+
   async getUserByIdWithRelation(
     id: string,
     relations: FindOptionsRelations<User>,

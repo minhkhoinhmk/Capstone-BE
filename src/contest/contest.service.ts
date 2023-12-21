@@ -21,6 +21,7 @@ import { UpdateContestRequest } from './dto/request/update-contest-request.dto';
 import { ConfigService } from '@nestjs/config';
 import { PromotionRepository } from 'src/promotion/promotion.repository';
 import { WinnerRepository } from 'src/winner/winner.repository';
+import { getDateWithPlus1Year } from 'src/utils/date-vietnam.util';
 
 @Injectable()
 export class ContestService {
@@ -135,14 +136,11 @@ export class ContestService {
     return new PageDto(responses, pageMetaDto);
   }
 
-  async getContestByStaffId(
+  async getContestByStaff(
     staffId: string,
     status: string,
   ): Promise<ViewContestResponse[]> {
-    const contests = await this.contestRepository.getContestByStaffId(
-      staffId,
-      status,
-    );
+    const contests = await this.contestRepository.getContestByStaff(status);
     const responses: ViewContestResponse[] = [];
 
     for (const contest of contests) {
@@ -210,56 +208,83 @@ export class ContestService {
     contestId: string,
   ): Promise<void> {
     const contest = await this.contestRepository.getContestById(contestId);
+    console.log(contest);
 
-    if (contest.customerDrawings.length > 0) {
+    if (contest.status === ContestStatus.EXPIRED) {
+      contest.isVisible = request.isVisible;
+      await this.contestRepository.save(contest);
+      return;
+    }
+
+    if (contest.status === ContestStatus.ACTIVE) {
       if (
-        contest.status === ContestStatus.EXPIRED &&
-        (new Date(request.startedDate).getTime() !==
-          contest.startedDate.getTime() ||
-          new Date(request.expiredDate).getTime() !==
-            contest.expiredDate.getTime())
+        new Date(request.startedDate).getTime() !==
+        contest.startedDate.getTime()
       ) {
         throw new BadRequestException(
-          `Không được phép chỉnh thời gian bắt đầu hoặc kết thúc cuộc thi khi cuộc thi đã kết thúc`,
+          `Không được phép chỉnh thời gian kết thúc cuộc thi khi cuộc thi đang diễn ra`,
         );
       }
 
       if (
-        contest.status === ContestStatus.ACTIVE &&
         new Date(request.expiredDate).getTime() !==
           contest.expiredDate.getTime() &&
         new Date(request.expiredDate).getTime() <= new Date().getTime()
       ) {
         throw new BadRequestException(
-          `Thời gian kết thúc cuộc thi không được phép nhỏ hơn hoặc giờ hiện tại`,
+          `Thời gian kết thúc cuộc thi không được phép nhỏ hơn hoặc bằng giờ hiện tại`,
         );
       }
 
       contest.title = request.title;
       contest.description = request.description;
       contest.prize = request.prize;
-      contest.startedDate = new Date(request.startedDate);
       contest.expiredDate = new Date(request.expiredDate);
       contest.isVisible = request.isVisible;
       await this.contestRepository.save(contest);
+      for (const winner of contest.winners) {
+        if (winner.position === 1) {
+          winner.promotion.discountPercent = request.discountPercentFirst;
+          winner.promotion.effectiveDate = new Date(request.expiredDate);
+          winner.promotion.expiredDate = getDateWithPlus1Year(
+            new Date(request.expiredDate),
+          );
+          await this.promotionReposiotory.savePromotion(winner.promotion);
+        }
+        if (winner.position === 2) {
+          winner.promotion.discountPercent = request.discountPercentSecond;
+          winner.promotion.effectiveDate = new Date(request.expiredDate);
+          winner.promotion.expiredDate = getDateWithPlus1Year(
+            new Date(request.expiredDate),
+          );
+          await this.promotionReposiotory.savePromotion(winner.promotion);
+        }
+        if (winner.position === 3) {
+          winner.promotion.discountPercent = request.discountPercentThird;
+          winner.promotion.effectiveDate = new Date(request.expiredDate);
+          winner.promotion.expiredDate = getDateWithPlus1Year(
+            new Date(request.expiredDate),
+          );
+          await this.promotionReposiotory.savePromotion(winner.promotion);
+        }
+      }
       this.logger.log(
         `method=updateContest, contestId=${contest.id} updated successfully`,
       );
-    } else {
+    }
+
+    if (contest.status === ContestStatus.PENDING) {
       if (
-        contest.status === ContestStatus.EXPIRED &&
-        (new Date(request.startedDate).getTime() !==
-          contest.startedDate.getTime() ||
-          new Date(request.expiredDate).getTime() !==
-            contest.expiredDate.getTime())
+        new Date(request.startedDate).getTime() !==
+          contest.startedDate.getTime() &&
+        new Date(request.startedDate).getTime() < new Date().getTime()
       ) {
         throw new BadRequestException(
-          `Không được phép chỉnh thời gian bắt đầu hoặc kết thúc cuộc thi khi cuộc thi đã kết thúc`,
+          `Thời gian bắt đầu cuộc thi không được phép nhỏ hơn giờ hiện tại`,
         );
       }
 
       if (
-        contest.status === ContestStatus.ACTIVE &&
         new Date(request.expiredDate).getTime() !==
           contest.expiredDate.getTime() &&
         new Date(request.expiredDate).getTime() < new Date().getTime()
@@ -269,26 +294,13 @@ export class ContestService {
         );
       }
 
-      if (contest.status === ContestStatus.PENDING) {
-        if (
-          new Date(request.startedDate).getTime() !==
-            contest.startedDate.getTime() &&
-          new Date(request.startedDate).getTime() < new Date().getTime()
-        ) {
-          throw new BadRequestException(
-            `Thời gian bắt đầu cuộc thi không được phép nhỏ hơn giờ hiện tại`,
-          );
-        }
-
-        if (
-          new Date(request.expiredDate).getTime() !==
-            contest.expiredDate.getTime() &&
-          new Date(request.expiredDate).getTime() < new Date().getTime()
-        ) {
-          throw new BadRequestException(
-            `Thời gian kết thúc cuộc thi không được phép nhỏ hơn giờ hiện tại`,
-          );
-        }
+      if (
+        new Date(request.startedDate).getTime() >
+        new Date(request.expiredDate).getTime()
+      ) {
+        throw new BadRequestException(
+          `Thời gian bắt đầu cuộc thi không được phép lớn hơn thời gian kết thúc cuộc thi`,
+        );
       }
 
       contest.title = request.title;
@@ -298,6 +310,32 @@ export class ContestService {
       contest.expiredDate = new Date(request.expiredDate);
       contest.isVisible = request.isVisible;
       await this.contestRepository.save(contest);
+      for (const winner of contest.winners) {
+        if (winner.position === 1) {
+          winner.promotion.discountPercent = request.discountPercentFirst;
+          winner.promotion.effectiveDate = new Date(request.expiredDate);
+          winner.promotion.expiredDate = getDateWithPlus1Year(
+            new Date(request.expiredDate),
+          );
+          await this.promotionReposiotory.savePromotion(winner.promotion);
+        }
+        if (winner.position === 2) {
+          winner.promotion.discountPercent = request.discountPercentSecond;
+          winner.promotion.effectiveDate = new Date(request.expiredDate);
+          winner.promotion.expiredDate = getDateWithPlus1Year(
+            new Date(request.expiredDate),
+          );
+          await this.promotionReposiotory.savePromotion(winner.promotion);
+        }
+        if (winner.position === 3) {
+          winner.promotion.discountPercent = request.discountPercentThird;
+          winner.promotion.effectiveDate = new Date(request.expiredDate);
+          winner.promotion.expiredDate = getDateWithPlus1Year(
+            new Date(request.expiredDate),
+          );
+          await this.promotionReposiotory.savePromotion(winner.promotion);
+        }
+      }
       this.logger.log(
         `method=updateContest, contestId=${contest.id} updated successfully`,
       );
@@ -307,36 +345,39 @@ export class ContestService {
   async deleteContest(contestId: string): Promise<void> {
     const contest = await this.contestRepository.getContestById(contestId);
 
-    const options = {
-      Bucket: this.configService.get('AWS_S3_PUBLIC_BUCKET_NAME'),
-      Key: contest.thumbnailUrl,
-    };
-
-    if (
-      contest.status === ContestStatus.ACTIVE &&
-      contest.customerDrawings.length > 0
-    ) {
-      throw new InternalServerErrorException(
+    if (contest.customerDrawings.length > 0) {
+      throw new BadRequestException(
         'Cuộc thi đã có người tham gia, không thể xóa',
       );
-    } else {
-      try {
+    } else if (contest.isVisible) {
+      throw new BadRequestException(
+        'Cuộc thi vẫn hiện trên giao diện trang chủ, nên không thể xóa',
+      );
+    }
+
+    try {
+      if (contest.thumbnailUrl) {
+        const options = {
+          Bucket: this.configService.get('AWS_S3_PUBLIC_BUCKET_NAME'),
+          Key: contest.thumbnailUrl,
+        };
+
         (await this.s3Service.deleteObject(options)).promise();
-
-        if (contest.winners.length > 0) {
-          for (const winner of contest.winners) {
-            await this.winnerRepository.removeWinner(winner);
-          }
-        }
-
-        await this.contestRepository.removeContest(contest);
-
-        this.logger.log(
-          `method=deleteContest, contestId=${contestId} removed successfully`,
-        );
-      } catch (error) {
-        this.logger.log(`method=deleteContest, error=${error.message}`);
       }
+
+      if (contest.winners.length > 0) {
+        for (const winner of contest.winners) {
+          await this.winnerRepository.removeWinner(winner);
+        }
+      }
+
+      await this.contestRepository.removeContest(contest);
+
+      this.logger.log(
+        `method=deleteContest, contestId=${contestId} removed successfully`,
+      );
+    } catch (error) {
+      this.logger.log(`method=deleteContest, error=${error.message}`);
     }
   }
 }

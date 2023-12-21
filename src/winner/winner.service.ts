@@ -11,6 +11,11 @@ import { User } from 'src/user/entity/user.entity';
 import { VoteService } from 'src/vote/vote.service';
 import { UserRepository } from 'src/user/user.repository';
 import { MailerService } from '@nestjs-modules/mailer';
+import { DeviceRepository } from 'src/device/device.repository';
+import { DynamodbService } from 'src/dynamodb/dynamodb.service';
+import { NotificationService } from 'src/notification/notification.service';
+import { getDateWithPlus1Year } from 'src/utils/date-vietnam.util';
+import { PromotionRepository } from 'src/promotion/promotion.repository';
 
 @Injectable()
 export class WinnerService {
@@ -25,6 +30,10 @@ export class WinnerService {
     private readonly voteService: VoteService,
     private readonly userRepository: UserRepository,
     private mailsService: MailerService,
+    private readonly deviceRepository: DeviceRepository,
+    private readonly dynamodbService: DynamodbService,
+    private readonly notificationService: NotificationService,
+    private readonly promotionRepository: PromotionRepository,
   ) {}
 
   @Cron(CronExpression.EVERY_10_SECONDS)
@@ -56,7 +65,12 @@ export class WinnerService {
 
           winner.customerDrawing = customerDrawing;
           winner.active = true;
+          winner.promotion.effectiveDate = new Date(contest.expiredDate);
+          winner.promotion.expiredDate = getDateWithPlus1Year(
+            new Date(contest.expiredDate),
+          );
 
+          await this.promotionRepository.savePromotion(winner.promotion);
           await this.winnerRepository.saveWinner(winner);
 
           await this.mailsService.sendMail({
@@ -69,6 +83,34 @@ export class WinnerService {
               PERCENT: winner.promotion.discountPercent,
               PROMOTION: winner.promotion.code,
             },
+          });
+
+          const tokens = await this.deviceRepository.getDeviceByUserId(
+            customerDrawing.user.id,
+          );
+
+          const createNotificationDto = {
+            title: `Cuộc thi ${customerDrawing.contest.title}`,
+            body: `Xin chúc mừng, bạn đã giành vị trí thứ ${winner.position} tại cuộc thi ${customerDrawing.contest.title}`,
+            data: {
+              type: 'WINNER-PRIZE',
+              contestId: customerDrawing.contest.id,
+            },
+            userId: customerDrawing.user.id,
+          };
+
+          await this.dynamodbService.saveNotification(createNotificationDto);
+
+          tokens.forEach((token) => {
+            const payload = {
+              token: token.deviceTokenId,
+              title: createNotificationDto.title,
+              body: createNotificationDto.body,
+              data: createNotificationDto.data,
+              userId: token.user.id,
+            };
+
+            this.notificationService.sendingNotification(payload);
           });
         }
       }
@@ -85,9 +127,14 @@ export class WinnerService {
     const response: ViewWinnerReponse[] = [];
 
     for (const winner of winners) {
+      const totalVotes = winner.customerDrawing.votes.length;
       const fullName = `${winner.customerDrawing.user.firstName} ${winner.customerDrawing.user.middleName} ${winner.customerDrawing.user.lastName}`;
       response.push(
-        this.mapper.filterViewWinnerResponseFromWinner(winner, fullName),
+        this.mapper.filterViewWinnerResponseFromWinner(
+          winner,
+          fullName,
+          totalVotes,
+        ),
       );
     }
 

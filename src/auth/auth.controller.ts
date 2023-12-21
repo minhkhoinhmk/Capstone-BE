@@ -66,8 +66,11 @@ export class AuthController {
     description: 'Logout Successfully',
   })
   @Get('/signout')
-  signout(@Query('code') code: string): Promise<void> {
-    return this.authService.logout(code);
+  signout(
+    @Query('code') code: string,
+    @Query('deviceToken') deviceToken?: string,
+  ): Promise<void> {
+    return this.authService.logout(code, deviceToken);
   }
 
   @ApiOkResponse({

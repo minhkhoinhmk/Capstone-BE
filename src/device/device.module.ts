@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
 import { DeviceService } from './device.service';
 import { DeviceController } from './device.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
@@ -12,7 +12,7 @@ import { LearnerModule } from 'src/learner/learner.module';
   imports: [
     TypeOrmModule.forFeature([Device]),
     UserModule,
-    AuthModule,
+    forwardRef(() => AuthModule),
     LearnerModule,
   ],
   providers: [DeviceService, DeviceRepository],

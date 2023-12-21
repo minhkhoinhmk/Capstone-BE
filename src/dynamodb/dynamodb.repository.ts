@@ -56,7 +56,7 @@ export class DynamodbRepository {
     return notification;
   }
 
-  async findByUserId(userId: string): Promise<Notification[]> {
+  async findByUserId(userId: string, size: number): Promise<Notification[]> {
     const results: Notification[] = [];
 
     const command = new QueryCommand({
@@ -66,7 +66,7 @@ export class DynamodbRepository {
         ':userId': { S: userId },
       },
       ScanIndexForward: false,
-      Limit: 20,
+      Limit: size,
     });
 
     const queryResponse = await this.client.send(command);
@@ -79,11 +79,13 @@ export class DynamodbRepository {
   }
 
   async updateIsSeen(createdDate: string, userId: string): Promise<void> {
+    const createDateTime = String(new Date(createdDate).getTime());
+    console.log(createDateTime);
     const command = new UpdateItemCommand({
       TableName: this.tableName,
       Key: {
         userId: { S: userId },
-        createdDate: { N: createdDate },
+        createdDate: { N: createDateTime },
       },
       UpdateExpression: 'SET isSeen = :isSeen',
       ExpressionAttributeValues: {

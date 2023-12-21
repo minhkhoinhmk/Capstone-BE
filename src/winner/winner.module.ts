@@ -11,6 +11,9 @@ import { PromotionModule } from 'src/promotion/promotion.module';
 import { VoteModule } from 'src/vote/vote.module';
 import { UserModule } from 'src/user/user.module';
 import { AuthModule } from 'src/auth/auth.module';
+import { DeviceModule } from 'src/device/device.module';
+import { NotificationModule } from 'src/notification/notification.module';
+import { DynamodbModule } from 'src/dynamodb/dynamodb.module';
 
 @Module({
   imports: [
@@ -21,6 +24,9 @@ import { AuthModule } from 'src/auth/auth.module';
     PromotionModule,
     VoteModule,
     UserModule,
+    DeviceModule,
+    NotificationModule,
+    DynamodbModule,
   ],
   providers: [WinnerService, WinnerRepository, WinnerMapper],
   controllers: [WinnerController],

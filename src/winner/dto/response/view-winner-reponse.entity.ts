@@ -33,4 +33,8 @@ export class ViewWinnerReponse {
   @ApiProperty()
   @Expose()
   description: string;
+
+  @ApiProperty()
+  @Expose()
+  totalVotes: number;
 }

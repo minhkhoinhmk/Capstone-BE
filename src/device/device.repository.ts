@@ -81,4 +81,14 @@ export class DeviceRepository {
 
     return devices;
   }
+
+  async removeDevice(userId: string, deviceToken: string): Promise<void> {
+    const device = await this.getDeviceByTokenAndUserId(userId, deviceToken);
+
+    console.log('method=removeDevice', device);
+
+    if (device) {
+      await this.deviceRepository.remove(device);
+    }
+  }
 }

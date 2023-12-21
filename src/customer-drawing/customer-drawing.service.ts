@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   ConflictException,
   Injectable,
   InternalServerErrorException,
@@ -21,6 +22,11 @@ import CustomerDrawingStatus from './enum/customer-drawing-status.enum';
 import { User } from 'src/user/entity/user.entity';
 import { Learner } from 'src/learner/entity/learner.entity';
 import { NameRole } from 'src/role/enum/name-role.enum';
+import { DeviceRepository } from 'src/device/device.repository';
+import { DynamodbService } from 'src/dynamodb/dynamodb.service';
+import { NotificationService } from 'src/notification/notification.service';
+import ContestStatus from 'src/contest/enum/contest-status.enum';
+import { LearnerRepository } from 'src/learner/learner.repository';
 
 @Injectable()
 export class CustomerDrawingService {
@@ -33,6 +39,10 @@ export class CustomerDrawingService {
     private readonly s3Service: S3Service,
     private readonly mailService: MailerService,
     private readonly mapper: CustomerDrawingMapper,
+    private readonly deviceRepository: DeviceRepository,
+    private readonly dynamodbService: DynamodbService,
+    private readonly notificationService: NotificationService,
+    private readonly learnerRepository: LearnerRepository,
   ) {}
 
   async createCustomerDrawing(
@@ -135,6 +145,43 @@ export class CustomerDrawingService {
         },
       });
 
+      const tokens = await this.deviceRepository.getDeviceByRole(
+        NameRole.Staff,
+      );
+
+      const usersStaff = await this.userRepository.getUserByRole(
+        NameRole.Staff,
+      );
+
+      for (const staff of usersStaff) {
+        const createNotificationDto = {
+          title: 'Xét duyệt bài thi',
+          body: `Một người tham dự vừa đăng bài thi tại cuộc thi ${customerDrawing.contest.title}. Hãy xét duyệt!`,
+          data: {
+            imageUrl: key,
+            type: 'STAFF-CUSTOMER_DRAWING',
+          },
+          userId: staff.id,
+        };
+
+        await this.dynamodbService.saveNotification(createNotificationDto);
+      }
+
+      tokens.forEach((token) => {
+        const payload = {
+          token: token.deviceTokenId,
+          title: 'Xét duyệt bài thi',
+          body: `Một người tham dự vừa đăng bài thi tại cuộc thi ${customerDrawing.contest.title}. Hãy xét duyệt!`,
+          data: {
+            imageUrl: key,
+            type: 'STAFF-CUSTOMER_DRAWING',
+          },
+          userId: token.user.id,
+        };
+
+        this.notificationService.sendingNotification(payload);
+      });
+
       this.logger.log(`method=uploadImageUrl, uploaded thumbnail successfully`);
     } catch (error) {
       this.logger.error(`method=uploadImageUrl, error:${error.message}`);
@@ -151,6 +198,12 @@ export class CustomerDrawingService {
           customerDrawingId,
         );
 
+      if (customerDrawing.contest.status !== ContestStatus.ACTIVE) {
+        throw new BadRequestException(
+          `Cuộc thi đang không diễn ra nên không thể duyệt bài vẽ`,
+        );
+      }
+
       if (status === CustomerDrawingStatus.APPROVED) {
         customerDrawing.active = true;
       }
@@ -166,6 +219,35 @@ export class CustomerDrawingService {
           SUBJECT: `Bài dự thi cuộc thi ${customerDrawing.contest.title}`,
           CONTENT: `Đã Được Xét Duyệt`,
         },
+      });
+
+      const tokens = await this.deviceRepository.getDeviceByUserId(
+        customerDrawing.user.id,
+      );
+
+      const createNotificationDto = {
+        title: 'Xét duyệt bài thi',
+        body: `Bài dự thi cuộc thi ${customerDrawing.contest.title} của bạn đã được xét duyệt thành công`,
+        data: {
+          customerDrawingId: customerDrawingId,
+          contestId: customerDrawing.contest.id,
+          type: 'CUSTOMER-CUSTOMER_DRAWING',
+        },
+        userId: customerDrawing.user.id,
+      };
+
+      await this.dynamodbService.saveNotification(createNotificationDto);
+
+      tokens.forEach((token) => {
+        const payload = {
+          token: token.deviceTokenId,
+          title: createNotificationDto.title,
+          body: createNotificationDto.body,
+          data: createNotificationDto.data,
+          userId: token.user.id,
+        };
+
+        this.notificationService.sendingNotification(payload);
       });
 
       this.logger.log(
@@ -211,9 +293,21 @@ export class CustomerDrawingService {
         isOwned = true;
       }
 
+      const learners = await this.learnerRepository.getLearnerByUserId(userId);
+
       for (const vote of customerDrawing.votes) {
-        if (vote.user.id === userId) {
+        if (vote.user.id === userId || vote.learner.id === userId) {
           isVoted = true;
+        }
+      }
+
+      if (learners) {
+        for (const vote of customerDrawing.votes) {
+          for (const learner of learners) {
+            if (vote.learner.id === learner.id) {
+              isVoted = true;
+            }
+          }
         }
       }
 
@@ -233,12 +327,58 @@ export class CustomerDrawingService {
     return new PageDto(responses, pageMetaDto);
   }
 
+  async getCustomerDrawingByContestForGuest(
+    contestId: string,
+    request: FilterCustomerDrawingRequest,
+  ): Promise<PageDto<ViewCustomerDrawingResponse>> {
+    let customerDrawings: CustomerDrawing[] = [];
+    const responses: ViewCustomerDrawingResponse[] = [];
+
+    const { count, entites } =
+      await this.customerDrawingRepository.getCustomerDrawingByContest(
+        contestId,
+        request,
+      );
+
+    customerDrawings = entites;
+
+    const itemCount = count;
+
+    const pageMetaDto = new PageMetaDto({
+      itemCount,
+      pageOptionsDto: request.pageOptions,
+    });
+
+    for (const customerDrawing of customerDrawings) {
+      const cusomerName = `${customerDrawing.user.lastName} ${customerDrawing.user.middleName} ${customerDrawing.user.firstName}`;
+      const totalVotes = customerDrawing.votes.length;
+      const isVoted = false;
+      const isOwned = false;
+
+      responses.push(
+        this.mapper.filterViewCustomerDrawingResponseFromCustomerDrawingV2(
+          customerDrawing,
+          cusomerName,
+          totalVotes,
+          isVoted,
+          isOwned,
+        ),
+      );
+    }
+
+    this.logger.log(`method=getCustomerDrawingByContest, total = ${itemCount}`);
+
+    return new PageDto(responses, pageMetaDto);
+  }
+
   async getCustomerDrawingByContestId(
     contestId: string,
+    status?: CustomerDrawingStatus,
   ): Promise<CustomerDrawing[]> {
     const customerDrawings =
       await this.customerDrawingRepository.getCustomerDrawingByContestId(
         contestId,
+        status,
       );
 
     return customerDrawings;

@@ -39,6 +39,7 @@ import { ChapterLectureRepository } from 'src/chapter-lecture/chapter-lecture.re
 import { ConfigService } from '@nestjs/config';
 import { PromotionRepository } from 'src/promotion/promotion.repository';
 import { PromotionCourseService } from 'src/promotion-course/promotion-course.service';
+import { DynamodbService } from 'src/dynamodb/dynamodb.service';
 
 @Injectable()
 export class InstructorService {
@@ -59,6 +60,7 @@ export class InstructorService {
     private readonly configService: ConfigService,
     private readonly promotionRepository: PromotionRepository,
     private readonly promotionCourseService: PromotionCourseService,
+    private readonly dynamodbService: DynamodbService,
   ) {}
 
   async uploadCertification(
@@ -82,13 +84,32 @@ export class InstructorService {
         NameRole.Admin,
       );
 
+      const usersAdmin = await this.userRepository.getUserByRole(
+        NameRole.Admin,
+      );
+
+      for (const admin of usersAdmin) {
+        const createNotificationDto = {
+          title: 'Cập nhật bằng cấp',
+          body: `Một giáo viên vừa cập nhật bằng cấp. Hãy xét duyệtt!`,
+          data: {
+            certificationUrl: key,
+            type: 'INSTRUCTOR-REGISTER',
+          },
+          userId: admin.id,
+        };
+
+        await this.dynamodbService.saveNotification(createNotificationDto);
+      }
+
       tokens.forEach((token) => {
         const payload = {
           token: token.deviceTokenId,
           title: 'Cập nhật bằng cấp',
-          body: 'Một giáo viên vừa cập nhật bằng cấp. Hãy xét duyệtt!',
+          body: `Một giáo viên vừa cập nhật bằng cấp. Hãy xét duyệtt!`,
           data: {
             certificationUrl: key,
+            type: 'INSTRUCTOR-REGISTER',
           },
           userId: token.user.id,
         };
