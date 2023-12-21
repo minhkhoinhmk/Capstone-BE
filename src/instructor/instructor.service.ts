@@ -550,7 +550,7 @@ export class InstructorService {
         }
 
         chapterLecture.course.totalChapter =
-          chapterLecture.course.totalChapter + 1;
+          chapterLecture.course.totalChapter - 1;
 
         await this.courseRepository.saveCourse(chapterLecture.course);
 
