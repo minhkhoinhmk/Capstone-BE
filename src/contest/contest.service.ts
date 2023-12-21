@@ -224,15 +224,6 @@ export class ContestService {
 
     if (contest.status === ContestStatus.ACTIVE) {
       if (
-        new Date(request.startedDate).getTime() !==
-        contest.startedDate.getTime()
-      ) {
-        throw new BadRequestException(
-          `Không được phép chỉnh thời gian kết thúc cuộc thi khi cuộc thi đang diễn ra`,
-        );
-      }
-
-      if (
         new Date(request.expiredDate).getTime() !==
           contest.expiredDate.getTime() &&
         new Date(request.expiredDate).getTime() <= new Date().getTime()
