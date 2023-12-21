@@ -96,12 +96,22 @@ export class PromotionService {
 
     await this.checkPromotionBodyValid(body, 'updatePromotion');
 
-    promotion = {
-      ...promotion,
-      ...body,
-      effectiveDate: new Date(body.effectiveDate),
-      expiredDate: new Date(body.expiredDate),
-    };
+    if (promotion.code !== body.code) {
+      promotion = {
+        ...promotion,
+        ...body,
+        effectiveDate: new Date(body.effectiveDate),
+        expiredDate: new Date(body.expiredDate),
+      };
+    } else {
+      const { code, ...rest } = body;
+      promotion = {
+        ...promotion,
+        ...rest,
+        effectiveDate: new Date(body.effectiveDate),
+        expiredDate: new Date(body.expiredDate),
+      };
+    }
 
     await this.promotionRepository.savePromotion(promotion);
 
