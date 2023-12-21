@@ -175,6 +175,12 @@ export class ContestService {
     );
   }
 
+  async getContestStatusActive(): Promise<Contest[]> {
+    const contests = await this.contestRepository.getContestStatusActive();
+
+    return contests;
+  }
+
   @Cron(CronExpression.EVERY_10_SECONDS)
   async setStatusContest() {
     const contests = await this.contestRepository.getContestsNotPagination();

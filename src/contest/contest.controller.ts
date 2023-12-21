@@ -109,10 +109,13 @@ export class ContestController {
   @ApiOkResponse({
     description: 'Get Contests By Id Successfully',
   })
-  // @UseGuards(AuthGuard(), RolesGuard)
-  // @HasRoles(NameRole.Staff, NameRole.Customer, NameRole.Learner)
   async getContestsById(@Param('id') id: string): Promise<ViewContestResponse> {
     return await this.contestService.getContestById(id);
+  }
+
+  @Get('/status/active')
+  async getContestsActive(): Promise<Contest[]> {
+    return await this.contestService.getContestStatusActive();
   }
 
   @Put(':id')
