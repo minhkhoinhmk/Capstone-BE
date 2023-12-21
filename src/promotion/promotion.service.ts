@@ -94,7 +94,7 @@ export class PromotionService {
       throw new NotFoundException(`promotionId=${promotionId} is not found`);
     }
 
-    await this.checkPromotionBodyValid(body, 'updatePromotion');
+    await this.checkPromotionBodyValid(body, 'updatePromotion', promotion.code);
 
     promotion = {
       ...promotion,
@@ -111,6 +111,7 @@ export class PromotionService {
   async checkPromotionBodyValid(
     body: CreatePromotionRequest | UpdatePromotionRequest,
     methodName: 'createPromotion' | 'updatePromotion',
+    codeOld?: string,
   ) {
     if (!this.checkDiscountPercentValid(body.discountPercent)) {
       this.logger.error(
@@ -142,12 +143,24 @@ export class PromotionService {
       );
     }
 
-    if (await this.promotionRepository.getPromotionByCode(body.code)) {
-      this.logger.error(
-        `method=${methodName}, code=${body.code} is already exists`,
-      );
-      // throw new ConflictException(`code=${body.code} is already exists`);
-      throw new ConflictException(`code=${body.code} đã tồn tại`);
+    if (methodName === 'createPromotion') {
+      if (await this.promotionRepository.getPromotionByCode(body.code)) {
+        this.logger.error(
+          `method=${methodName}, code=${body.code} is already exists`,
+        );
+        // throw new ConflictException(`code=${body.code} is already exists`);
+        throw new ConflictException(`code=${body.code} đã tồn tại`);
+      }
+    } else {
+      if (
+        (await this.promotionRepository.getPromotionByCode(body.code)) &&
+        codeOld !== body.code
+      ) {
+        this.logger.error(
+          `method=${methodName}, code=${body.code} is already exists`,
+        );
+        throw new ConflictException(`code=${body.code} đã tồn tại`);
+      }
     }
 
     if (!this.checkAmountValid(body.amount)) {
