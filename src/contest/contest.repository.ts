@@ -50,6 +50,23 @@ export class ContestRepository {
     });
   }
 
+  async getContestStatusActive(): Promise<Contest[]> {
+    return await this.contestRepository.find({
+      where: { active: true, isVisible: true, status: ContestStatus.ACTIVE },
+      order: {
+        expiredDate: 'ASC',
+      },
+      take: 3,
+      relations: {
+        user: true,
+        customerDrawings: true,
+        winners: {
+          promotion: true,
+        },
+      },
+    });
+  }
+
   async getContests(
     request: FilterContestRequest,
   ): Promise<{ count: number; entites: Contest[] }> {
